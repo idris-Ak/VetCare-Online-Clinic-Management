@@ -6,7 +6,7 @@
 ## Group-PX-XX
 
 ## Members
-* Student Name 1 (sXXXXX)
+* Yifan Shen (s3939815)
 * Student Name 2 (sXXXXX)
 * Student Name 3 (sXXXXX)
 * Student Name 4 (sXXXXX)
