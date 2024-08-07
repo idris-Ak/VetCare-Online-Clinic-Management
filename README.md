@@ -8,7 +8,7 @@
 ## Members
 * Yifan Shen (s3939815)
 * Farahan Wazer (s3944027)
-* Student Name 3 (sXXXXX)
+* Idris Aklan (s4003401)
 * Student Name 4 (sXXXXX)
 
 ## Records
