@@ -7,7 +7,7 @@
 
 ## Members
 * Yifan Shen (s3939815)
-* Student Name 2 (sXXXXX)
+* Farahan Wazer (s3944027)
 * Student Name 3 (sXXXXX)
 * Student Name 4 (sXXXXX)
 
