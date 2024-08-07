@@ -3,7 +3,7 @@
 
 # Group Information
 
-## Group-PX-XX
+## Group-P06-02
 
 ## Members
 * Yifan Shen (s3939815)
