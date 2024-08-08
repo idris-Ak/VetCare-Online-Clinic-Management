@@ -14,7 +14,8 @@
 
 ## Records
 
-* Github repository: https://github.com/xxx
-* Github Project Board : https://xxxx
+* Github repository: https://github.com/cosc2299-2024/team-project-group-p06-02
+* Github Project Board : https://github.com/orgs/cosc2299-2024/projects/3
+* Communication: Microsoft Teams
 
 See [Instructions](INSTRUCTIONS.md)
