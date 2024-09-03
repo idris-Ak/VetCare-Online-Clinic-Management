@@ -78,6 +78,9 @@ function SignUp() {
            ))}
       <h2 className="mb-4 text-center" style={{ fontWeight: '600', color: '#333', fontSize:'40px'}}>SignUp To VetCare</h2>
       <Form onSubmit={handleSubmit} className="rounded-3">
+        <Form.Label className="mb-2 text-center w-100" style={{ fontWeight: '500', fontSize: '20px', color: '#333' }}>
+                Choose Your Role:
+        </Form.Label>
          <div className="d-flex justify-content-center mb-4">
             <ToggleButtonGroup 
               type="radio" 
