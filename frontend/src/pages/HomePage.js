@@ -1,12 +1,9 @@
 
 import React from 'react';
-import Navbar from '../components/Navbar';
-import Footer from '../components/Footer';
 import "./HomePage.css";
 function HomePage() {
   return (
     <div>
-      <Navbar />
 
 
       <h1>Welcome to My React App</h1>
@@ -37,8 +34,6 @@ function HomePage() {
     Join us in making pet care effortless and effective, with all the tools you need just a click away. Together, let's nurture the health and happiness of our beloved pets.
   </p>
 </div>
-
-<Footer />
     </div>
   );
 }
