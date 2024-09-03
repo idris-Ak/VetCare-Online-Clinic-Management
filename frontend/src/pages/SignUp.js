@@ -1,13 +1,14 @@
 import React, { useState} from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Button, Form, Alert, Container} from 'react-bootstrap';
+import { Button, Form, Alert, Container, ToggleButtonGroup, ToggleButton } from 'react-bootstrap';
 
-function SignUp({loginUser}) {
+function SignUp() {
   const [user, setUser] = useState({
     name: '',
     email: '',
     password: '',
-    confirmPassword: ''
+    confirmPassword: '',
+    role: 'Pet Owner'
   });
   const [showSuccessAlert, setShowSuccessAlert] = useState(false);
   const[errorMessages, setErrorMessages] = useState([]);
@@ -17,6 +18,10 @@ function SignUp({loginUser}) {
   const handleChange = (event) => {
     const { name, value } = event.target;
     setUser((prevUser) => ({ ...prevUser, [name]: value}));
+  };
+
+  const handleRoleChange = (role) => {
+    setUser((prevUser) => ({ ...prevUser, role: role }));
   };
 
   //The following function was given by OpenAI (2024) ChatGPT [Large language model], accessed 20 March 2024. (*Link could not be generated successfully*)
@@ -52,39 +57,53 @@ function SignUp({loginUser}) {
   if(!validateForm()){
     return;
   }
-//Try to get connection with the api 
-try{
-  await axios.post('http://localhost:4000/api/user/SignUp', {
-    name: user.name,
-    email: user.email,
-    password: user.password
-});
-  //Register user if validations pass
-   setShowSuccessAlert(true);
-      setTimeout(() => {
-        setShowSuccessAlert(false);
-        loginUser(user);
-        navigate('/'); 
-      }, 3000);
-    }
-  catch (error) {
-      const message = error.response?.data.message || "An unexpected error occurred";
-      setErrorMessages([message]);
-      setShowErrorMessage(true);
-      setTimeout(() => setShowErrorMessage(false), 3000);
-    }
-  };
+
+  //Save the user to localStorage
+ localStorage.setItem(user.email, JSON.stringify(user));
+ setShowSuccessAlert(true);
+ //Redirect to login page after a successful signup
+ setTimeout(() => {
+ setShowSuccessAlert(false);
+    navigate('/login');
+    }, 3000);
+ };
 
   return (
-    <Container className="d-flex justify-content-center align-items-center" style={{ minHeight: '75vh', fontFamily: 'Lato, sans-serif'}}>
+    <Container className="d-flex justify-content-center align-items-center" style={{ minHeight: '100vh', fontFamily: 'Lato, sans-serif'}}>
        <div className="w-100 p-4" style={{ maxWidth: '600px', background: '#fff', borderRadius: '20px', boxShadow: '0 4px 8px rgba(0,0,0,0.1)'}}>
         <br></br>
         {showSuccessAlert && <Alert variant="success">SignUp Successful!</Alert>}
         {showErrorMessage && errorMessages.map((error, index) => (
                         <Alert key={index} variant="danger">{error}</Alert>
            ))}
-      <h2 className="mb-4 text-center" style={{ fontWeight: '600', color: '#333', fontSize:'40px'}}>SignUp To SOIL</h2>
+      <h2 className="mb-4 text-center" style={{ fontWeight: '600', color: '#333', fontSize:'40px'}}>SignUp To VetCare</h2>
       <Form onSubmit={handleSubmit} className="rounded-3">
+         <div className="d-flex justify-content-center mb-4">
+            <ToggleButtonGroup 
+              type="radio" 
+              name="role" 
+              value={user.role} 
+              onChange={handleRoleChange}
+              className="w-100"
+            >
+              <ToggleButton 
+                id="tbg-radio-1"
+                value="Pet Owner" 
+                variant={user.role === 'Pet Owner' ? 'primary' : 'outline-primary'}
+                className="w-50"
+              >
+                Pet Owner
+              </ToggleButton>
+              <ToggleButton 
+                id="tbg-radio-2"
+                value="Vet" 
+                variant={user.role === 'Vet' ? 'primary' : 'outline-primary'}
+                className="w-50"
+              >
+                Vet
+              </ToggleButton>
+            </ToggleButtonGroup>
+          </div>
         <Form.Group className="mb-3" controlId="userName">
           <Form.Label style={{fontFamily: 'Lato, sans-serif', fontSize:'20px'}}>Name</Form.Label>
           <Form.Control type="text" name="name" value={user.name} onChange={handleChange} required style={{ borderRadius: '15px'}}/>

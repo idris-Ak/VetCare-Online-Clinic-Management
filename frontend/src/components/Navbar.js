@@ -1,9 +1,16 @@
 // src/components/Navbar.js
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import './Navbar.css';  // Import the CSS file for styling
 
-function Navbar() {
+function Navbar({logoutUser, isLoggedIn}) {
+     const navigate = useNavigate();
+
+     const handleLogout = () => {
+      logoutUser();
+      navigate('/login');
+    };
+
   return (
     <nav className="navbar">
       <ul className="navbar-list">
@@ -16,9 +23,24 @@ function Navbar() {
         <li className="navbar-item">
           <Link to="/contact" className="navbar-link">Contact</Link>
         </li>
-         <li className="navbar-item">
-          <Link to="/login" className="navbar-link">Login</Link>
-        </li>
+        {isLoggedIn ? (
+            <>
+            {/*<a href="https://www.flaticon.com/free-icons/user" title="user icons">User icons created by Freepik - Flaticon</a>*/}
+            <Link className="nav-link act me-2" to="/myprofile" style={{marginRight: '20px'}}>
+              <img src="/user.png" alt="Profile" style={{ width: '28px', height: '28px'}} />
+            </Link>
+            <span className="welcome-text" style={{ marginRight: '20px' }}>Welcome, </span>
+             <button onClick={handleLogout} className="logout-button" style={{background: 'none', border: 'none'}}>Logout</button>
+              </>
+          ) : (
+            <>
+              {/*<a href="https://www.flaticon.com/free-icons/user" title="user icons">User icons created by Freepik - Flaticon</a>*/}
+              <Link className="nav-link act" to="/login" style={{ display: 'flex', alignItems: 'center', marginLeft: '30px', marginRight: '30px' }}>
+                <img src="/user.png" alt="Login" style={{ width: '28px', height: '28px', borderRadius: '50%' }} />
+                <span style={{ marginLeft: '10px' }}>Login</span>
+              </Link>
+            </>
+          )}
       </ul>
     </nav>
   );
