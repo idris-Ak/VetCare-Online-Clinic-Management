@@ -37,7 +37,7 @@ function Navbar({logoutUser, isLoggedIn}) {
               {/*<a href="https://www.flaticon.com/free-icons/user" title="user icons">User icons created by Freepik - Flaticon</a>*/}
               <Link className="nav-link act" to="/login" style={{ display: 'flex', alignItems: 'center', marginLeft: '30px', marginRight: '30px' }}>
                 <img src="/user.png" alt="Login" style={{ width: '28px', height: '28px', borderRadius: '50%' }} />
-                <span style={{ marginLeft: '10px' }}>Login</span>
+                <span style={{ marginLeft: '10px', color: 'white' }}>Login</span>
               </Link>
             </>
           )}
