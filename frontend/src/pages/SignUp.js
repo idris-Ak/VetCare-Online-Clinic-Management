@@ -33,6 +33,12 @@ function SignUp() {
   //Validate the user inputs
   const validateForm = () => {
     let errors = [];
+
+    //Check if the Vet's email ends with @vetcare.com
+    if (user.role === 'Vet' && !user.email.endsWith('@vetcare.com')) {
+      errors.push("Vets must use an email that ends with '@vetcare.com'.");
+    }
+    
     //If password is not equal to confirmMessage, output the error message
     if(user.password !== user.confirmPassword){
       errors.push("Passwords do not match.");
