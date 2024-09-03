@@ -1,0 +1,30 @@
+/* HomePage.css */
+.AboutUs {
+    display: flex;
+    flex-direction: column; /* Stacks the content vertically */
+    align-items: flex-end; /* Aligns the content to the right */
+    text-align: left; /* Keeps the text alignment to the left */
+    margin-left: 40%; /* Starts the content from the middle of the page */
+    margin-right: 30%;
+    width: 50%; /* Sets the width of the container to 50% of its parent */
+  }
+  
+  .AboutUs h1, .AboutUs p {
+    width: 80%; /* Each paragraph takes the full width of the .AboutUs container */
+  }
+  
+
+  .Research h1, .Research p {
+    width: 100%;
+    text-align: center;
+  }
+
+  .Research {
+    background-color: #272B31;
+    color: white;
+    padding: 0px 0 350px 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+  }
