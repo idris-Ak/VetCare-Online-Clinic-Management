@@ -23,6 +23,9 @@ function Navbar({logoutUser, isLoggedIn}) {
         <li className="navbar-item">
           <Link to="/contact" className="navbar-link">Contact</Link>
         </li>
+        <li className="navbar-item">
+          <Link to="/VetCareDashboard" className="navbar-link">VetCare Dashboard</Link>
+        </li>
         {isLoggedIn ? (
             <>
             {/*<a href="https://www.flaticon.com/free-icons/user" title="user icons">User icons created by Freepik - Flaticon</a>*/}
