@@ -3,7 +3,7 @@ import { Button, Form, Alert, Container, ToggleButtonGroup, ToggleButton } from 
 import { useNavigate, Link } from "react-router-dom";
 
 
-function Login() {
+function Login({loginUser}) {
   const [userDetails, setUserDetails] = useState({ email: '', password: '', role: 'Pet Owner' });
   const [errorMessage, setErrorMessage] = useState('');
   const [showErrorMessage, setShowErrorMessage] = useState(false);
@@ -35,16 +35,19 @@ function Login() {
       return;
     }
 
+    //Retrieve the users array from localStorage
+    const users = JSON.parse(localStorage.getItem('users')) || [];
+
     //Store the user details in local storage temporarily 
-    const storedUser = JSON.parse(localStorage.getItem(userDetails.email));
+    const storedUser = users.find(user => user.email === userDetails.email && user.role === userDetails.role);
     
     if (storedUser && storedUser.password === userDetails.password && storedUser.role === userDetails.role) {
       setShowSuccessAlert(true);
       setTimeout(() => {
         setShowSuccessAlert(false);
+        loginUser(storedUser);
         navigate('/');
       }, 3000);
-      localStorage.setItem('isLoggedIn', 'true');
     } else {
       setErrorMessage('Invalid email, password, or role selection.');
       setShowErrorMessage(true);

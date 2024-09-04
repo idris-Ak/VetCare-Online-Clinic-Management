@@ -2,7 +2,7 @@ import React, { useState} from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Button, Form, Alert, Container, ToggleButtonGroup, ToggleButton } from 'react-bootstrap';
 
-function SignUp() {
+function SignUp({loginUser}) {
   const [user, setUser] = useState({
     name: '',
     email: '',
@@ -17,14 +17,19 @@ function SignUp() {
 
   const handleChange = (event) => {
     const { name, value } = event.target;
-    setUser((prevUser) => ({ ...prevUser, [name]: value}));
+    setUser((prevUserDetails) => ({
+      ...prevUserDetails, [name]: value
+    }));
   };
 
-  const handleRoleChange = (role) => {
-    setUser((prevUser) => ({ ...prevUser, role: role }));
+   const handleRoleChange = (role) => {
+    setUser((prevUserDetails) => ({
+      ...prevUserDetails, role: role
+    }));
   };
 
-  //The following function was given by OpenAI (2024) ChatGPT [Large language model], accessed 20 March 2024. (*Link could not be generated successfully*)
+
+  //The following function was given by OpenAI (2024) ChatGPT [Large language model], accessed 3 September 2024. (*Link could not be generated successfully*)
   const isPasswordStrong = (password) => {
     const re = new RegExp("^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\\$%\\^&\\*()_+\\-={}[\\]\\\\|;:'\",<.>/?~`])(?=.{8,})");
     return re.test(password);
@@ -38,7 +43,7 @@ function SignUp() {
     if (user.role === 'Vet' && !user.email.endsWith('@vetcare.com')) {
       errors.push("Vets must use an email that ends with '@vetcare.com'.");
     }
-    
+
     //If password is not equal to confirmMessage, output the error message
     if(user.password !== user.confirmPassword){
       errors.push("Passwords do not match.");
@@ -47,12 +52,12 @@ function SignUp() {
     if (!isPasswordStrong(user.password)) {
       errors.push("Your password must be at least 8 characters long and include uppercase letters, lowercase letters, numbers, and special characters.");
     }
-    //Display the error messages for 3 seconds 
+    //Display the error messages for 5 seconds 
     if (errors.length > 0) {
       setErrorMessages(errors);
       setShowErrorMessage(true);
-      //Hide error message after 3 seconds
-      setTimeout(() => setShowErrorMessage(false), 3000);
+      //Hide error message after 5 seconds
+      setTimeout(() => setShowErrorMessage(false), 5000);
       return false;
     }
     return true;
@@ -64,15 +69,36 @@ function SignUp() {
     return;
   }
 
-  //Save the user to localStorage
- localStorage.setItem(user.email, JSON.stringify(user));
- setShowSuccessAlert(true);
- //Redirect to login page after a successful signup
- setTimeout(() => {
- setShowSuccessAlert(false);
-    navigate('/login');
-    }, 3000);
- };
+//Save the user to localStorage
+const users = JSON.parse(localStorage.getItem('users')) || [];
+const emailExists = users.some(users => users.email === user.email);
+
+if (emailExists) {
+    setErrorMessages("An account with this email already exists.");
+    setShowErrorMessage(true);
+    setTimeout(() => setShowErrorMessage(false), 3000);
+    return;
+}
+
+ //Save the new user in localStorage
+    const newUser = {
+      name: user.name,
+      email: user.email,
+      password: user.password,
+      role: user.role,
+    };
+
+    //Add the new user to the users array and store it in localStorage
+    users.push(newUser);
+    localStorage.setItem('users', JSON.stringify(users));
+
+    setShowSuccessAlert(true);
+    setTimeout(() => {
+      setShowSuccessAlert(false);
+      loginUser(user);
+      navigate('/'); 
+    }, 2000);
+  };
 
   return (
     <Container className="d-flex justify-content-center align-items-center" style={{ minHeight: '100vh', fontFamily: 'Lato, sans-serif'}}>
