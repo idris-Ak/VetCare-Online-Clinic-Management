@@ -3,7 +3,7 @@ import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import './Navbar.css';  // Import the CSS file for styling
 
-function Navbar({logoutUser, isLoggedIn}) {
+function Navbar({logoutUser, isLoggedIn, user}) {
      const navigate = useNavigate();
 
      const handleLogout = () => {
@@ -32,7 +32,7 @@ function Navbar({logoutUser, isLoggedIn}) {
             <Link className="nav-link act me-2" to="/myprofile" style={{marginRight: '20px'}}>
               <img src="/user.png" alt="Profile" style={{ width: '28px', height: '28px'}} />
             </Link>
-            <span className="welcome-text" style={{ marginRight: '20px' }}>Welcome, </span>
+            <span className="welcome-text" style={{ marginRight: '20px' }}>Welcome, {user?.name} </span>
              <button onClick={handleLogout} className="logout-button" style={{background: 'none', border: 'none'}}>Logout</button>
               </>
           ) : (

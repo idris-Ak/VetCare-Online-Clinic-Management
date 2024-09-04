@@ -12,21 +12,29 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 
 function App() {
     const [isLoggedIn, setIsLoggedIn] = useState(Boolean(localStorage.getItem('isLoggedIn')));
+    const [user, setUser] = useState(localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')) : null);
 
+    const loginUser = (userData) => {
+    localStorage.setItem('isLoggedIn', 'true');
+    localStorage.setItem('user', JSON.stringify(userData));
+    setUser(userData);  
+    setIsLoggedIn(true); 
+  };
     const logoutUser = async () => {
-    localStorage.removeItem('currentUserID');
+    localStorage.removeItem('user');
     localStorage.removeItem('isLoggedIn');
     setIsLoggedIn(false);
+    setUser(null);  
   };
 
  return (
     <Router>
       <div className="App">
-        <Navbar logoutUser={logoutUser} isLoggedIn={isLoggedIn} />
+        <Navbar logoutUser={logoutUser} isLoggedIn={isLoggedIn} user={user} />
         <Routes>
           <Route path="/" element={<HomePage />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<SignUp />} />
+          <Route path="/login" element={<Login loginUser={loginUser} />} />
+          <Route path="/signup" element={<SignUp loginUser={loginUser} />} />
           <Route path="/VetCareDashboard" element={<VetCareDashboard />} />
         </Routes>
         <Footer />
