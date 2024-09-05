@@ -1,27 +1,57 @@
-/* src/components/Navbar.css */
 .navbar {
-    background-color: #272B31;
-    padding: 10px;
-  }
-  
-  .navbar-list {
-    display: flex;
-    list-style-type: none;
-    margin: 10;
-    padding: 50;
-    justify-content: center;
-  }
-  
-  .navbar-item {
-    margin-right: 70px;
-  }
-  
-  .navbar-link {
-    color: white;
-    text-decoration: none;
-  }
-  
-  .navbar-link:hover {
-    text-decoration: underline;
-  }
-  
+  background-color: #272B31;
+  display: flex;
+  justify-content: space-between; /* Aligns both ul to opposite ends */
+  padding: 10px;
+  height: 100px; /* Ensuring there's enough vertical space */
+}
+
+.navbar-list {
+  display: flex;
+  list-style-type: none;
+  align-items: center; /* Center items vertically */
+  padding: 0px;
+  font-size: 17px;
+}
+
+.main-links {
+  flex-grow: 1;
+  justify-content: center; /* Centers main navigation links */
+  max-width: 100%; /* Adjusted to allow 100% usage within its container */
+}
+
+.navbar-item {
+  margin-right: 70px; /* Equal spacing between links */
+  padding: 10px; /* Padding to create the outline box effect */
+  border: 1px solid transparent; /* Initial transparent border */
+}
+
+.navbar-item:last-child {
+  margin-right: 5px; /* Ensure unit is specified */
+}
+
+.navbar-link {
+  color: white;
+  text-decoration: none;
+  display: block; /* Makes the entire area of the .navbar-item clickable */
+  padding: 10px; /* Moved padding from .navbar-item to .navbar-link */
+  box-sizing: border-box; /* Ensures padding and border are included in the element's dimensions */
+}
+
+.navbar-link:hover {
+  background-color: #68cdd486; /* Lighter shade of the original navbar color */
+  border-radius: 20px;
+}
+
+
+.user-links {
+  display: flex;
+  justify-content: flex-end; /* Aligns user links to the right */
+}
+
+.logout-button {
+  background: none;
+  border: none;
+  color: white; /* Ensures button text is visible */
+  cursor: pointer;
+}

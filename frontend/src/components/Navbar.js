@@ -1,49 +1,46 @@
-// src/components/Navbar.js
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import './Navbar.css';  // Import the CSS file for styling
+import profilepic from '../components/assets/profilepic.png';
 
 function Navbar({logoutUser, isLoggedIn, user}) {
-     const navigate = useNavigate();
+  const navigate = useNavigate();
 
-     const handleLogout = () => {
-      logoutUser();
-      navigate('/login');
-    };
+  const handleLogout = () => {
+    logoutUser();
+    navigate('/login');
+  };
 
   return (
     <nav className="navbar">
-      <ul className="navbar-list">
+      <ul className="navbar-list main-links">
         <li className="navbar-item">
           <Link to="/" className="navbar-link">Home</Link>
         </li>
         <li className="navbar-item">
-          <Link to="/about" className="navbar-link">About</Link>
-        </li>
-        <li className="navbar-item">
-          <Link to="/contact" className="navbar-link">Contact</Link>
+          <Link to="/BookOnline" className="navbar-link">Book Online</Link>
         </li>
         <li className="navbar-item">
           <Link to="/VetCareDashboard" className="navbar-link">VetCare Dashboard</Link>
         </li>
+        <li className="navbar-item">
+          <Link to="/educational" className="navbar-link">Educational Resources</Link>
+        </li>
+      </ul>
+      <ul className="navbar-list user-links">
         {isLoggedIn ? (
-            <>
-            {/*<a href="https://www.flaticon.com/free-icons/user" title="user icons">User icons created by Freepik - Flaticon</a>*/}
-            <Link className="nav-link act me-2" to="/myprofile" style={{marginRight: '20px'}}>
-              <img src="/user.png" alt="Profile" style={{ width: '28px', height: '28px'}} />
-            </Link>
-            <span className="welcome-text" style={{ marginRight: '20px' }}>Welcome, {user?.name} </span>
-             <button onClick={handleLogout} className="logout-button" style={{background: 'none', border: 'none'}}>Logout</button>
-              </>
-          ) : (
-            <>
-              {/*<a href="https://www.flaticon.com/free-icons/user" title="user icons">User icons created by Freepik - Flaticon</a>*/}
-              <Link className="nav-link act" to="/login" style={{ display: 'flex', alignItems: 'center', marginLeft: '30px', marginRight: '30px' }}>
-                <img src="/user.png" alt="Login" style={{ width: '28px', height: '28px', borderRadius: '50%' }} />
-                <span style={{ marginLeft: '10px', color: 'white' }}>Login</span>
+            <li className="navbar-item">
+              <Link to="/myprofile" className="navbar-link">
+                <img src={profilepic} alt="Profile" style={{ width: '28px', height: '28px'}} />
               </Link>
-            </>
-          )}
+              <span className="welcome-text">Welcome, {user?.name}</span>
+              <button onClick={handleLogout} className="logout-button">Logout</button>
+            </li>
+        ) : (
+            <li className="navbar-item">
+              <Link to="/login" className="navbar-link">Login</Link>
+            </li>
+        )}
       </ul>
     </nav>
   );

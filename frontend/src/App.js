@@ -8,6 +8,8 @@ import SignUp from './pages/SignUp';
 import VetCareDashboard from './pages/VetCareDashboard';
 import './App.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import VetProfilePage from '../src/pages/VetProfilePage'; // Make sure to create this component
+import vets from '../src/components/data/vets';
 
 
 function App() {
@@ -27,12 +29,16 @@ function App() {
     setUser(null);  
   };
 
- return (
+  return (
     <Router>
       <div className="App">
+      <div className="navbar-spacer" style={{ height: '50px', backgroundColor: '#68ccd4' }}></div> {/* Spacer div */}
         <Navbar logoutUser={logoutUser} isLoggedIn={isLoggedIn} user={user} />
         <Routes>
           <Route path="/" element={<HomePage />} />
+          {vets.map(vet => (
+            <Route key={vet.id} path={vet.detailPath} element={<VetProfilePage vet={vet} />} />
+          ))}
           <Route path="/login" element={<Login loginUser={loginUser} />} />
           <Route path="/signup" element={<SignUp loginUser={loginUser} />} />
           <Route path="/VetCareDashboard" element={<VetCareDashboard />} />

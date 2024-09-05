@@ -1,16 +1,46 @@
-/* HomePage.css */
 .AboutUs {
   display: flex;
-  flex-direction: column; /* Stacks the content vertically */
-  align-items: flex-end; /* Aligns the content to the right */
-  text-align: left; /* Keeps the text alignment to the left */
-  margin-left: 50%; /* Starts the content from the middle of the page */
-  width: 50%; /* Sets the width of the container to 50% of its parent */
+  align-items: center;
+  justify-content: center;
+  position: relative; /* Necessary for absolute positioning of images */
+  padding-top: 70px;
+}
+
+.about-images {
+  position: relative;
+  width: 40%; /* Adjust based on your layout needs */
+  height: 400px; /* Adjust height to fit your images or content */
+
+}
+
+.dog-image {
+  position: absolute;
+  top: 90px; /* Adjust top positioning for alignment */
+  left: 0; /* Aligns image to the left side */
+  width: 50%; /* Image width, adjust as needed */
+  z-index: 1; /* Lower z-index so it's under the cat image */
+}
+
+.cat-image {
+  position: absolute;
+  bottom: 90px; /* Adjust bottom positioning for alignment */
+  right: 0; /* Aligns image to the right side */
+  width: 50%; /* Image width, adjust as needed */
+  z-index: 2; /* Higher z-index to overlap over the dog image */
+}
+
+.about-content {
+  width: 50%; /* Takes up half of the AboutUs container */
+  padding: 20px;
+  text-align: left;
 }
 
 .AboutUs h1, .AboutUs p {
-  width: 100%; /* Each paragraph takes the full width of the .AboutUs container */
+  padding-bottom: 100px;
+  font-size: 20px;
 }
+
+
 
 
 .Research {
@@ -34,10 +64,8 @@
 
 .swiper-container {
   width: 100%;  /* Takes the full width of its parent */
-  height: 500px; /* Set a fixed height for consistent behavior */
+  height: 600px; /* Set a fixed height for consistent behavior */
   margin: 20px auto 50px; /* Centered horizontally */
-  box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-  border-radius: 10px;
   display: flex; /* Flexbox for inner alignment */
 }
 
@@ -108,33 +136,3 @@
   padding-top: 20px;
 }
 
-.vet-card {
-  width: 20%; /* Adjust based on your layout preferences */
-  padding: 20px;
-  box-shadow: 0px 4px 8px rgba(0,0,0,0.1);
-  background-color: #fff;
-  color: #000;
-  border-radius: 10%;
-  margin-bottom: 70px;
-
-}
-
-.vet-image {
-  width: 150px; /* Adjust size as needed */
-  height: 150px; /* Ensure width and height are the same */
-  background-color: #ccc; /* Placeholder color for images */
-  border-radius: 50%; /* This makes the shape a circle */
-  margin-bottom: 70px;
-  margin-left: 5px;  /* Center the image horizontally */
-  margin-right: auto; /* Center the image horizontally */
-}
-
-
-.vet-info {
-  font-size: 16px;
-  text-align: center;
-  background-color: #ccc; /* Placeholder color for images */
-  width: auto; /* Adjust size as needed */
-  height: 150px; /* Ensure width and height are the same */
-  
-}
