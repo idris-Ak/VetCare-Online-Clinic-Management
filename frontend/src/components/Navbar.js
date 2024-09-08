@@ -18,7 +18,7 @@ function Navbar({logoutUser, isLoggedIn, user}) {
           <Link to="/" className="navbar-link">Home</Link>
         </li>
         <li className="navbar-item">
-          <Link to="/BookOnline" className="navbar-link">Book Online</Link>
+          <Link to="/AppointmentPage/Appointments" className="navbar-link">Book Online</Link>
         </li>
         <li className="navbar-item">
           <Link to="/VetCareDashboard" className="navbar-link">VetCare Dashboard</Link>

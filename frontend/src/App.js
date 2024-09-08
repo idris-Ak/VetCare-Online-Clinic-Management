@@ -10,6 +10,7 @@ import './App.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import VetProfilePage from '../src/pages/VetProfilePage'; // Make sure to create this component
 import vets from '../src/components/data/vets';
+import Appointments from './pages/AppointmentPage/Appointments';
 
 
 function App() {
@@ -42,6 +43,7 @@ function App() {
           <Route path="/login" element={<Login loginUser={loginUser} />} />
           <Route path="/signup" element={<SignUp loginUser={loginUser} />} />
           <Route path="/VetCareDashboard" element={<VetCareDashboard />} />
+          <Route path="/AppointmentPage/Appointments" element={<Appointments />}></Route>
         </Routes>
         <Footer />
       </div>
