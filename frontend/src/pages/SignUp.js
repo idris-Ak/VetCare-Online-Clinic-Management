@@ -80,7 +80,7 @@ if (emailExists) {
     return;
 }
 
- //Save the new user in localStorage
+    //Save the new user in localStorage
     const newUser = {
       name: user.name,
       email: user.email,
@@ -146,7 +146,8 @@ if (emailExists) {
         
         <Form.Group className="mb-3" controlId="userEmailSignUp">
           <Form.Label style={{fontFamily: 'Lato, sans-serif', fontSize:'20px'}}>Email</Form.Label>
-          <Form.Control type="email" name="email" value={user.email} onChange={handleChange} required style={{ borderRadius: '15px'}}/>
+          <Form.Control type="email" name="email" value={user.email} onChange={handleChange} required placeholder={user.role === 'Vet' ? "Please enter an email ending with '@vetcare.com'" : ""}
+ style={{ borderRadius: '15px'}}/>
         </Form.Group>
 
         <Form.Group className="mb-3" controlId="userPassword">
