@@ -15,11 +15,20 @@ function VetCareDashboard() {
 
   // Prescription Refills State
   const [prescriptions] = useState([
-    { name: 'Flea Prevention', status: 'Available', id: 1 },
-    { name: 'Heartworm Prevention', status: 'Available', id: 2 },
+    { name: 'Flea Prevention', status: 'Available', id: 1, price: 50.00 },
+    { name: 'Heartworm Prevention', status: 'Available', id: 2, price: 75.00},
   ]);
   const [selectedPrescription, setSelectedPrescription] = useState(null);
   const [showPrescriptionModal, setShowPrescriptionModal] = useState(false);
+  const [paymentSuccess, setPaymentSuccess] = useState(false); //State for showing success page
+  const [formErrors, setFormErrors] = useState('');
+
+  //Payment Form State
+  const [paymentDetails, setPaymentDetails] = useState({
+    cardNumber: '',
+    expiryDate: '',
+    cvv: ''
+  });
 
   // Handle Download Record
   const handleDownload = (record) => {
@@ -44,9 +53,48 @@ function VetCareDashboard() {
     setShowPrescriptionModal(true);
   };
 
+  // Handle form changes
+  const handlePaymentChange = (event) => {
+    const { name, value } = event.target;
+    setPaymentDetails(prevDetails => ({
+      ...prevDetails,
+      [name]: value
+    }));
+  };
+
+  // Validate the payment form
+  const validatePaymentForm = () => {
+    const { cardNumber, expiryDate, cvv } = paymentDetails;
+    const errors = [];
+
+    // Validate card number (16 digits)
+    if (!/^\d{16}$/.test(cardNumber)) {
+      errors.push("Card number must be 16 digits.");
+    }
+
+    // Validate expiry date (MM/YY)
+    if (!/^(0[1-9]|1[0-2])\/?([0-9]{2})$/.test(expiryDate)) {
+      errors.push("Invalid expiry date. Use MM/YY format.");
+    }
+
+    // Validate CVV (3 digits)
+    if (!/^\d{3}$/.test(cvv)) {
+      errors.push("CVV must be 3 digits.");
+    }
+
+    if (errors.length > 0) {
+      setFormErrors(errors.join(' '));
+      return false;
+    }
+    return true;
+  };
+
+  // Handle payment submission
   const handlePayment = () => {
-    alert(`Payment successful for ${selectedPrescription.name}`);
-    setShowPrescriptionModal(false);
+    if (validatePaymentForm()) {
+      setPaymentSuccess(true); // Show the success page
+      setShowPrescriptionModal(false);
+    }
   };
 
   return (
@@ -109,6 +157,7 @@ function VetCareDashboard() {
               <tr>
                 <th>Prescription</th>
                 <th>Status</th>
+                <th>Price</th>
                 <th>Actions</th>
               </tr>
             </thead>
@@ -117,6 +166,7 @@ function VetCareDashboard() {
                 <tr key={prescription.id}>
                   <td>{prescription.name}</td>
                   <td>{prescription.status}</td>
+                  <td>${prescription.price.toFixed(2)}</td>
                   <td>
                     <Button variant="primary" onClick={() => handleRequestRefill(prescription)}>
                       Request Refill
@@ -152,12 +202,13 @@ function VetCareDashboard() {
       )}
 
       {/* Modal for Prescription Refill */}
-      {selectedPrescription && (
+      {selectedPrescription && !paymentSuccess && (
         <Modal show={showPrescriptionModal} onHide={() => setShowPrescriptionModal(false)}>
           <Modal.Header closeButton>
             <Modal.Title>Refill {selectedPrescription.name}</Modal.Title>
           </Modal.Header>
           <Modal.Body>
+                {formErrors && <Alert variant="danger">{formErrors}</Alert>}
             <Form>
               <Form.Group>
                 <Form.Label>Pharmacy</Form.Label>
