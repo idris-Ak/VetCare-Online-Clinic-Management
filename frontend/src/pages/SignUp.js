@@ -1,6 +1,6 @@
 import React, { useState} from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Button, Form, Alert, Container, ToggleButtonGroup, ToggleButton } from 'react-bootstrap';
+import { Button, Form, Alert, Container, ToggleButtonGroup, ToggleButton, OverlayTrigger, Tooltip } from 'react-bootstrap';
 
 function SignUp({loginUser}) {
   const [user, setUser] = useState({
@@ -10,9 +10,12 @@ function SignUp({loginUser}) {
     confirmPassword: '',
     role: 'Pet Owner'
   });
+  const [errors, setErrors] = useState({
+    emailError: '',
+    passwordError: '',
+    confirmPasswordError: '',
+  });
   const [showSuccessAlert, setShowSuccessAlert] = useState(false);
-  const[errorMessages, setErrorMessages] = useState([]);
-  const [showErrorMessage, setShowErrorMessage] = useState(false);
   const navigate = useNavigate();
 
   const handleChange = (event) => {
@@ -37,30 +40,33 @@ function SignUp({loginUser}) {
 
   //Validate the user inputs
   const validateForm = () => {
-    let errors = [];
+    let isValid = true;
+    const newErrors = {
+      emailError: '',
+      passwordError: '',
+      confirmPasswordError: '',
+    };
 
     //Check if the Vet's email ends with @vetcare.com
     if (user.role === 'Vet' && !user.email.endsWith('@vetcare.com')) {
-      errors.push("Vets must use an email that ends with '@vetcare.com'.");
+      newErrors.emailError = "Vets must use an email that ends with '@vetcare.com'.";
+      isValid = false; 
     }
 
     //If password is not equal to confirmMessage, output the error message
     if(user.password !== user.confirmPassword){
-      errors.push("Passwords do not match.");
+      newErrors.confirmPasswordError = 'Passwords do not match.';
+      isValid = false; 
     }
     //If password is not strong, output the error message
     if (!isPasswordStrong(user.password)) {
-      errors.push("Your password must be at least 8 characters long and include uppercase letters, lowercase letters, numbers, and special characters.");
+      newErrors.passwordError = 'Your password must be at least 8 characters long and include uppercase letters, lowercase letters, numbers, and special characters.';
+      isValid = false; 
     }
-    //Display the error messages for 5 seconds 
-    if (errors.length > 0) {
-      setErrorMessages(errors);
-      setShowErrorMessage(true);
-      //Hide error message after 5 seconds
-      setTimeout(() => setShowErrorMessage(false), 5000);
-      return false;
-    }
-    return true;
+
+    setErrors(newErrors);
+    
+     return isValid;
   };
 
   const handleSubmit = async(event) => {
@@ -71,14 +77,15 @@ function SignUp({loginUser}) {
 
 //Save the user to localStorage
 const users = JSON.parse(localStorage.getItem('users')) || [];
-const emailExists = users.some(users => users.email === user.email);
+const emailExists = users.some(existingUser => existingUser.email === user.email);
 
-if (emailExists) {
-    setErrorMessages("An account with this email already exists.");
-    setShowErrorMessage(true);
-    setTimeout(() => setShowErrorMessage(false), 3000);
+ if (emailExists) {
+    setErrors((prevErrors) => ({ ...prevErrors, emailError: 'An account with this email already exists.' }));
+    setTimeout(() => {
+      setErrors((prevErrors) => ({ ...prevErrors, emailError: '' }));
+    }, 4000); //Clear the error after 4 seconds
     return;
-}
+  }
 
     //Save the new user in localStorage
     const newUser = {
@@ -100,14 +107,23 @@ if (emailExists) {
     }, 2000);
   };
 
+   const renderTooltipEmail = (props) => (
+    <Tooltip id="button-tooltip" {...props}>
+      Enter a valid email. If you're a vet, use an email ending in '@vetcare.com'.
+    </Tooltip>
+  );
+
+  const renderTooltipPassword = (props) => (
+    <Tooltip id="button-tooltip" {...props}>
+      Password must be at least 8 characters long and include uppercase, lowercase, numbers, and special characters.
+    </Tooltip>
+  );
+
   return (
     <Container className="d-flex justify-content-center align-items-center" style={{ minHeight: '100vh', fontFamily: 'Lato, sans-serif'}}>
        <div className="w-100 p-4" style={{ maxWidth: '600px', background: '#fff', borderRadius: '20px', boxShadow: '0 4px 8px rgba(0,0,0,0.1)'}}>
         <br></br>
         {showSuccessAlert && <Alert variant="success">SignUp Successful!</Alert>}
-        {showErrorMessage && errorMessages.map((error, index) => (
-                        <Alert key={index} variant="danger">{error}</Alert>
-           ))}
       <h2 className="mb-4 text-center" style={{ fontWeight: '600', color: '#333', fontSize:'40px'}}>SignUp To VetCare</h2>
       <Form onSubmit={handleSubmit} className="rounded-3">
         <Form.Label className="mb-2 text-center w-100" style={{ fontWeight: '500', fontSize: '20px', color: '#333' }}>
@@ -145,19 +161,31 @@ if (emailExists) {
         </Form.Group>
         
         <Form.Group className="mb-3" controlId="userEmailSignUp">
-          <Form.Label style={{fontFamily: 'Lato, sans-serif', fontSize:'20px'}}>Email</Form.Label>
-          <Form.Control type="email" name="email" value={user.email} onChange={handleChange} required placeholder={user.role === 'Vet' ? "Please enter an email ending with '@vetcare.com'" : ""}
- style={{ borderRadius: '15px'}}/>
+        <Form.Label style={{ fontFamily: 'Lato, sans-serif', fontSize: '20px' }}>
+              Email{' '}
+              <OverlayTrigger placement="right" delay={{ show: 250, hide: 400 }} overlay={renderTooltipEmail}>
+                <i className="bi bi-info-circle"></i>
+              </OverlayTrigger>
+            </Form.Label>
+            <Form.Control type="email" name="email" value={user.email} onChange={handleChange} required style={{ borderRadius: '15px'}}/>
+            {errors.emailError && <div style={{ color: 'red', fontSize: '0.85rem', marginTop: '0.25rem' }}>{errors.emailError}</div>}
         </Form.Group>
 
         <Form.Group className="mb-3" controlId="userPassword">
-          <Form.Label style={{fontFamily: 'Lato, sans-serif', fontSize:'20px'}}>Password</Form.Label>
-          <Form.Control type="password" name="password" value={user.password} onChange={handleChange} required style={{ borderRadius: '15px' }} />
+        <Form.Label style={{ fontFamily: 'Lato, sans-serif', fontSize: '20px' }}>
+              Password{' '}
+              <OverlayTrigger placement="right" delay={{ show: 250, hide: 400 }} overlay={renderTooltipPassword}>
+                <i className="bi bi-info-circle"></i>
+              </OverlayTrigger>
+            </Form.Label>
+        <Form.Control type="password" name="password" value={user.password} onChange={handleChange} required style={{ borderRadius: '15px' }} />
+        {errors.passwordError && <div style={{ color: 'red', fontSize: '0.85rem', marginTop: '0.25rem' }}>{errors.passwordError}</div>}
         </Form.Group>
 
         <Form.Group className="mb-4" controlId="userConfirmPassword">
           <Form.Label style={{fontFamily: 'Lato, sans-serif', fontSize:'20px'}}>Confirm Password</Form.Label>
           <Form.Control type="password" name="confirmPassword" value={user.confirmPassword} onChange={handleChange} required style={{ borderRadius: '15px'}}/>
+          {errors.confirmPasswordError && <div style={{ color: 'red', fontSize: '0.85rem', marginTop: '0.25rem' }}>{errors.confirmPasswordError}</div>}
         </Form.Group>
         <div className="d-grid gap-2">
             <Button variant="outline-primary" type="submit" className="rounded-pill shadow-sm" style={{ fontWeight: '500', fontSize:'22px'}}>Sign Up</Button>
