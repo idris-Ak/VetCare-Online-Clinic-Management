@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
-import { Button, Table, Container, Modal, Alert, Form } from 'react-bootstrap';
+import { Button, Table, Container, Modal, Alert, Form, Row, Col } from 'react-bootstrap';
+import { useNavigate } from "react-router-dom";
+
 
 function VetCareDashboard() {
   // State for switching between views (Medical Records vs. Prescription Refills)
@@ -20,8 +22,7 @@ function VetCareDashboard() {
   ]);
   const [selectedPrescription, setSelectedPrescription] = useState(null);
   const [showPrescriptionModal, setShowPrescriptionModal] = useState(false);
-  const [paymentSuccess, setPaymentSuccess] = useState(false); //State for showing success page
-  const [formErrors, setFormErrors] = useState('');
+  const navigate = useNavigate();
 
   //Payment Form State
   const [paymentDetails, setPaymentDetails] = useState({
@@ -29,6 +30,13 @@ function VetCareDashboard() {
     expiryDate: '',
     cvv: ''
   });
+
+  const [errors, setErrors] = useState({
+    cardNumberError: '',
+    expiryDateError: '',
+    cvvError: ''
+  });
+
 
   // Handle Download Record
   const handleDownload = (record) => {
@@ -62,38 +70,43 @@ function VetCareDashboard() {
     }));
   };
 
-  // Validate the payment form
+  //Validate the payment form
   const validatePaymentForm = () => {
     const { cardNumber, expiryDate, cvv } = paymentDetails;
-    const errors = [];
+    let isValid = true;
+    let newErrors = {
+      cardNumberError: '',
+      expiryDateError: '',
+      cvvError: ''
+    };
 
-    // Validate card number (16 digits)
+    //Validate card number (16 digits)
     if (!/^\d{16}$/.test(cardNumber)) {
-      errors.push("Card number must be 16 digits.");
+      newErrors.cardNumberError = "Card number must be 16 digits.";
+      isValid = false;
     }
 
-    // Validate expiry date (MM/YY)
+    //Validate expiry date (MM/YY)
     if (!/^(0[1-9]|1[0-2])\/?([0-9]{2})$/.test(expiryDate)) {
-      errors.push("Invalid expiry date. Use MM/YY format.");
+      newErrors.expiryDateError = "Invalid expiry date. Use MM/YY format.";
+      isValid = false;
     }
 
-    // Validate CVV (3 digits)
+    //Validate CVV (3 digits)
     if (!/^\d{3}$/.test(cvv)) {
-      errors.push("CVV must be 3 digits.");
+      newErrors.cvvError = "CVV must be 3 digits.";
+      isValid = false;
     }
 
-    if (errors.length > 0) {
-      setFormErrors(errors.join(' '));
-      return false;
-    }
-    return true;
+    setErrors(newErrors);
+
+    return isValid;
   };
 
   // Handle payment submission
   const handlePayment = () => {
-    if (validatePaymentForm()) {
-      setPaymentSuccess(true); // Show the success page
-      setShowPrescriptionModal(false);
+     if (validatePaymentForm()) {
+        navigate('/payment-success'); // Navigate to the success page
     }
   };
 
@@ -202,36 +215,93 @@ function VetCareDashboard() {
       )}
 
       {/* Modal for Prescription Refill */}
-      {selectedPrescription && !paymentSuccess && (
-        <Modal show={showPrescriptionModal} onHide={() => setShowPrescriptionModal(false)}>
-          <Modal.Header closeButton>
-            <Modal.Title>Refill {selectedPrescription.name}</Modal.Title>
+      {selectedPrescription && (
+        <Modal show={showPrescriptionModal} size="lg" centered style={{maxHeight: '80vh', overflowY: 'auto', margin: 'auto' }} onHide={() => setShowPrescriptionModal(false)}>
+        <Modal.Header closeButton style={{ borderBottom: "none", paddingBottom: "0" }}>
+        <Modal.Title style={{ fontWeight: "bold", fontSize: "1.8rem", color: "#343a40", marginBottom: "0.5rem" }}>
+            Refill Prescription: <span className="text-info">{selectedPrescription.name}</span>
+        </Modal.Title>
           </Modal.Header>
           <Modal.Body>
-                {formErrors && <Alert variant="danger">{formErrors}</Alert>}
             <Form>
-              <Form.Group>
-                <Form.Label>Pharmacy</Form.Label>
-                <Form.Control as="select">
+              <Form.Group className="mb-4">
+              <Form.Label style={{ fontWeight: "bold", fontSize: "1.2rem" }}>Select Pharmacy</Form.Label>
+              <Form.Control as="select" className="rounded border border-info" style={{ padding: "0.6rem", fontSize: "1rem" }}>
                   <option>Pharmacy 1</option>
                   <option>Pharmacy 2</option>
                 </Form.Control>
               </Form.Group>
-              <Form.Group>
-                <Form.Label>Payment Method</Form.Label>
-                <Form.Control as="select">
-                  <option>Credit Card</option>
-                  <option>PayPal</option>
-                </Form.Control>
+              <h4 className="mt-4" style={{ fontWeight: "bold", color: "#495057" }}>Payment Details</h4>
+              <Form.Group className="mb-3">
+              <Form.Label style={{ fontWeight: "bold", fontSize: "1.1rem" }}>Card Number</Form.Label>
+                <Form.Control
+                  type="text"
+                  name="cardNumber"
+                  value={paymentDetails.cardNumber}
+                  onChange={handlePaymentChange}
+                  placeholder="Enter your 16-digit card number"
+                  maxLength="16"
+                  required
+                  className="rounded border border-info"
+                  style={{ padding: "0.6rem", fontSize: "1rem" }}
+                />
+                 {errors.cardNumberError && (
+                <div style={{ color: 'red', fontSize: '0.85rem', marginTop: '0.25rem' }}>
+                  {errors.cardNumberError}
+                </div>
+                  )}
               </Form.Group>
+              <Row>
+                <Col md={6}>
+                  <Form.Group className="mb-3">
+                  <Form.Label style={{ fontWeight: "bold", fontSize: "1.1rem" }}>Expiry Date (MM/YY)</Form.Label>
+                    <Form.Control
+                      type="text"
+                      name="expiryDate"
+                      value={paymentDetails.expiryDate}
+                      onChange={handlePaymentChange}
+                      placeholder="MM/YY"
+                      required
+                      className="rounded border border-info"
+                      style={{ padding: "0.6rem", fontSize: "1rem" }}
+                    />
+                      {errors.expiryDateError && (
+                    <div style={{ color: 'red', fontSize: '0.85rem', marginTop: '0.25rem' }}>
+                      {errors.expiryDateError}
+                    </div>
+                    )}
+                  </Form.Group>
+                </Col>
+                <Col md={6}>
+                  <Form.Group className="mb-3">
+                  <Form.Label style={{ fontWeight: "bold", fontSize: "1.1rem" }}>CVV</Form.Label>
+                    <Form.Control
+                      type="text"
+                      name="cvv"
+                      value={paymentDetails.cvv}
+                      onChange={handlePaymentChange}
+                      placeholder="Enter 3-digit CVV"
+                      maxLength="3"
+                      required
+                      className="rounded border border-info"
+                      style={{ padding: "0.6rem", fontSize: "1rem" }}
+                    />
+                    {errors.cvvError && (
+                    <div style={{ color: 'red', fontSize: '0.85rem', marginTop: '0.25rem' }}>
+                      {errors.cvvError}
+                    </div>
+                    )}
+                  </Form.Group>
+                </Col>
+              </Row>
             </Form>
-          </Modal.Body>
-          <Modal.Footer>
-            <Button variant="secondary" onClick={() => setShowPrescriptionModal(false)}>
+          </Modal.Body> 
+          <Modal.Footer className="d-flex justify-content-between" style={{ borderTop: "none", paddingTop: "0" }}>
+          <Button variant="outline-secondary" className="rounded-pill" style={{ padding: "0.5rem 1.5rem", fontSize: "1rem" }} onClick={() => setShowPrescriptionModal(false)}>
               Cancel
             </Button>
-            <Button variant="success" onClick={handlePayment}>
-              Pay Securely
+          <Button variant="outline-success" className="rounded-pill" style={{ padding: "0.5rem 1.5rem", fontSize: "1rem", borderColor: "#28a745" }} onClick={handlePayment}>
+              Pay ${selectedPrescription.price.toFixed(2)}
             </Button>
           </Modal.Footer>
         </Modal>

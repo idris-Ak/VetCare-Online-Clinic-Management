@@ -11,6 +11,8 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import VetProfilePage from '../src/pages/VetProfilePage'; // Make sure to create this component
 import vets from '../src/components/data/vets';
 import Appointments from './pages/AppointmentPage/Appointments';
+import PaymentSuccess from './pages/PaymentSuccess';
+
 
 
 function App() {
@@ -44,6 +46,7 @@ function App() {
           <Route path="/signup" element={<SignUp loginUser={loginUser} />} />
           <Route path="/VetCareDashboard" element={<VetCareDashboard />} />
           <Route path="/AppointmentPage/Appointments" element={<Appointments />}></Route>
+          <Route path="/payment-success" element={<PaymentSuccess />} />
         </Routes>
         <Footer />
       </div>
