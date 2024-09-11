@@ -1,154 +1,190 @@
 .header nav button:hover {
-    color: lightgray;
-  }
-  
-  /* Pet Selection Section */
-  .pet-selection {
-    background-color: #333;
-    color: white;
-    padding: 20px;
-    text-align: center;
-  }
-  
-  .pet-profiles {
-    display: flex;
-    justify-content: center;
-    gap: 20px;
-  }
-  
-  .pet-card {
-    background-color: white;
-    color: black;
-    padding: 20px;
-    text-align: center;
-    border-radius: 10px;
-    width: 200px;
-  }
-  
-  .pet-card img {
-    width: 100%;
-    height: auto;
-    border-radius: 10px;
-  }
-  
-  .pet-card button {
-    margin-top: 10px;
-    background-color: #00bfbf;
-    color: white;
-    border: none;
-    padding: 10px;
-    cursor: pointer;
-  }
-  
-  .pet-card button:hover {
-    background-color: #009595;
-  }
-  
-  /* Appointment Buttons */
-  .appointment-buttons {
-    display: flex;
-    justify-content: center;
-    gap: 20px;
-    margin: 20px;
-  }
-  
-  .book-appointment {
-    background-color: green;
-    color: white;
-    padding: 10px 20px;
-    border: none;
-    cursor: pointer;
-  }
-  
-  .cancel-appointment {
-    background-color: red;
-    color: white;
-    padding: 10px 20px;
-    border: none;
-    cursor: pointer;
-  }
-  
-  .book-appointment:hover, .cancel-appointment:hover {
-    opacity: 0.8;
-  }
-  .calendar {
-    width: 400px;
-    margin: 20px auto;
-    text-align: center;
-    font-family: Arial, sans-serif;
-  }
-  
-  .calendar-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 10px;
-  }
-  
-  .calendar-header button {
-    padding: 5px 10px;
-    font-size: 16px;
-    cursor: pointer;
-  }
-  
-  .calendar-grid {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr); /* 7 columns for the days of the week */
-    gap: 2px; /* Space between cells */
-  }
-  
-  .calendar-cell {
-    padding: 20px;
-    border: 1px solid #ddd;
-    box-sizing: border-box;
-    text-align: center;
-    font-size: 14px;
-    transition: background-color 0.3s, color 0.3s;
-  }
-  
-  .calendar-cell:hover {
-    background-color: black;
-    color: white;
-  }
-  
-  .calendar-cell.day-names {
-    background-color: #f0f0f0;
-    font-weight: bold;
-  }
-  
-  .title {
-    margin-bottom: 20px;
-    font-size: 24px;
-  }
-  
-  .selector {
-    margin-top: 20px;
-    padding: 10px;
-    border: 1px solid #ddd;
-    background-color: #f9f9f9;
-  }
-  
-  .selector h3 {
-    margin-bottom: 10px;
-  }
-  
-  .selector label {
-    display: block;
-    margin-bottom: 10px;
-  }
-  
-  .selector input, .selector select {
-    padding: 5px;
-    margin-left: 10px;
-  }
-  
-  .selector button {
-    padding: 5px 10px;
-    margin-top: 10px;
-    cursor: pointer;
-  }
-  
-  button:hover {
-    background-color: #ddd;
-  }
-  
+  color: lightgray;
+}
+
+/* Pet Selection Section */
+.pet-selection {
+  background-color: #333;
+  color: white;
+  padding: 20px;
+  text-align: center;
+}
+
+.pet-profiles {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+}
+
+.pet-card {
+  background-color: white;
+  color: black;
+  padding: 20px;
+  text-align: center;
+  border-radius: 10px;
+  width: 200px;
+}
+
+.pet-card img {
+  width: 100%;
+  height: auto;
+  border-radius: 10px;
+}
+
+.pet-card button {
+  margin-top: 10px;
+  background-color: #00bfbf;
+  color: white;
+  border: none;
+  padding: 10px;
+  cursor: pointer;
+}
+
+.pet-card button:hover {
+  background-color: #009595;
+}
+
+/* CALENDAR SECTION */
+
+.calendar {
+  width: 400px;
+  margin: 20px auto;
+  text-align: center;
+  font-family: Arial, sans-serif;
+}
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+}
+
+.calendar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.calendar-header button {
+  padding: 5px 10px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.calendar-cell {
+  padding: 20px;
+  border: 1px solid #ddd;
+  box-sizing: border-box;
+  text-align: center;
+  font-size: 14px;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.calendar-cell:hover {
+  background-color: black;
+  color: white;
+}
+
+.calendar-cell.day-names {
+  background-color: #f0f0f0;
+  font-weight: bold;
+}
+
+.calendar-cell.has-appointment {
+  background-color: #90ee90;
+  color: #fff;
+  font-weight: bold;
+}
+
+.title {
+  margin-bottom: 20px;
+  font-size: 24px;
+}
+
+.selector {
+  margin-top: 20px;
+  padding: 10px;
+  border: 1px solid #ddd;
+  background-color: #f9f9f9;
+}
+
+.selector h3 {
+  margin-bottom: 10px;
+}
+
+.selector label {
+  display: block;
+  margin-bottom: 10px;
+}
+
+.selector input, .selector select {
+  padding: 5px;
+  margin-left: 10px;
+}
+
+.selector button {
+  padding: 5px 10px;
+  margin-top: 10px;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #ddd;
+}
+
+.day-status {
+  margin-top: 20px;
+  text-align: center;
+}
+
+.day-status button {
+  margin-top: 10px;
+  padding: 10px 20px;
+  cursor: pointer;
+  background-color: #007bff;
+  color: white;
+  border: none;
+}
+
+.day-status button:hover {
+  background-color: #0056b3;
+}
+
+.day-names {
+  font-weight: bold;
+}
+
+/* MODAL SECTION */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-content {
+  background-color: white;
+  padding: 20px;
+  border-radius: 10px;
+  text-align: center;
+  width: 300px;
+}
+
+.close-modal {
+  background-color: red;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  cursor: pointer;
+  margin-top: 20px;
+}
+
+.close-modal:hover {
+  background-color: darkred;
+}

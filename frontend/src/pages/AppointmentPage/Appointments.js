@@ -7,6 +7,9 @@ function Appointments() {
   const [showSelector, setShowSelector] = useState(false);
   const [selectedYear, setSelectedYear] = useState(currentDate.getFullYear());
   const [selectedMonth, setSelectedMonth] = useState(currentDate.getMonth());
+  const [selectedDay, setSelectedDay] = useState(null);
+  const [appointments, setAppointments] = useState({});
+  const [showModal, setShowModal] = useState(false);
 
   // Helper function to get the number of days in a month
   const getDaysInMonth = (year, month) => {
@@ -60,9 +63,35 @@ function Appointments() {
   };
 
   const monthNames = [
-    "January", "February", "March", "April", "May", "June", 
+    "January", "February", "March", "April", "May", "June",
     "July", "August", "September", "October", "November", "December"
   ];
+
+  const openDayModal = (day) => {
+    if (typeof day === "number") {
+      setSelectedDay(day);
+      setShowModal(true);  // Show the modal when a day is clicked
+    }
+  };
+
+  // Generate a unique key for an appointment using year, month, and day
+  const getAppointmentKey = (year, month, day) => {
+    return `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+  };
+
+  const bookAppointment = () => {
+    const key = getAppointmentKey(currentDate.getFullYear(), currentDate.getMonth(), selectedDay);
+    setAppointments({ ...appointments, [key]: true });
+    setShowModal(false);
+  };
+
+  const cancelAppointment = () => {
+    const key = getAppointmentKey(currentDate.getFullYear(), currentDate.getMonth(), selectedDay);
+    const newAppointments = { ...appointments };
+    delete newAppointments[key];
+    setAppointments(newAppointments);
+    setShowModal(false);
+  };
 
   const currentMonth = monthNames[currentDate.getMonth()];
   const currentYear = currentDate.getFullYear();
@@ -91,15 +120,9 @@ function Appointments() {
         </div>
       </section>
 
-      {/* Appointment Buttons */}
-      <div className="appointment-buttons">
-        <button className="book-appointment">Book Appointment</button>
-        <button className="cancel-appointment">Cancel Appointment</button>
-      </div>
-
       {/* Calendar Section */}
       <div className="calendar">
-        <h1 className="title">Interactive Calendar</h1>
+        <h1 className="title">Make OR Cancel Appointments</h1>
         <div className="calendar-header">
           <button onClick={handlePreviousMonth}>Previous</button>
           <span>
@@ -120,7 +143,7 @@ function Appointments() {
               <input
                 type="number"
                 value={selectedYear}
-                onChange={(e) => setSelectedYear(e.target.value)}
+                onChange={(e) => setSelectedYear(Number(e.target.value))}
               />
             </label>
             <label>
@@ -141,20 +164,51 @@ function Appointments() {
         )}
 
         <div className="calendar-grid">
+          {/* Days of the Week Headers */}
           {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day, index) => (
             <div key={index} className="calendar-cell day-names">
               {day}
             </div>
           ))}
 
-          {daysInMonth.map((day, index) => (
-            <div key={index} className="calendar-cell">
-              {day ? day : ""}
-            </div>
-          ))}
+          {/* Days of the Month */}
+          {daysInMonth.map((day, index) => {
+            const appointmentKey = getAppointmentKey(currentYear, currentDate.getMonth(), day);
+            return (
+              <div
+                key={index}
+                className={`calendar-cell ${
+                  appointments[appointmentKey] ? "has-appointment" : ""
+                }`}
+                onClick={() => openDayModal(day)}
+              >
+                {day || ""}
+              </div>
+            );
+          })}
         </div>
       </div>
 
+      {/* Day Status Modal */}
+      {showModal && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <h3>Day: {selectedDay} {currentMonth} {currentYear}</h3>
+            {appointments[getAppointmentKey(currentYear, currentDate.getMonth(), selectedDay)] ? (
+              <div>
+                <p>You have an appointment on this day.</p>
+                <button onClick={cancelAppointment}>Cancel Appointment</button>
+              </div>
+            ) : (
+              <div>
+                <p>No appointment on this day.</p>
+                <button onClick={bookAppointment}>Book Appointment</button>
+              </div>
+            )}
+            <button className="close-modal" onClick={() => setShowModal(false)}>Close</button>
+          </div>
+        </div>
+      )}
     </>
   );
 }
