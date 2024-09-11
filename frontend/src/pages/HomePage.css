@@ -35,7 +35,7 @@
   text-align: left;
 }
 
-.AboutUs h1, .AboutUs p {
+.AboutUs p {
   padding-bottom: 100px;
   font-size: 20px;
 }
@@ -125,8 +125,12 @@
 .VetTeam {
   background-color: #272B31;
   color: white;
-  padding: 50px 20px;
+  padding: 80px 20px;
   text-align: center;
+}
+
+.VetTeam h1 {
+  padding-bottom: 60px;
 }
 
 .vet-team-container {

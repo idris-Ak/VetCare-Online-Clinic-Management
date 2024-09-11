@@ -1,0 +1,51 @@
+.customer-reviews-container {
+    text-align: center;
+    padding: 60px 20px; /* Increased vertical padding for more height */
+    background-color: #f8f9fa;
+    color: #333;
+    font-family: Arial, sans-serif; /* Ensuring the font is consistent */
+}
+
+.customer-reviews-container h1 {
+    padding: 20px 80px; /* Increased padding for more vertical space */
+    color: #ecf8f0;
+    background-color: #333;
+    display: inline-block; /* Keeps the background around the text */
+}
+
+.review-card {
+    font-size: 24px; /* Increased font size */
+    line-height: 2.0; /* Increased line height for better readability */
+    padding: 100px; /* Increased padding for more internal space */
+    background-color: #fff;
+    border-radius: 5px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    margin: 0 auto;
+    width: 90%;
+    max-width: 900px; /* Increased max width */
+    margin-top: 60px; /* Increased top margin */
+}
+
+.swiper-pagination-bullet {
+    width: 40px; /* Normal width */
+    height: 10px;
+    background-color: #bbb;
+    opacity: 1;
+    margin: 20px 5px; /* Increased vertical margin for more spacing */
+    border-radius: 0;
+    transition: width 0.3s ease-in-out;
+}
+
+.swiper-pagination-bullet-active {
+    background-color: #333;
+    width: 90px; /* Increased width for active bullet */
+    height: 10px;
+}
+
+.reviewer {
+    font-size: 18px; /* Slightly smaller than the review text */
+    font-style: italic; /* A common style for attributions */
+    color: #666; /* Softer color for less emphasis than the main text */
+    margin-top: 20px; /* Space between the review text and the reviewer's name */
+    font-weight: bold; /* Optional, if you want the name to stand out more */
+}
