@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import './Prescription.css';
+import './prescription.css';
 
 
 import pet3Image from 'frontend/src/components/assets/about1.jpg';
