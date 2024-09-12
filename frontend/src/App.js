@@ -5,7 +5,7 @@ import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import Login from './pages/Login';
 import SignUp from './pages/SignUp';
-import VetCareDashboard from './pages/VetCareDashboard';
+import MedicalRecords from './pages/MedicalRecords';
 import './App.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import VetProfilePage from '../src/pages/VetProfilePage'; // Make sure to create this component
@@ -44,7 +44,7 @@ function App() {
           ))}
           <Route path="/login" element={<Login loginUser={loginUser} />} />
           <Route path="/signup" element={<SignUp loginUser={loginUser} />} />
-          <Route path="/VetCareDashboard" element={<VetCareDashboard />} />
+          <Route path="/MedicalRecords" element={<MedicalRecords />} />
           <Route path="/AppointmentPage/Appointments" element={<Appointments />}></Route>
         </Routes>
         <Footer />
