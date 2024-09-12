@@ -1,0 +1,96 @@
+.medical-records-container {
+    margin-top: 2rem;
+    max-width: 85%;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.title {
+    text-align: center;
+    font-size: 2.8rem;
+    margin-bottom: 2rem;
+    color: #007bff;
+    font-weight: 700;
+}
+
+.records-table {
+    background-color: #fdfdfd;
+    border-radius: 0.75rem;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+}
+
+.records-table th {
+    background-color: #007bff;
+    color: white;
+    text-align: center;
+    padding: 1rem;
+    font-weight: 600;
+}
+
+.records-table td {
+    text-align: center;
+    padding: 1rem;
+}
+
+.action-button {
+    margin-right: 0.5rem;
+}
+
+.action-button:last-child {
+    margin-right: 0;
+}
+
+.record-modal .modal-header {
+    background-color: #007bff;
+    color: white;
+    border-radius: 0.5rem 0.5rem 0 0;
+}
+
+.record-modal .modal-body {
+    font-size: 1.1rem;
+    padding: 2rem;
+}
+
+.record-modal .modal-footer {
+    display: flex;
+    justify-content: space-between;
+}
+
+.pet-selection {
+    margin-top: 2rem;
+    display: flex;
+    justify-content: center;
+}
+
+.pet-card {
+    border: 1px solid #ddd;
+    border-radius: 1rem;
+    margin-right: 1.5rem;
+    padding: 1rem;
+    text-align: center;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+}
+
+.pet-card img {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+}
+
+.pet-card:hover {
+    transform: translateY(-5px);
+    cursor: pointer;
+}
+
+.search-bar {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 1rem;
+}
+
+.search-bar input {
+    border-radius: 0.5rem;
+    padding: 0.5rem 1rem;
+    border: 1px solid #007bff;
+}
