@@ -10,7 +10,7 @@ import Appointments from './pages/AppointmentPage/Appointments';
 import HomePage from './pages/HomePage';
 import Login from './pages/Login';
 import SignUp from './pages/SignUp';
-import VetCareDashboard from './pages/VetCareDashboard';
+import MedicalRecords from './pages/MedicalRecords';
 import VetProfilePage from './pages/VetProfilePage'; // Adjusted relative path
 // Import the Prescription page
 import Prescription from './pages/Prescriptionrefill/Prescription'; // Import Prescription.js
