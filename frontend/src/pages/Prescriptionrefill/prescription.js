@@ -1,15 +1,20 @@
 import React, { useState } from 'react';
 import './Prescription.css';
 
+// Import the images
+import pet3Image from 'frontend/src/components/assets/about1.jpg';
+import pet2Image from 'frontend/src/components/assets/about2.jpg';
+import pet1Image from 'frontend/src/components/assets/blog3.jpg';
+
 const Prescription = () => {
   const [petTag, setPetTag] = useState('');
   const [prescriptionNumber, setPrescriptionNumber] = useState('');
   const [selectedPet, setSelectedPet] = useState(null);
 
   const pets = [
-    { id: 1, name: 'Pet 1', image: '/path/to/dog1.jpg' },
-    { id: 2, name: 'Pet 2', image: '/path/to/dog2.jpg' },
-    { id: 3, name: 'Pet 3', image: '/path/to/dog3.jpg' },
+    { id: 1, name: 'Pet 1', image: pet1Image },
+    { id: 2, name: 'Pet 2', image: pet2Image },
+    { id: 3, name: 'Pet 3', image: pet3Image },
   ];
 
   const handlePetSelect = (petId) => {
@@ -20,7 +25,6 @@ const Prescription = () => {
     e.preventDefault();
     console.log('Pet Tag:', petTag);
     console.log('Prescription Number:', prescriptionNumber);
-    // Here, you can handle form submission (e.g., API call)
   };
 
   return (
