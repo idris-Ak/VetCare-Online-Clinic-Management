@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import './Navbar.css';  // Import the CSS file for styling
 import profilepic from '../components/assets/profilepic.png';
+import './Navbar.css'; // Import the CSS file for styling
 
 function Navbar({logoutUser, isLoggedIn, user}) {
   const navigate = useNavigate();
@@ -25,6 +25,9 @@ function Navbar({logoutUser, isLoggedIn, user}) {
         </li>
         <li className="navbar-item">
           <Link to="/educational" className="navbar-link">Educational Resources</Link>
+        </li>
+        <li className="navbar-item">
+          <Link to="/prescription" className="navbar-link">Prescription</Link>
         </li>
       </ul>
       <ul className="navbar-list user-links">

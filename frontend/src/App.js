@@ -1,18 +1,19 @@
+import 'bootstrap/dist/css/bootstrap.min.css';
 import React, { useState } from 'react';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import HomePage from './pages/HomePage';
-import Navbar from './components/Navbar';
+import { Route, BrowserRouter as Router, Routes } from 'react-router-dom';
+import './App.css';
 import Footer from './components/Footer';
+import Navbar from './components/Navbar';
+import vets from './components/data/vets';
+import AllVetMembers from './pages/AllVetMembers';
+import Appointments from './pages/AppointmentPage/Appointments';
+import HomePage from './pages/HomePage';
 import Login from './pages/Login';
 import SignUp from './pages/SignUp';
 import VetCareDashboard from './pages/VetCareDashboard';
-import './App.css';
-import 'bootstrap/dist/css/bootstrap.min.css';
-import VetProfilePage from '../src/pages/VetProfilePage'; // Make sure to create this component
-import vets from '../src/components/data/vets';
-import Appointments from './pages/AppointmentPage/Appointments';
-import AllVetMembers from './pages/AllVetMembers';
-
+import VetProfilePage from './pages/VetProfilePage'; // Adjusted relative path
+// Import the Prescription page
+import Prescription from './pages/Prescriptionrefill/Prescription'; // Import Prescription.js
 
 function App() {
     const [isLoggedIn, setIsLoggedIn] = useState(Boolean(localStorage.getItem('isLoggedIn')));
@@ -24,6 +25,7 @@ function App() {
     setUser(userData);  
     setIsLoggedIn(true); 
   };
+
     const logoutUser = async () => {
     localStorage.removeItem('user');
     localStorage.removeItem('isLoggedIn');
@@ -34,7 +36,7 @@ function App() {
   return (
     <Router>
       <div className="App">
-      <div className="navbar-spacer" style={{ height: '65px', backgroundColor: '#68ccd4' }}></div> {/* Spacer div */}
+        <div className="navbar-spacer" style={{ height: '65px', backgroundColor: '#68ccd4' }}></div> {/* Spacer div */}
         <Navbar logoutUser={logoutUser} isLoggedIn={isLoggedIn} user={user} />
         <Routes>
           <Route path="/" element={<HomePage />} />
@@ -46,6 +48,8 @@ function App() {
           <Route path="/signup" element={<SignUp loginUser={loginUser} />} />
           <Route path="/VetCareDashboard" element={<VetCareDashboard />} />
           <Route path="/AppointmentPage/Appointments" element={<Appointments />}></Route>
+          {/* Add the Prescription route */}
+          <Route path="/prescription" element={<Prescription />} />  {/* New route for Prescription page */}
         </Routes>
         <Footer />
       </div>
