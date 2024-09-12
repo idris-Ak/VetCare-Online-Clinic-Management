@@ -25,7 +25,7 @@ const Prescription = () => {
 
   return (
     <div className="prescription-page">
-      <h1>Select your pet</h1>
+      <h1>Request Prescription for Your Pet</h1>
       <div className="pet-selection">
         {pets.map((pet) => (
           <div key={pet.id} className="pet">
@@ -43,23 +43,31 @@ const Prescription = () => {
       <div className="prescription-form">
         <h2>Prescription Refill</h2>
         <form onSubmit={handleSubmit}>
-          <label htmlFor="petTag">Add your Pet Tag:</label>
-          <input
-            type="text"
-            id="petTag"
-            value={petTag}
-            onChange={(e) => setPetTag(e.target.value)}
-            required
-          />
+          <div className="form-group">
+            <label htmlFor="petTag">Pet Tag:</label>
+            <input
+              type="text"
+              id="petTag"
+              className="form-input"
+              value={petTag}
+              onChange={(e) => setPetTag(e.target.value)}
+              placeholder="Enter your pet's tag"
+              required
+            />
+          </div>
 
-          <label htmlFor="prescriptionNumber">Add Prescription Number:</label>
-          <input
-            type="text"
-            id="prescriptionNumber"
-            value={prescriptionNumber}
-            onChange={(e) => setPrescriptionNumber(e.target.value)}
-            required
-          />
+          <div className="form-group">
+            <label htmlFor="prescriptionNumber">Prescription Number:</label>
+            <input
+              type="text"
+              id="prescriptionNumber"
+              className="form-input"
+              value={prescriptionNumber}
+              onChange={(e) => setPrescriptionNumber(e.target.value)}
+              placeholder="Enter prescription number"
+              required
+            />
+          </div>
 
           <button type="submit" className="submit-btn">Submit Request</button>
         </form>
