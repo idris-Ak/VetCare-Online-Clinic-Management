@@ -18,7 +18,7 @@ const Prescription = () => {
       { id: 1, name: 'Goatie', image: pet1Image },
       { id: 2, name: 'Pookie', image: pet2Image },
       { id: 3, name: 'Dogie', image: pet3Image },
-    ];
+    ]; // branch test
   
     const handlePetSelect = (petId) => {
       const selectedPet = pets.find(pet => pet.id === petId); // Find the selected pet
