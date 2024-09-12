@@ -114,15 +114,15 @@ function Appointments() {
 
   return (
     <>
-      <section className="pet-selection">
+      <section className="appointment-pet-selection">
         <h2>Select Pet Profile</h2>
-        <div className="pet-profiles">
+        <div className="appointment-pet-profiles">
         {petData.map((pet) => (
           <div key={pet.id} className="pet">
             <img src={pet.image} alt={pet.name} />
             <p className="pet-name">{pet.name}</p> 
             <button
-              className={selectedPet === pet.id ? 'selected' : 'select'}
+              className={selectedPet === pet ? 'selected' : 'select'}
               onClick={() => setSelectedPet(pet)}
             >
               {selectedPet === pet ? 'Selected' : 'Select'}
