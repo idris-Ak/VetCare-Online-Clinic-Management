@@ -10,6 +10,17 @@ function Appointments() {
   const [selectedDay, setSelectedDay] = useState(null);
   const [appointments, setAppointments] = useState({});
   const [showModal, setShowModal] = useState(false);
+  const [petData, setPetData] = useState([]);
+  const [selectedPet, setSelectedPet] = useState(null);
+
+  // DEFAULT DATA FOR PETS
+  useEffect(() => {
+    const defaultPets = [
+      { name: "Buddy", age: 3 },
+      { name: "Mittens", age: 2 },
+    ];
+    setPetData(defaultPets);
+  }, []);
 
   // Helper function to get the number of days in a month
   const getDaysInMonth = (year, month) => {
@@ -68,15 +79,19 @@ function Appointments() {
   ];
 
   const openDayModal = (day) => {
-    if (typeof day === "number") {
-      setSelectedDay(day);
-      setShowModal(true);  // Show the modal when a day is clicked
+    if (selectedPet) {
+      if (typeof day === "number") {
+        setSelectedDay(day);
+        setShowModal(true);  // Show the modal when a day is clicked
+      }
+    } else {
+      alert("Please select a pet first.");
     }
   };
 
   // Generate a unique key for an appointment using year, month, and day
   const getAppointmentKey = (year, month, day) => {
-    return `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    return `${selectedPet?.name || "no-pet"}-${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
   };
 
   const bookAppointment = () => {
@@ -102,21 +117,19 @@ function Appointments() {
       <section className="pet-selection">
         <h2>Select Pet Profile</h2>
         <div className="pet-profiles">
-          <div className="pet-card">
-            <img src="pet1.jpg" alt="Pet 1" />
-            <p>Pet 1</p>
-            <button>Select</button>
-          </div>
-          <div className="pet-card">
-            <img src="pet2.jpg" alt="Pet 2" />
-            <p>Pet 2</p>
-            <button>Select</button>
-          </div>
-          <div className="pet-card">
-            <img src="pet3.jpg" alt="Pet 3" />
-            <p>Pet 3</p>
-            <button>Select</button>
-          </div>
+          {petData.length > 0 ? (
+            petData.map((pet, index) => (
+              <div key={index} className={`pet-card ${selectedPet?.name === pet.name ? "selected" : ""}`}>
+                <p>{pet.name}</p>
+                <p>Age: {pet.age}</p>
+                <button onClick={() => setSelectedPet(pet)}>
+                  {selectedPet?.name === pet.name ? "Selected" : "Select"}
+                </button>
+              </div>
+            ))
+          ) : (
+            <p>No pets available. Please add pets to your profile.</p>
+          )}
         </div>
       </section>
 
@@ -196,12 +209,12 @@ function Appointments() {
             <h3>Day: {selectedDay} {currentMonth} {currentYear}</h3>
             {appointments[getAppointmentKey(currentYear, currentDate.getMonth(), selectedDay)] ? (
               <div>
-                <p>You have an appointment on this day.</p>
+                <p>{selectedPet?.name} has an appointment on this day.</p>
                 <button onClick={cancelAppointment}>Cancel Appointment</button>
               </div>
             ) : (
               <div>
-                <p>No appointment on this day.</p>
+                <p>No appointment on this day for {selectedPet?.name}.</p>
                 <button onClick={bookAppointment}>Book Appointment</button>
               </div>
             )}
