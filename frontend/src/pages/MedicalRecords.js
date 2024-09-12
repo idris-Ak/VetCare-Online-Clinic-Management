@@ -1,33 +1,46 @@
 import React, { useState } from 'react';
-import { Button, Table, Container, Modal, Alert, Form, Row, Col, InputGroup, FormControl, Tab, Nav } from 'react-bootstrap';
+import { Button, Table, Container, Modal, Alert, Form } from 'react-bootstrap';
 import { jsPDF } from 'jspdf';  // Import jsPDF library
-import { useNavigate } from 'react-router-dom';
+import './MedicalRecords.css';
+
+// Importing pet images
+import pet1Image from 'frontend/src/components/assets/blog3.jpg';
+import pet2Image from 'frontend/src/components/assets/about2.jpg';
+import pet3Image from 'frontend/src/components/assets/about1.jpg';
 
 function MedicalRecords() {
-  const [activeView, setActiveView] = useState('medicalRecords'); // Tracks whether to show medical records or prescriptions
-  const [searchTerm, setSearchTerm] = useState(''); // Search term for filtering records
+  // Mock user data with multiple pets
+  const pets = [
+    { id: 1, name: 'Goatie', image: pet1Image },
+    { id: 2, name: 'Pookie', image: pet2Image },
+    { id: 3, name: 'Dogie', image: pet3Image }
+  ];
 
-  // Dummy Data for Medical Records
-  const [records] = useState([
-    { date: '01/01/2023', service: 'Annual Check-up', vet: 'Dr. Doofenshmirtz', id: 1, notes: 'Healthy checkup, all vitals normal.' },
-    { date: '01/06/2023', service: 'Vaccination', vet: 'Dr. Perry', id: 2, notes: 'Rabies and distemper vaccinations administered.' },
+  // Medical records for all pets
+  const [allRecords] = useState([
+    { petId: 1, date: '01/01/2023', service: 'Annual Check-up', vet: 'Dr. Doofenshmirtz', id: 1 },
+    { petId: 1, date: '01/06/2023', service: 'Vaccination', vet: 'Dr. Perry', id: 2 },
+    { petId: 2, date: '02/01/2023', service: 'Surgery', vet: 'Dr. Doofenshmirtz', id: 3 },
+    { petId: 3, date: '03/10/2023', service: 'General Check-up', vet: 'Dr. Perry', id: 4 },
   ]);
-  const [filteredRecords, setFilteredRecords] = useState(records); // Filtered records for the search
 
+  // State for selected pet (default is all)
+  const [selectedPet, setSelectedPet] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
+
+  // Modal state for viewing medical record
   const [selectedRecord, setSelectedRecord] = useState(null);
   const [showRecordModal, setShowRecordModal] = useState(false);
 
-  const navigate = useNavigate();
+  // Handle filtering based on selected pet and search term
+  const filteredRecords = allRecords
+    .filter(record => 
+      (!selectedPet || record.petId === selectedPet) && 
+      (record.service.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      record.date.includes(searchTerm))
+    );
 
-  // Payment form state and validation
-  const [paymentDetails, setPaymentDetails] = useState({
-    cardNumber: '', expiryDate: '', cvv: ''
-  });
-  const [errors, setErrors] = useState({
-    cardNumberError: '', expiryDateError: '', cvvError: ''
-  });
-
-  // Handle download of medical record as PDF
+  // Handle Download Record (PDF)
   const handleDownload = (record) => {
     const doc = new jsPDF();
     doc.setFontSize(16);
@@ -36,88 +49,115 @@ function MedicalRecords() {
     doc.text(`Date: ${record.date}`, 10, 20);
     doc.text(`Service: ${record.service}`, 10, 30);
     doc.text(`Veterinarian: ${record.vet}`, 10, 40);
-    doc.text(`Notes: ${record.notes}`, 10, 50);
     doc.save(`medical-record-${record.id}.pdf`);
   };
 
-  // Filter records based on search term
-  const handleSearchChange = (e) => {
-    const term = e.target.value.toLowerCase();
-    setSearchTerm(term);
-    setFilteredRecords(records.filter(record => record.service.toLowerCase().includes(term) || record.vet.toLowerCase().includes(term)));
+  // Handle Email Record
+  const handleEmail = (record) => {
+    alert(`Record of ${record.service} sent via email.`);
+  };
+
+  // Format JSON for better display
+  const formatRecordDetails = (record) => {
+    return `
+      Date: ${record.date}\n
+      Service: ${record.service}\n
+      Veterinarian: ${record.vet}
+    `;
   };
 
   return (
     <Container>
-      <h1 className="title">VetCare Dashboard</h1>
+      <h1>VetCare Dashboard</h1>
 
-      {/* Tab Navigation for Medical Records and Prescription Refills */}
-      <Tab.Container id="dashboard-tabs" defaultActiveKey="medicalRecords">
-        <Nav variant="tabs" className="mb-4">
-          <Nav.Item>
-            <Nav.Link eventKey="medicalRecords" onClick={() => setActiveView('medicalRecords')}>Medical Records</Nav.Link>
-          </Nav.Item>
-        </Nav>
-
-        <Tab.Content>
-          {/* Medical Records View */}
-          {activeView === 'medicalRecords' && (
-            <div className="medical-records-container">
-              <h2>Pet Medical Records</h2>
-              
-              {/* Search Bar */}
-              <div className="search-bar">
-                <InputGroup>
-                  <FormControl
-                    placeholder="Search by service or vet..."
-                    value={searchTerm}
-                    onChange={handleSearchChange}
-                  />
-                </InputGroup>
-              </div>
-
-              <Table striped bordered hover className="records-table">
-                <thead>
-                  <tr>
-                    <th>Date</th>
-                    <th>Type of Service</th>
-                    <th>Veterinarian</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredRecords.length > 0 ? filteredRecords.map(record => (
-                    <tr key={record.id}>
-                      <td>{record.date}</td>
-                      <td>{record.service}</td>
-                      <td>{record.vet}</td>
-                      <td>
-                        <Button variant="primary" className="action-button" onClick={() => { setSelectedRecord(record); setShowRecordModal(true); }}>View</Button>
-                        <Button variant="success" className="action-button" onClick={() => handleDownload(record)}>Download</Button>
-                      </td>
-                    </tr>
-                  )) : <tr><td colSpan="4">No records found</td></tr>}
-                </tbody>
-              </Table>
+      {/* Pet Selection UI */}
+      <div className="pet-selection">
+        <h2>Select Pet Profile</h2>
+        <div className="pet-list">
+          {pets.map(pet => (
+            <div key={pet.id} className="pet">
+              <img src={pet.image} alt={pet.name} className="pet-image" />
+              <p className="pet-name">{pet.name}</p>
+              <Button
+                className={selectedPet === pet.id ? 'selected' : 'select'}
+                onClick={() => setSelectedPet(selectedPet === pet.id ? null : pet.id)}
+              >
+                {selectedPet === pet.id ? 'Selected' : 'Select'}
+              </Button>
             </div>
-          )}
-        </Tab.Content>
-      </Tab.Container>
+          ))}
+        </div>
+      </div>
+
+      {/* Search Bar */}
+      <div className="search-bar">
+        <Form.Control
+          type="text"
+          placeholder="Search records by date or service..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+      </div>
+
+      {/* Medical Records Table */}
+      <div>
+        <h2>{selectedPet ? `${pets.find(pet => pet.id === selectedPet).name}'s Medical Records` : 'All Pets Medical Records'}</h2>
+        {filteredRecords.length > 0 ? (
+          <Table striped bordered hover>
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Type of Service</th>
+                <th>Veterinarian</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredRecords.map((record) => (
+                <tr key={record.id}>
+                  <td>{record.date}</td>
+                  <td>{record.service}</td>
+                  <td>{record.vet}</td>
+                  <td>
+                    <Button variant="primary" onClick={() => { setSelectedRecord(record); setShowRecordModal(true); }}>
+                      View
+                    </Button>
+                    <Button variant="success" onClick={() => handleDownload(record)}>
+                      Download
+                    </Button>
+                    <Button variant="warning" onClick={() => handleEmail(record)}>
+                      Share via Email
+                    </Button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </Table>
+        ) : (
+          <p>No records available for the selected pet or search term.</p>
+        )}
+      </div>
 
       {/* Modal for Viewing Medical Record */}
       {selectedRecord && (
-        <Modal show={showRecordModal} onHide={() => setShowRecordModal(false)} className="record-modal">
+        <Modal show={showRecordModal} onHide={() => setShowRecordModal(false)} centered>
           <Modal.Header closeButton>
-            <Modal.Title>{selectedRecord.service} Details</Modal.Title>
+            <Modal.Title>Record Details for {selectedRecord.service}</Modal.Title>
           </Modal.Header>
-          <Modal.Body>
-            <Alert variant="info">Consulted by: {selectedRecord.vet}</Alert>
-            <h5>Service Details</h5>
-            <p>{selectedRecord.notes}</p>
+          <Modal.Body className="modal-body">
+            <div className="modal-content">
+              <Alert variant="info" className="modal-alert">Veterinarian: {selectedRecord.vet}</Alert>
+              <h5>Report</h5>
+              <pre>{formatRecordDetails(selectedRecord)}</pre>
+            </div>
           </Modal.Body>
           <Modal.Footer>
-            <Button variant="secondary" onClick={() => setShowRecordModal(false)}>Close</Button>
-            <Button variant="success" onClick={() => handleDownload(selectedRecord)}>Download PDF</Button>
+            <Button variant="secondary" onClick={() => setShowRecordModal(false)}>
+              Close
+            </Button>
+            <Button variant="success" onClick={() => handleDownload(selectedRecord)}>
+              Download PDF
+            </Button>
           </Modal.Footer>
         </Modal>
       )}
