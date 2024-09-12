@@ -11,7 +11,9 @@ const Prescription = () => {
     const [preferredPharmacy, setPreferredPharmacy] = useState('');
     const [preferredPickupDate, setPreferredPickupDate] = useState('');
     const [preferredPickupTime, setPreferredPickupTime] = useState('');
+    const [showModal, setShowModal] = useState(false);  // State to control the modal
   
+    // Pet images and names
     const pets = [
       { id: 1, name: 'Goatie', image: pet1Image },
       { id: 2, name: 'Pookie', image: pet2Image },
@@ -19,16 +21,18 @@ const Prescription = () => {
     ];
   
     const handlePetSelect = (petId) => {
-      const selectedPet = pets.find(pet => pet.id === petId); 
-      setSelectedPet(selectedPet); 
+      const selectedPet = pets.find(pet => pet.id === petId); // Find the selected pet
+      setSelectedPet(selectedPet); // Update the selected pet
     };
   
     const handleSubmit = (e) => {
       e.preventDefault();
-      console.log('Prescription Detail:', prescriptionDetail);
-      console.log('Preferred Pharmacy:', preferredPharmacy);
-      console.log('Preferred Pickup Date:', preferredPickupDate);
-      console.log('Preferred Pickup Time:', preferredPickupTime);
+      // Show modal on submit
+      setShowModal(true);
+    };
+  
+    const handleCloseModal = () => {
+      setShowModal(false); // Close the modal
     };
   
     return (
@@ -112,6 +116,24 @@ const Prescription = () => {
             <button type="submit" className="submit-btn">Submit Request</button>
           </form>
         </div>
+  
+        {/* Modal for showing summary */}
+        {showModal && (
+          <div className="modal">
+            <div className="modal-content">
+              <h3>Thank you for your submission!</h3>
+              <p>Here is a summary of your request:</p>
+              <ul>
+                <li><strong>Pet:</strong> {selectedPet?.name || 'N/A'}</li>
+                <li><strong>Prescription Detail:</strong> {prescriptionDetail}</li>
+                <li><strong>Preferred Pharmacy:</strong> {preferredPharmacy}</li>
+                <li><strong>Preferred Pickup Date:</strong> {preferredPickupDate}</li>
+                <li><strong>Preferred Pickup Time:</strong> {preferredPickupTime}</li>
+              </ul>
+              <button onClick={handleCloseModal} className="close-btn">Close</button>
+            </div>
+          </div>
+        )}
       </div>
     );
   };
