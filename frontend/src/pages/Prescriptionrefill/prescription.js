@@ -60,15 +60,19 @@ const Prescription = () => {
           <form onSubmit={handleSubmit}>
             <div className="form-group">
               <label htmlFor="prescriptionDetail">Prescription Detail:</label>
-              <textarea
-                id="prescriptionDetail"
-                className="form-input"
-                value={prescriptionDetail}
-                onChange={(e) => setPrescriptionDetail(e.target.value)}
-                placeholder="Enter details about the prescription"
-                rows="4"
-                required
-              />
+              <select
+  id="prescriptionDetail"
+  className="form-input"
+  value={prescriptionDetail}
+  onChange={(e) => setPrescriptionDetail(e.target.value)}
+  required
+>
+  <option value="">Select a prescription</option>
+  <option value="Antibiotics">Antibiotics</option>
+  <option value="Painkillers">Painkillers</option>
+  <option value="Vitamins">Vitamins</option>
+</select>
+
             </div>
   
             <div className="form-group">
