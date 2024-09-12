@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import './Prescription.css';
 
-// Import the images
+
 import pet3Image from 'frontend/src/components/assets/about1.jpg';
 import pet2Image from 'frontend/src/components/assets/about2.jpg';
 import pet1Image from 'frontend/src/components/assets/blog3.jpg';
@@ -11,10 +11,11 @@ const Prescription = () => {
   const [prescriptionNumber, setPrescriptionNumber] = useState('');
   const [selectedPet, setSelectedPet] = useState(null);
 
+  // Update image sources and assign pet names
   const pets = [
-    { id: 1, name: 'Pet 1', image: pet1Image },
-    { id: 2, name: 'Pet 2', image: pet2Image },
-    { id: 3, name: 'Pet 3', image: pet3Image },
+    { id: 1, name: 'Goatie', image: pet1Image },
+    { id: 2, name: 'Pookie', image: pet2Image },
+    { id: 3, name: 'Dogie', image: pet3Image },
   ];
 
   const handlePetSelect = (petId) => {
@@ -25,6 +26,7 @@ const Prescription = () => {
     e.preventDefault();
     console.log('Pet Tag:', petTag);
     console.log('Prescription Number:', prescriptionNumber);
+    // Handle form submission (e.g., API call)
   };
 
   return (
@@ -34,6 +36,7 @@ const Prescription = () => {
         {pets.map((pet) => (
           <div key={pet.id} className="pet">
             <img src={pet.image} alt={pet.name} />
+            <p className="pet-name">{pet.name}</p> {/* Display the pet's name */}
             <button
               className={selectedPet === pet.id ? 'selected' : 'select'}
               onClick={() => handlePetSelect(pet.id)}
