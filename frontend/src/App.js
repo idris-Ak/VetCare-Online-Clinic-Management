@@ -9,11 +9,11 @@ import AllVetMembers from './pages/AllVetMembers';
 import Appointments from './pages/AppointmentPage/Appointments';
 import HomePage from './pages/HomePage';
 import Login from './pages/Login';
-import SignUp from './pages/SignUp';
 import MedicalRecords from './pages/MedicalRecords';
+import SignUp from './pages/SignUp';
 import VetProfilePage from './pages/VetProfilePage'; // Adjusted relative path
 // Import the Prescription page
-import Prescription from './pages/Prescriptionrefill/prescription'; // Import Prescription.js
+import Prescription from './pages/Prescriptionrefill/Prescription'; // Import Prescription.js
 
 function App() {
     const [isLoggedIn, setIsLoggedIn] = useState(Boolean(localStorage.getItem('isLoggedIn')));
