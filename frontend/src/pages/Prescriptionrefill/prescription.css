@@ -1,0 +1,73 @@
+/* src/pages/Prescriptionrefill/Prescription.css */
+
+.prescription-page {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    margin: 20px;
+  }
+  
+  .pet-selection {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 20px;
+  }
+  
+  .pet {
+    text-align: center;
+    border: 1px solid #ccc;
+    padding: 10px;
+    background-color: #fff;
+  }
+  
+  .pet img {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 50%;
+  }
+  
+  button.select,
+  button.selected {
+    margin-top: 10px;
+    padding: 5px 10px;
+    font-size: 16px;
+    border: none;
+    cursor: pointer;
+  }
+  
+  button.select {
+    background-color: #007bff;
+    color: white;
+  }
+  
+  button.selected {
+    background-color: #28a745;
+    color: white;
+  }
+  
+  .prescription-form {
+    margin-top: 40px;
+  }
+  
+  .prescription-form label {
+    display: block;
+    margin-top: 10px;
+    font-size: 18px;
+  }
+  
+  .prescription-form input {
+    margin-top: 5px;
+    padding: 8px;
+    width: 200px;
+  }
+  
+  button.submit-btn {
+    background-color: #28a745;
+    color: white;
+    padding: 10px 15px;
+    margin-top: 20px;
+    cursor: pointer;
+    border: none;
+  }
+  
