@@ -67,41 +67,42 @@ function MedicalRecords() {
   };
 
   return (
-    <Container>
-      <h1>VetCare Dashboard</h1>
-
-      {/* Pet Selection UI */}
-      <div className="pet-selection">
-        <h2>Select Pet Profile</h2>
-        <div className="pet-list">
-          {pets.map(pet => (
-            <div key={pet.id} className="pet">
-              <img src={pet.image} alt={pet.name} className="pet-image" />
-              <p className="pet-name">{pet.name}</p>
-              <Button
-                className={selectedPet === pet.id ? 'selected' : 'select'}
-                onClick={() => setSelectedPet(selectedPet === pet.id ? null : pet.id)}
-              >
-                {selectedPet === pet.id ? 'Selected' : 'Select'}
-              </Button>
-            </div>
-          ))}
+    <Container className='medicarecords-page'>
+      <div className='pet-section'>
+        <h1 >Select Pet Profile</h1>
+        {/* Pet Selection UI */}
+        <div className="pet-selection">
+          <div className="pet-list">
+            {pets.map(pet => (
+              <div key={pet.id} className="pet">
+                <img src={pet.image} alt={pet.name} className="pet-image" />
+                <p className="pet-name">{pet.name}</p>
+                <Button
+                  className={selectedPet === pet.id ? 'selected' : 'select'}
+                  onClick={() => setSelectedPet(selectedPet === pet.id ? null : pet.id)}
+                >
+                  {selectedPet === pet.id ? 'Selected' : 'Select'}
+                </Button>
+              </div>
+            ))}
+          </div>
         </div>
-      </div>
-
-      {/* Search Bar */}
-      <div className="search-bar">
-        <Form.Control
-          type="text"
-          placeholder="Search records by date or service..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
       </div>
 
       {/* Medical Records Table */}
       <div>
         <h2>{selectedPet ? `${pets.find(pet => pet.id === selectedPet).name}'s Medical Records` : 'All Pets Medical Records'}</h2>
+
+        {/* Search Bar */}
+        <div className="search-bar">
+          <Form.Control
+            type="text"
+            placeholder="Search records by date or service..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+
         {filteredRecords.length > 0 ? (
           <Table striped bordered hover>
             <thead>
