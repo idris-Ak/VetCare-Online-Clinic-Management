@@ -4,6 +4,7 @@ import './prescription.css';
 import pet3Image from 'frontend/src/components/assets/about1.jpg';
 import pet2Image from 'frontend/src/components/assets/about2.jpg';
 import pet1Image from 'frontend/src/components/assets/blog3.jpg';
+import successfulPaymentCheck from 'frontend/src/components/assets/check.png';
 
 const Prescription = () => {
     const [selectedPet, setSelectedPet] = useState(null);
@@ -48,9 +49,34 @@ const Prescription = () => {
     // Handle Payment Form Changes
     const handlePaymentChange = (event) => {
     const { name, value } = event.target;
+
+    let formattedValue = value;
+    if (name === 'cardNumber') {
+      // Remove all non-digit characters
+      formattedValue = formattedValue.replace(/\D/g, '');
+      // Insert dashes after every 4 digits
+      formattedValue = formattedValue.substring(0, 16); // Limit to 16 digits
+      formattedValue = formattedValue.replace(/(.{4})/g, '$1-').trim();
+      // Remove trailing dash if any
+      if (formattedValue.endsWith('-')) {
+        formattedValue = formattedValue.slice(0, -1);
+      }
+    } else if (name === 'expiryDate') {
+      // Auto-format expiry date as MM/YY
+      formattedValue = formattedValue.replace(/\D/g, '');
+      if (formattedValue.length > 2) {
+        formattedValue = formattedValue.substring(0, 4);
+        formattedValue = formattedValue.replace(/(\d{2})(\d{1,2})/, '$1/$2');
+      }
+    } else if (name === 'cvv') {
+      // Only digits, limit to 3
+      formattedValue = formattedValue.replace(/\D/g, '');
+      formattedValue = formattedValue.substring(0, 3);
+    }
+
     setPaymentDetails(prevDetails => ({
       ...prevDetails,
-      [name]: value
+      [name]: formattedValue
     }));
   };
   
@@ -65,19 +91,20 @@ const Prescription = () => {
     };
 
     // Validate card number (16 digits)
-    if (!/^\d{16}$/.test(cardNumber)) {
+    const cardNumberDigits = cardNumber.replace(/\D/g, '');
+    if (cardNumberDigits.length !== 16) {
       newErrors.cardNumberError = "Card number must be 16 digits.";
       isValid = false;
     }
 
     // Validate expiry date (MM/YY)
-    if (!/^(0[1-9]|1[0-2])\/?([0-9]{2})$/.test(expiryDate)) {
+    if (!/^(0[1-9]|1[0-2])\/([0-9]{2})$/.test(expiryDate)) {
       newErrors.expiryDateError = "Invalid expiry date. Use MM/YY format.";
       isValid = false;
     }
 
     // Validate CVV (3 digits)
-    if (!/^\d{3}$/.test(cvv)) {
+    if (cvv.length !== 3) {
       newErrors.cvvError = "CVV must be 3 digits.";
       isValid = false;
     }
@@ -198,67 +225,80 @@ const Prescription = () => {
           </form>
         </div>
   
-        {/* Payment Modal */}
+      {/* Payment Modal */}
       {showPaymentModal && (
         <div className="modal">
-          <div className="modal-content">
+          <div className="modal-content payment-modal">
             <h3>Payment Details</h3>
             <form onSubmit={handlePaymentSubmit}>
               <div className="form-group">
                 <label htmlFor="cardNumber">Card Number:</label>
-                <input
-                  type="text"
-                  id="cardNumber"
-                  name="cardNumber"
-                  className="form-input"
-                  value={paymentDetails.cardNumber}
-                  onChange={handlePaymentChange}
-                  placeholder="Enter your 16-digit card number"
-                  maxLength="16"
-                  required
-                />
+                 <div className="input-icon">
+                  <i className="fa fa-credit-card" aria-hidden="true"></i>
+                  <input
+                    type="text"
+                    id="cardNumber"
+                    name="cardNumber"
+                    className="form-input"
+                    value={paymentDetails.cardNumber}
+                    onChange={handlePaymentChange}
+                    placeholder="1234-5678-9012-3456"
+                    maxLength="19"
+                    required
+                  />
+                </div>
                 {errors.cardNumberError && (
                   <div className="error">{errors.cardNumberError}</div>
                 )}
               </div>
 
-              <div className="form-group">
-                <label htmlFor="expiryDate">Expiry Date (MM/YY):</label>
-                <input
-                  type="text"
-                  id="expiryDate"
-                  name="expiryDate"
-                  className="form-input"
-                  value={paymentDetails.expiryDate}
-                  onChange={handlePaymentChange}
-                  placeholder="MM/YY"
-                  required
-                />
+             <div className="form-row">
+                <div className="form-group half-width">
+                  <label htmlFor="expiryDate">Expiry Date (MM/YY):</label>
+                  <div className="input-icon">
+                    <i className="fa fa-calendar" aria-hidden="true"></i>
+                    <input
+                      type="text"
+                      id="expiryDate"
+                      name="expiryDate"
+                      className="form-input"
+                      value={paymentDetails.expiryDate}
+                      onChange={handlePaymentChange}
+                      placeholder="MM/YY"
+                      required
+                    />
+                  </div>
                 {errors.expiryDateError && (
                   <div className="error">{errors.expiryDateError}</div>
                 )}
               </div>
 
-              <div className="form-group">
-                <label htmlFor="cvv">CVV:</label>
-                <input
-                  type="text"
-                  id="cvv"
-                  name="cvv"
-                  className="form-input"
-                  value={paymentDetails.cvv}
-                  onChange={handlePaymentChange}
-                  placeholder="Enter 3-digit CVV"
-                  maxLength="3"
-                  required
-                />
-                {errors.cvvError && (
-                  <div className="error">{errors.cvvError}</div>
-                )}
+              <div className="form-group half-width">
+                  <label htmlFor="cvv">CVV:</label>
+                  <div className="input-icon">
+                    <i className="fa fa-lock" aria-hidden="true"></i>
+                    <input
+                      type="text"
+                      id="cvv"
+                      name="cvv"
+                      className="form-input"
+                      value={paymentDetails.cvv}
+                      onChange={handlePaymentChange}
+                      placeholder="123"
+                      maxLength="3"
+                      required
+                    />
+                  </div>
+                  {errors.cvvError && (
+                    <div className="error">{errors.cvvError}</div>
+                  )}
+                </div>
               </div>
 
-              <button type="submit" className="submit-btn">Pay Now</button>
-              <button onClick={() => setShowPaymentModal(false)} className="close-btn">Cancel</button>
+              <div className="button-row">
+                <button type="submit" className="submit-btn">Pay Now</button>
+                <button onClick={() => setShowPaymentModal(false)} className="cancel-btn">Cancel</button>
+              </div>
             </form>
           </div>
         </div>
@@ -267,9 +307,10 @@ const Prescription = () => {
       {/* Confirmation Modal */}
       {showConfirmationModal && (
         <div className="modal">
-          <div className="modal-content">
+          <div className="modal-content confirmation-modal">
             <h3>Payment Successful!</h3>
-            <img src="check.png" alt="payment successful" className="checkmark" />
+            {/*<a href="https://www.flaticon.com/free-icons/yes" title="yes icons">Yes icons created by hqrloveq - Flaticon</a> */}
+            <img src={successfulPaymentCheck} alt="payment successful" className="checkmark" />
             <p>Thank you for your submission and payment!</p>
             <p>Here is a summary of your request:</p>
             <ul>
