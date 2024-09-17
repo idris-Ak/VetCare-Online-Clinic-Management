@@ -62,7 +62,7 @@ function Login({loginUser}) {
   };
 
   return (
-  <Container className="d-flex justify-content-center align-items-center" style={{ minHeight: '75vh', fontFamily: 'Lato, sans-serif'}}>
+  <Container className="d-flex justify-content-center align-items-center" style={{ marginTop: '25px', marginBottom: '25px', minHeight: '75vh', fontFamily: 'Lato, sans-serif'}}>
       <div className="w-100 p5" style={{ maxWidth: '600px', background: '#ffffff', borderRadius: '20px', boxShadow: '0 6px 20px rgba(0, 0, 0, 0.1'}}>
           {showErrorMessage && errorMessage && <Alert variant="danger">{errorMessage}</Alert>}
           {showSuccessAlert && <Alert variant="success">Login Successful!</Alert>}
