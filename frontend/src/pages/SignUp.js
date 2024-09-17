@@ -120,7 +120,7 @@ const emailExists = users.some(existingUser => existingUser.email === user.email
   );
 
   return (
-    <Container className="d-flex justify-content-center align-items-center" style={{ minHeight: '100vh', fontFamily: 'Lato, sans-serif'}}>
+    <Container className="d-flex justify-content-center align-items-center" style={{ marginTop: '25px', marginBottom: '25px', minHeight: '100vh', fontFamily: 'Lato, sans-serif'}}>
        <div className="w-100 p-4" style={{ maxWidth: '600px', background: '#fff', borderRadius: '20px', boxShadow: '0 4px 8px rgba(0,0,0,0.1)'}}>
         <br></br>
         {showSuccessAlert && <Alert variant="success">SignUp Successful!</Alert>}
