@@ -11,14 +11,28 @@ const Prescription = () => {
     const [preferredPharmacy, setPreferredPharmacy] = useState('');
     const [preferredPickupDate, setPreferredPickupDate] = useState('');
     const [preferredPickupTime, setPreferredPickupTime] = useState('');
-    const [showModal, setShowModal] = useState(false);  // State to control the modal
-  
+    const [showPaymentModal, setShowPaymentModal] = useState(false); // State to control payment modal
+    const [showConfirmationModal, setShowConfirmationModal] = useState(false); // State to control confirmation modal  
+    
     // Pet images and names
     const pets = [
       { id: 1, name: 'Goatie', image: pet1Image },
       { id: 2, name: 'Pookie', image: pet2Image },
       { id: 3, name: 'Dogie', image: pet3Image },
     ];
+
+     // Payment Form State
+    const [paymentDetails, setPaymentDetails] = useState({
+      cardNumber: '',
+      expiryDate: '',
+      cvv: ''
+    });
+
+    const [errors, setErrors] = useState({
+      cardNumberError: '',
+      expiryDateError: '',
+      cvvError: ''
+    });
   
     const handlePetSelect = (petId) => {
       const selectedPet = pets.find(pet => pet.id === petId); // Find the selected pet
@@ -27,14 +41,81 @@ const Prescription = () => {
   
     const handleSubmit = (e) => {
       e.preventDefault();
-      // Show modal on submit
-      setShowModal(true);
+      // Show payment modal on submit
+      setShowPaymentModal(true);
     };
+
+    // Handle Payment Form Changes
+    const handlePaymentChange = (event) => {
+    const { name, value } = event.target;
+    setPaymentDetails(prevDetails => ({
+      ...prevDetails,
+      [name]: value
+    }));
+  };
   
-    const handleCloseModal = () => {
-      setShowModal(false); // Close the modal
+    // Validate Payment Form
+    const validatePaymentForm = () => {
+    const { cardNumber, expiryDate, cvv } = paymentDetails;
+    let isValid = true;
+    let newErrors = {
+      cardNumberError: '',
+      expiryDateError: '',
+      cvvError: ''
     };
-  
+
+    // Validate card number (16 digits)
+    if (!/^\d{16}$/.test(cardNumber)) {
+      newErrors.cardNumberError = "Card number must be 16 digits.";
+      isValid = false;
+    }
+
+    // Validate expiry date (MM/YY)
+    if (!/^(0[1-9]|1[0-2])\/?([0-9]{2})$/.test(expiryDate)) {
+      newErrors.expiryDateError = "Invalid expiry date. Use MM/YY format.";
+      isValid = false;
+    }
+
+    // Validate CVV (3 digits)
+    if (!/^\d{3}$/.test(cvv)) {
+      newErrors.cvvError = "CVV must be 3 digits.";
+      isValid = false;
+    }
+
+    setErrors(newErrors);
+
+    return isValid;
+  };
+
+  // Handle Payment Submission
+  const handlePaymentSubmit = (e) => {
+    e.preventDefault();
+    if (validatePaymentForm()) {
+      // Close payment modal and open confirmation modal
+      setShowPaymentModal(false);
+      setShowConfirmationModal(true);
+    }
+  };
+
+  const handleCloseConfirmationModal = () => {
+    // Reset form or navigate to home page
+    setShowConfirmationModal(false);
+    setSelectedPet(null);
+    setPrescriptionDetail('');
+    setPreferredPharmacy('');
+    setPreferredPickupDate('');
+    setPreferredPickupTime('');
+    setPaymentDetails({
+      cardNumber: '',
+      expiryDate: '',
+      cvv: ''
+    });
+    setErrors({
+      cardNumberError: '',
+      expiryDateError: '',
+      cvvError: ''
+    });
+  };
     return (
       <div className="prescription-page">
         <h1>Request Prescription for Your Pet</h1>
@@ -113,29 +194,97 @@ const Prescription = () => {
               />
             </div>
   
-            <button type="submit" className="submit-btn">Submit Request</button>
+            <button type="submit" className="submit-btn">Proceed To Payment</button>
           </form>
         </div>
   
-        {/* Modal for showing summary */}
-        {showModal && (
-          <div className="modal">
-            <div className="modal-content">
-              <h3>Thank you for your submission!</h3>
-              <p>Here is a summary of your request:</p>
-              <ul>
-                <li><strong>Pet:</strong> {selectedPet?.name || 'N/A'}</li>
-                <li><strong>Prescription Detail:</strong> {prescriptionDetail}</li>
-                <li><strong>Preferred Pharmacy:</strong> {preferredPharmacy}</li>
-                <li><strong>Preferred Pickup Date:</strong> {preferredPickupDate}</li>
-                <li><strong>Preferred Pickup Time:</strong> {preferredPickupTime}</li>
-              </ul>
-              <button onClick={handleCloseModal} className="close-btn">Close</button>
-            </div>
+        {/* Payment Modal */}
+      {showPaymentModal && (
+        <div className="modal">
+          <div className="modal-content">
+            <h3>Payment Details</h3>
+            <form onSubmit={handlePaymentSubmit}>
+              <div className="form-group">
+                <label htmlFor="cardNumber">Card Number:</label>
+                <input
+                  type="text"
+                  id="cardNumber"
+                  name="cardNumber"
+                  className="form-input"
+                  value={paymentDetails.cardNumber}
+                  onChange={handlePaymentChange}
+                  placeholder="Enter your 16-digit card number"
+                  maxLength="16"
+                  required
+                />
+                {errors.cardNumberError && (
+                  <div className="error">{errors.cardNumberError}</div>
+                )}
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="expiryDate">Expiry Date (MM/YY):</label>
+                <input
+                  type="text"
+                  id="expiryDate"
+                  name="expiryDate"
+                  className="form-input"
+                  value={paymentDetails.expiryDate}
+                  onChange={handlePaymentChange}
+                  placeholder="MM/YY"
+                  required
+                />
+                {errors.expiryDateError && (
+                  <div className="error">{errors.expiryDateError}</div>
+                )}
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="cvv">CVV:</label>
+                <input
+                  type="text"
+                  id="cvv"
+                  name="cvv"
+                  className="form-input"
+                  value={paymentDetails.cvv}
+                  onChange={handlePaymentChange}
+                  placeholder="Enter 3-digit CVV"
+                  maxLength="3"
+                  required
+                />
+                {errors.cvvError && (
+                  <div className="error">{errors.cvvError}</div>
+                )}
+              </div>
+
+              <button type="submit" className="submit-btn">Pay Now</button>
+              <button onClick={() => setShowPaymentModal(false)} className="close-btn">Cancel</button>
+            </form>
           </div>
-        )}
-      </div>
-    );
-  };
+        </div>
+      )}
+
+      {/* Confirmation Modal */}
+      {showConfirmationModal && (
+        <div className="modal">
+          <div className="modal-content">
+            <h3>Payment Successful!</h3>
+            <img src="check.png" alt="payment successful" className="checkmark" />
+            <p>Thank you for your submission and payment!</p>
+            <p>Here is a summary of your request:</p>
+            <ul>
+              <li><strong>Pet:</strong> {selectedPet?.name || 'N/A'}</li>
+              <li><strong>Prescription Detail:</strong> {prescriptionDetail}</li>
+              <li><strong>Preferred Pharmacy:</strong> {preferredPharmacy}</li>
+              <li><strong>Preferred Pickup Date:</strong> {preferredPickupDate}</li>
+              <li><strong>Preferred Pickup Time:</strong> {preferredPickupTime}</li>
+            </ul>
+            <button onClick={handleCloseConfirmationModal} className="close-btn">Close</button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
   
   export default Prescription;
