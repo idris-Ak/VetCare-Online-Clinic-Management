@@ -46,7 +46,12 @@ function Login({loginUser}) {
       setTimeout(() => {
         setShowSuccessAlert(false);
         loginUser(storedUser);
-        navigate('/');
+        if(storedUser.role === 'Vet'){
+          navigate('/AdminDashboard');
+        }
+        else {
+          navigate('/');
+        }
       }, 3000);
     } else {
       setErrorMessage('Invalid email, password, or role selection.');
