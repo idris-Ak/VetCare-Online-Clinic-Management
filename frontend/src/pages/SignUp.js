@@ -95,6 +95,10 @@ const emailExists = users.some(existingUser => existingUser.email === user.email
       role: user.role,
     };
 
+    if (user.role === 'Vet') {
+      newUser.medRecSent = []; // Array to hold multiple medical records
+    }
+
     //Add the new user to the users array and store it in localStorage
     users.push(newUser);
     localStorage.setItem('users', JSON.stringify(users));

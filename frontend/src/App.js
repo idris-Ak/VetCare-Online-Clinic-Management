@@ -9,7 +9,7 @@ import AllVetMembers from './pages/AllVetMembers';
 import Appointments from './pages/AppointmentPage/Appointments';
 import HomePage from './pages/HomePage';
 import Login from './pages/Login';
-import MedicalRecords from './pages/MedicalRecords';
+import MedicalRecords from './pages/MedicalRec/MedicalRecords';
 import SignUp from './pages/SignUp';
 import VetProfilePage from './pages/VetProfilePage'; // Adjusted relative path
 // Import the Prescription page
