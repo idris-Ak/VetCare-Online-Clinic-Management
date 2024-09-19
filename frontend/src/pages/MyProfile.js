@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Form, Container, Modal, Card } from 'react-bootstrap';
+import { Button, Form, Container, Modal, Card, Row, Col } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import profilepic from '../components/assets/profilepic.png';
 
@@ -43,6 +43,14 @@ function MyProfile({ user, setUser, logoutUser }) {
       };
       reader.readAsDataURL(file);
     }
+  };
+
+
+  const handleRemoveProfilePic = () => {
+  const updatedUser = { ...user, profilePicture: null };
+    setUser(updatedUser);
+    setProfilePicPreview(profilepic);
+    updateUserInLocalStorage(updatedUser);
   };
 
   // Update user in localStorage
@@ -119,11 +127,12 @@ function MyProfile({ user, setUser, logoutUser }) {
     }
   };
 
-  const handleRemoveProfilePic = () => {
-  const updatedUser = { ...user, profilePicture: null };
-  setUser(updatedUser);
-  setProfilePicPreview(null);
-  updateUserInLocalStorage(updatedUser);
+   const handleRemovePetProfilePic = (petId) => {
+    const updatedPets = pets.map((pet) =>
+      pet.id === petId ? { ...pet, profilePicture: null } : pet
+    );
+    setPets(updatedPets);
+    updateUserPets(updatedPets);
   };
 
   const updateUserPets = (updatedPets) => {
@@ -138,7 +147,7 @@ function MyProfile({ user, setUser, logoutUser }) {
     if (pet.profilePicture) {
       return pet.profilePicture;
     } else {
-      return null;
+      return 'https://via.placeholder.com/286x180.png?text=Pet+Picture';
     }
   };
 
@@ -162,13 +171,26 @@ function MyProfile({ user, setUser, logoutUser }) {
     const updatedUser = { ...user };
     const newName = form.elements.name.value.trim();
     const newEmail = form.elements.email.value.trim();
+    const currentPassword = form.elements.currentPassword.value;
     const newPassword = form.elements.password.value;
     const confirmPassword = form.elements.confirmPassword.value;
+
+     // Validate current password
+    if (currentPassword !== user.password) {
+      alert('Current password is incorrect.');
+      return;
+    }
 
     // Validate that new password and the new confirm password match
     if (newPassword && newPassword !== confirmPassword) {
       alert("Passwords do not match.");
       return;
+    }
+
+    // Email validation for Vet role
+    if (user.role === 'Vet' && !newEmail.endsWith('@vetcare.com')) {
+        alert("As a Vet, your email must end with '@vetcare.com'.");
+        return;
     }
 
     // Check if the email is changed and already exists in the users array
@@ -205,7 +227,24 @@ function MyProfile({ user, setUser, logoutUser }) {
     setShowDeleteAccountModal(false);
     // Call logoutUser function
     logoutUser(); 
-    navigate('/signup');
+    navigate('/');
+  };
+
+   // Handle pet profile picture upload
+  const handlePetProfilePicChange = (event, petId) => {
+    const file = event.target.files[0];
+    if (file) {
+      // Convert image file to base64 string
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const updatedPets = pets.map((pet) =>
+          pet.id === petId ? { ...pet, profilePicture: reader.result } : pet
+        );
+        setPets(updatedPets);
+        updateUserPets(updatedPets);
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   return (
@@ -242,9 +281,9 @@ function MyProfile({ user, setUser, logoutUser }) {
               cursor: 'pointer',
             }}
           >
-            <i className="bi bi-plus-circle" style={{ color: '#fff', fontSize: '24px' }}></i>
+            <i className="bi bi-pencil-fill" style={{ color: '#fff', fontSize: '16px' }}></i>
           </div>
-           {profilePicPreview && (
+           {user.profilePicture && (
             <div
             onClick={handleRemoveProfilePic}
             style={{
@@ -286,61 +325,124 @@ function MyProfile({ user, setUser, logoutUser }) {
         </div>
 
         {/* Pet Profiles */}
+        {user.role === 'Pet Owner' && (
         <div className="w-100 mt-5">
           <h3 style={{ fontWeight: '700', color: '#333' }}>My Pets</h3>
-          <div className="d-flex flex-wrap">
+          <Row>
             {/* Pet Cards */}
             {pets.map((pet) => (
-              <Card key={pet.id} className="m-2" style={{ width: '18rem' }}>
-                <Card.Img
-                  variant="top"
-                  src={
-                    getPetProfilePicPreview(pet) ||
-                    'https://via.placeholder.com/286x180.png?text=Pet+Picture'
-                  }
-                  style={{ height: '180px', objectFit: 'cover' }}
-                />
-                <Card.Body>
-                  <Card.Title>{pet.name}</Card.Title>
-                  <Card.Text>
-                    Type: {pet.type}
-                    <br />
-                    Breed: {pet.breed}
-                    <br />
-                    Age: {pet.age}
-                  </Card.Text>
-                  <Button
-                    variant="outline-primary"
-                    className="me-2"
-                    onClick={() => handlePetEdit(pet)}
-                  >
-                    Edit
-                  </Button>
-                  <Button variant="outline-danger" onClick={() => handlePetDelete(pet.id)}>
-                    Delete
-                  </Button>
-                </Card.Body>
-              </Card>
-            ))}
-            {/* Add Pet */}
-            <div
-              className="d-flex flex-column align-items-center justify-content-center m-2"
-              style={{
-                width: '18rem',
-                height: '286px',
-                border: '2px dashed #ccc',
-                borderRadius: '10px',
-                cursor: 'pointer',
-              }}
-              onClick={() => {
-                setCurrentPet(null); // Reset currentPet
-                setShowPetModal(true)}}
-            >
-              <i className="bi bi-plus-circle" style={{ fontSize: '48px', color: '#007bff' }}></i>
-              <p style={{ fontSize: '18px', color: '#007bff', marginTop: '10px' }}>Add Pet</p>
-            </div>
+              <Col md={4} sm={6} xs={12} key={pet.id} className="d-flex">
+                  <Card className="m-2 flex-fill" style={{ width: '100%' }}>
+                    <div style={{ position: 'relative' }}>
+                      <Card.Img
+                        variant="top"
+                        src={getPetProfilePicPreview(pet)}
+                        style={{ height: '180px', objectFit: 'cover' }}
+                      />
+                      <div
+                        onClick={() => document.getElementById(`petPicInput-${pet.id}`).click()}
+                        style={{
+                          position: 'absolute',
+                          bottom: '10px',
+                          right: '10px',
+                          backgroundColor: '#007bff',
+                          borderRadius: '50%',
+                          width: '30px',
+                          height: '30px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          cursor: 'pointer',
+                        }}
+                      >
+                        <i className="bi bi-pencil-fill" style={{ color: '#fff', fontSize: '16px' }}></i>
+                      </div>
+                      {pet.profilePicture && (
+                        <div
+                          onClick={() => handleRemovePetProfilePic(pet.id)}
+                          style={{
+                            position: 'absolute',
+                            top: '10px',
+                            right: '10px',
+                            backgroundColor: 'red',
+                            borderRadius: '50%',
+                            width: '30px',
+                            height: '30px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            cursor: 'pointer',
+                          }}
+                        >
+                          <i className="bi bi-x" style={{ color: '#fff', fontSize: '16px' }}></i>
+                        </div>
+                      )}
+                      <input
+                        type="file"
+                        id={`petPicInput-${pet.id}`}
+                        style={{ display: 'none' }}
+                        accept="image/*"
+                        onChange={(e) => handlePetProfilePicChange(e, pet.id)}
+                      />
+                    </div>
+                    <Card.Body>
+                      <Card.Title style={{ fontWeight: '700', marginBottom: '5px', fontSize: '16px', lineHeight: '1.6' }}>{pet.name}</Card.Title>
+                      <Card.Text style={{ marginBottom: '15px' }}>
+                        <div style={{ marginBottom: '5px' }}>
+                         <strong style={{ marginRight: '10px', fontWeight: 'bold' }}>Type:</strong> 
+                         <span>{pet.type}</span>
+                        </div>
+                         <div style={{ marginBottom: '5px' }}>
+                         <strong style={{ marginRight: '10px', fontWeight: 'bold' }}>Breed:</strong> 
+                         <span>{pet.breed || 'N/A'}</span>
+                        </div>
+                        <div style={{ marginBottom: '10px' }}>
+                         <strong style={{ marginRight: '10px', fontWeight: 'bold' }}>Age:</strong> 
+                         <span>{pet.age || 'N/A'}</span>
+                        </div>        
+                       </Card.Text>
+                      <div className="d-flex justify-content-between">
+                        <Button
+                          variant="outline-primary"
+                          onClick={() => handlePetEdit(pet)}
+                          style={{ flex: '1', marginRight: '5px' }}
+                        >
+                          Edit
+                        </Button>
+                        <Button
+                          variant="outline-danger"
+                          onClick={() => handlePetDelete(pet.id)}
+                          style={{ flex: '1', marginLeft: '5px' }}
+                        >
+                          Delete
+                        </Button>
+                      </div>
+                    </Card.Body>
+                  </Card>
+                </Col>
+              ))}
+               {/* Add Pet */}
+              <Col md={4} sm={6} xs={12} className="d-flex">
+                <div
+                  className="d-flex flex-column align-items-center justify-content-center m-2 flex-fill"
+                  style={{
+                    border: '2px dashed #ccc',
+                    borderRadius: '10px',
+                    cursor: 'pointer',
+                    minHeight: '286px',
+                  }}
+                  onClick={() => {
+                    setCurrentPet(null); // Reset currentPet
+                    setShowPetModal(true);
+                  }}
+                >
+                  <i className="bi bi-plus-circle" style={{ fontSize: '48px', color: '#007bff' }}></i>
+                  <p style={{ fontSize: '18px', color: '#007bff', marginTop: '10px' }}>Add Pet</p>
+                </div>
+              </Col>
+            </Row>
           </div>
-        </div>
+        )}
       </div>
 
       {/* Pet Modal */}
@@ -348,8 +450,8 @@ function MyProfile({ user, setUser, logoutUser }) {
         <Modal.Header closeButton>
           <Modal.Title>{currentPet ? 'Edit Pet' : 'Add Pet'}</Modal.Title>
         </Modal.Header>
-        <Modal.Body>
         <Form onSubmit={handlePetSubmit}>
+            <Modal.Body>
             <Form.Group controlId="petName" className="mb-3">
               <Form.Label>Pet Name</Form.Label>
               <Form.Control
@@ -384,15 +486,8 @@ function MyProfile({ user, setUser, logoutUser }) {
                 type="text"
                 name="petBreed"
                 defaultValue={currentPet ? currentPet.breed : ''}
-                list="breedList"
-                placeholder="Enter your pet's breed"
+                placeholder="Enter your pet's breed (optional)"
               />
-            <datalist id="breedList">
-            <option value="Labrador Retriever" />
-            <option value="German Shepherd" />
-            <option value="Golden Retriever" />
-            <option value="Bulldog" />
-            </datalist>
             </Form.Group>
             <Form.Group controlId="petAge" className="mb-3">
               <Form.Label>Age</Form.Label>
@@ -400,13 +495,13 @@ function MyProfile({ user, setUser, logoutUser }) {
                 type="number"
                 name="petAge"
                 defaultValue={currentPet ? currentPet.age : ''}
+                placeholder="Enter your pet's age (optional)"
               />
             </Form.Group>
             <Form.Group controlId="petProfilePicture" className="mb-3">
               <Form.Label>Pet Profile Picture</Form.Label>
               <Form.Control type="file" name="petProfilePicture" accept="image/*" />
             </Form.Group>
-                  </Form>
           </Modal.Body>
           <Modal.Footer className="d-flex justify-content-between">
             <Button variant="secondary" onClick={() => { setShowPetModal(false); setCurrentPet(null); }}>
@@ -416,6 +511,7 @@ function MyProfile({ user, setUser, logoutUser }) {
               {currentPet ? 'Save Changes' : 'Add Pet'}
             </Button>
           </Modal.Footer>
+        </Form>
       </Modal>
 
       {/* Edit Profile Modal */}
@@ -425,6 +521,15 @@ function MyProfile({ user, setUser, logoutUser }) {
         </Modal.Header>
         <Form onSubmit={handleProfileUpdate}>
           <Modal.Body>
+             <Form.Group controlId="currentPassword" className="mb-3">
+              <Form.Label>Current Password</Form.Label>
+              <Form.Control
+                type="password"
+                name="currentPassword"
+                placeholder="Enter current password"
+                required
+              />
+            </Form.Group>
             <Form.Group controlId="userName" className="mb-3">
               <Form.Label>Name</Form.Label>
               <Form.Control
