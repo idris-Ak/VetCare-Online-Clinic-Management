@@ -1,6 +1,11 @@
 import React, { useState, useEffect } from "react";
 import './Appointments.css';
 
+import pet3Image from 'frontend/src/components/assets/about1.jpg';
+import pet2Image from 'frontend/src/components/assets/about2.jpg';
+import pet1Image from 'frontend/src/components/assets/blog3.jpg';
+
+
 function Appointments() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [daysInMonth, setDaysInMonth] = useState([]);
@@ -16,29 +21,26 @@ function Appointments() {
   // DEFAULT DATA FOR PETS
   useEffect(() => {
     const defaultPets = [
-      { name: "Buddy", age: 3 },
-      { name: "Mittens", age: 2 },
+      { id: 1, name: 'Goatie', image: pet1Image },
+      { id: 2, name: 'Pookie', image: pet2Image },
+      { id: 3, name: 'Dogie', image: pet3Image },
     ];
     setPetData(defaultPets);
   }, []);
 
-  // Helper function to get the number of days in a month
   const getDaysInMonth = (year, month) => {
     return new Date(year, month + 1, 0).getDate();
   };
 
-  // Function to generate an array representing the days of the current month
   const generateCalendar = (year, month) => {
     const days = [];
     const firstDay = new Date(year, month, 1).getDay();
     const totalDays = getDaysInMonth(year, month);
 
-    // Add empty cells for days before the 1st of the month
     for (let i = 0; i < firstDay; i++) {
       days.push(null);
     }
 
-    // Add the days of the month
     for (let i = 1; i <= totalDays; i++) {
       days.push(i);
     }
@@ -82,14 +84,13 @@ function Appointments() {
     if (selectedPet) {
       if (typeof day === "number") {
         setSelectedDay(day);
-        setShowModal(true);  // Show the modal when a day is clicked
+        setShowModal(true); 
       }
     } else {
       alert("Please select a pet first.");
     }
   };
 
-  // Generate a unique key for an appointment using year, month, and day
   const getAppointmentKey = (year, month, day) => {
     return `${selectedPet?.name || "no-pet"}-${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
   };
@@ -113,27 +114,24 @@ function Appointments() {
 
   return (
     <>
-      {/* Pet Selection Section */}
-      <section className="pet-selection">
+      <section className="appointment-pet-selection">
         <h2>Select Pet Profile</h2>
-        <div className="pet-profiles">
-          {petData.length > 0 ? (
-            petData.map((pet, index) => (
-              <div key={index} className={`pet-card ${selectedPet?.name === pet.name ? "selected" : ""}`}>
-                <p>{pet.name}</p>
-                <p>Age: {pet.age}</p>
-                <button onClick={() => setSelectedPet(pet)}>
-                  {selectedPet?.name === pet.name ? "Selected" : "Select"}
-                </button>
-              </div>
-            ))
-          ) : (
-            <p>No pets available. Please add pets to your profile.</p>
-          )}
+        <div className="appointment-pet-profiles">
+        {petData.map((pet) => (
+          <div key={pet.id} className="pet">
+            <img src={pet.image} alt={pet.name} />
+            <p className="pet-name">{pet.name}</p> 
+            <button
+              className={selectedPet === pet ? 'selected' : 'select'}
+              onClick={() => setSelectedPet(pet)}
+            >
+              {selectedPet === pet ? 'Selected' : 'Select'}
+            </button>
+          </div>
+        ))}
         </div>
       </section>
 
-      {/* Calendar Section */}
       <div className="calendar">
         <h1 className="title">Make OR Cancel Appointments</h1>
         <div className="calendar-header">
@@ -177,14 +175,12 @@ function Appointments() {
         )}
 
         <div className="calendar-grid">
-          {/* Days of the Week Headers */}
           {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day, index) => (
             <div key={index} className="calendar-cell day-names">
               {day}
             </div>
           ))}
 
-          {/* Days of the Month */}
           {daysInMonth.map((day, index) => {
             const appointmentKey = getAppointmentKey(currentYear, currentDate.getMonth(), day);
             return (
@@ -202,7 +198,6 @@ function Appointments() {
         </div>
       </div>
 
-      {/* Day Status Modal */}
       {showModal && (
         <div className="modal-overlay">
           <div className="modal-content">

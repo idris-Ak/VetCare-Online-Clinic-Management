@@ -158,6 +158,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    z-index: 1000;
   }
   
   .modal-content {
@@ -165,34 +166,146 @@
     padding: 20px;
     border-radius: 10px;
     text-align: center;
-    width: 400px;
+    width: 600px;
     max-width: 90%;
+    position: relative;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   }
   
   .modal-content h3 {
     margin-bottom: 15px;
+    color: #333;
+    font-size: 26px;
   }
   
   .modal-content ul {
     list-style-type: none;
     padding: 0;
     text-align: left;
+    margin-top: 20px;
   }
   
   .modal-content li {
+    margin-bottom: 10px;
+    color: #555;
+    font-size: 16px;
+  }
+
+  /* Payment Modal Styling */
+ .payment-modal h3 {
+    color: #007bff;
+    font-size: 28px;
+  }
+  
+  .payment-modal .form-group {
+    text-align: left;
+    margin-bottom: 20px;
+  }
+  
+  .input-icon {
+    position: relative;
+  }
+  
+  .input-icon i {
+    position: absolute;
+    top: 50%;
+    left: 14px;
+    transform: translateY(-50%);
+    color: #555;
+    font-size: 18px;
+  }
+  
+  .input-icon input.form-input {
+    padding-left: 50px;
+  }
+  
+  .form-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+  }
+  
+  .half-width {
+    width: 48%;
+  }
+  
+  .error {
+    color: red;
+    font-size: 14px;
+    margin-top: 5px;
+  }
+  
+  .button-row {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 30px;
+  }
+  
+  .cancel-btn {
+    background-color: #6c757d;
+    color: white;
+    padding: 12px 20px;
+    border-radius: 25px;
+    font-size: 18px;
+    cursor: pointer;
+    border: none;
+    width: 48%;
+    transition: background-color 0.3s ease;
+  }
+  
+  .cancel-btn:hover {
+    background-color: #5a6268;
+  }
+  
+  .submit-btn {
+    width: 48%;
+  }
+  
+  /* Confirmation Modal Styling */
+  .confirmation-modal h3 {
+    color: #28a745;
+    font-size: 28px;
+  }
+  
+  .checkmark {
+    width: 100px;
+    margin: 20px auto;
+  }
+  
+  .confirmation-modal p {
+    color: #333;
+    font-size: 18px;
+    margin-top: 10px;
+  }
+  
+  .confirmation-modal ul {
+    list-style-type: none;
+    padding: 0;
+    text-align: left;
+    margin-top: 20px;
+    margin-bottom: 20px;
+  }
+
+  .confirmation-modal ul li {
+    color: #555;
+    font-size: 16px;
     margin-bottom: 10px;
   }
   
   .close-btn {
     background-color: #007bff;
     color: white;
-    padding: 10px 20px;
+    padding: 14px 20px;
     border: none;
-    border-radius: 5px;
+    border-radius: 25px;
     cursor: pointer;
-    margin-top: 15px;
+    margin-top: 25px;
+    font-size: 18px;
+    width: 100%;
+    transition: background-color 0.3s ease;
   }
   
   .close-btn:hover {
     background-color: #0056b3;
   }
+  
