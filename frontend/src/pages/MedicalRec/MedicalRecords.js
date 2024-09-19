@@ -1,41 +1,44 @@
 import React, { useState } from 'react';
 import { Button, Table, Container, Modal, Alert, Form } from 'react-bootstrap';
 import { jsPDF } from 'jspdf';  // Import jsPDF library
-import './MedicalRecords.css';
-
 // Importing pet images
 import pet1Image from 'frontend/src/components/assets/blog3.jpg';
 import pet2Image from 'frontend/src/components/assets/about2.jpg';
 import pet3Image from 'frontend/src/components/assets/about1.jpg';
+import './MedicalRecords.css';
 
 function MedicalRecords() {
+
   // Mock user data with multiple pets
   const pets = [
-    { id: 1, name: 'Goatie', image: pet1Image },
-    { id: 2, name: 'Pookie', image: pet2Image },
-    { id: 3, name: 'Dogie', image: pet3Image }
+    { id: 1, name: 'Goatie', image: pet1Image, age: '2 years', breed: 'Goat' },
+    { id: 2, name: 'Pookie', image: pet2Image, age: '1 year', breed: 'Cat' },
+    { id: 3, name: 'Dogie', image: pet3Image, age: '3 years', breed: 'Dog' }
   ];
 
-  // Medical records for all pets
+  // Expanded medical records with vaccination and treatment plans
   const [allRecords] = useState([
     { petId: 1, date: '01/01/2023', service: 'Annual Check-up', vet: 'Dr. Doofenshmirtz', id: 1 },
-    { petId: 1, date: '01/06/2023', service: 'Vaccination', vet: 'Dr. Perry', id: 2 },
+    { petId: 1, date: '01/06/2023', service: 'Vaccination', vet: 'Dr. Perry', id: 2, vaccine: 'Rabies', dose: '10mg', nextDose: '06/06/2023' },
+    { petId: 1, date: '01/10/2023', service: 'Treatment Plan', vet: 'Dr. Doofenshmirtz', id: 5, treatment: 'Allergy Treatment', medications: 'Antihistamine', duration: '2 weeks' },
     { petId: 2, date: '02/01/2023', service: 'Surgery', vet: 'Dr. Doofenshmirtz', id: 3 },
     { petId: 3, date: '03/10/2023', service: 'General Check-up', vet: 'Dr. Perry', id: 4 },
+    { petId: 2, date: '03/15/2023', service: 'Vaccination', vet: 'Dr. Perry', id: 6, vaccine: 'Distemper', dose: '5mg', nextDose: '09/15/2023' },
+    { petId: 3, date: '04/10/2023', service: 'Treatment Plan', vet: 'Dr. Perry', id: 7, treatment: 'Post-Surgery Recovery', medications: 'Painkillers', duration: '1 month' }
   ]);
 
   // State for selected pet (default is all)
   const [selectedPet, setSelectedPet] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
 
-  // Modal state for viewing medical record
+  // Modal state for viewing medical record, vaccination, or treatment plan
   const [selectedRecord, setSelectedRecord] = useState(null);
   const [showRecordModal, setShowRecordModal] = useState(false);
 
   // Handle filtering based on selected pet and search term
   const filteredRecords = allRecords
-    .filter(record => 
-      (!selectedPet || record.petId === selectedPet) && 
+    .filter(record =>
+      (!selectedPet || record.petId === selectedPet) &&
       (record.service.toLowerCase().includes(searchTerm.toLowerCase()) ||
       record.date.includes(searchTerm))
     );
@@ -49,6 +52,16 @@ function MedicalRecords() {
     doc.text(`Date: ${record.date}`, 10, 20);
     doc.text(`Service: ${record.service}`, 10, 30);
     doc.text(`Veterinarian: ${record.vet}`, 10, 40);
+    if (record.vaccine) {
+      doc.text(`Vaccine: ${record.vaccine}`, 10, 50);
+      doc.text(`Dose: ${record.dose}`, 10, 60);
+      doc.text(`Next Dose: ${record.nextDose}`, 10, 70);
+    }
+    if (record.treatment) {
+      doc.text(`Treatment: ${record.treatment}`, 10, 50);
+      doc.text(`Medications: ${record.medications}`, 10, 60);
+      doc.text(`Duration: ${record.duration}`, 10, 70);
+    }
     doc.save(`medical-record-${record.id}.pdf`);
   };
 
@@ -57,20 +70,22 @@ function MedicalRecords() {
     alert(`Record of ${record.service} sent via email.`);
   };
 
-  // Format JSON for better display
+  // Format record details for display in modal
   const formatRecordDetails = (record) => {
-    return `
-      Date: ${record.date}\n
-      Service: ${record.service}\n
-      Veterinarian: ${record.vet}
-    `;
+    let details = `Date: ${record.date}\nService: ${record.service}\nVeterinarian: ${record.vet}`;
+    if (record.vaccine) {
+      details += `\n\nVaccine: ${record.vaccine}\nDose: ${record.dose}\nNext Dose: ${record.nextDose}`;
+    }
+    if (record.treatment) {
+      details += `\n\nTreatment: ${record.treatment}\nMedications: ${record.medications}\nDuration: ${record.duration}`;
+    }
+    return details;
   };
 
   return (
     <Container className='medicarecords-page'>
       <div className='pet-section'>
-        <h1 >Select Pet Profile</h1>
-        {/* Pet Selection UI */}
+        <h1>Select Pet Profile</h1>
         <div className="pet-selection">
           <div className="pet-list">
             {pets.map(pet => (
@@ -148,16 +163,13 @@ function MedicalRecords() {
           <Modal.Body className="modal-body">
             <div className="modal-content">
               <Alert variant="info" className="modal-alert">Veterinarian: {selectedRecord.vet}</Alert>
-              <h5>Report</h5>
+              <h5>Details</h5>
               <pre>{formatRecordDetails(selectedRecord)}</pre>
             </div>
           </Modal.Body>
           <Modal.Footer>
             <Button variant="secondary" onClick={() => setShowRecordModal(false)}>
               Close
-            </Button>
-            <Button variant="success" onClick={() => handleDownload(selectedRecord)}>
-              Download PDF
             </Button>
           </Modal.Footer>
         </Modal>
