@@ -9,7 +9,6 @@ import AllVetMembers from './pages/AllVetMembers';
 import Appointments from './pages/AppointmentPage/Appointments';
 import HomePage from './pages/HomePage';
 import Login from './pages/Login';
-import MedicalRecords from './pages/MedicalRec/MedicalRecords';
 import SignUp from './pages/SignUp';
 import VetProfilePage from './pages/VetProfilePage'; // Adjusted relative path
 // Import the Prescription page
@@ -47,6 +46,7 @@ function App() {
           <Route path="/login" element={<Login loginUser={loginUser} />} />
           <Route path="/signup" element={<SignUp loginUser={loginUser} />} />
           <Route path="/MedicalRecords" element={<MedicalRecords />} />
+          <Route path="/educational" element={<EducationalResource />} />
           <Route path="/AppointmentPage/Appointments" element={<Appointments />}></Route>
           {/* Add the Prescription route */}
           <Route path="/prescription" element={<Prescription />} />  {/* New route for Prescription page */}
