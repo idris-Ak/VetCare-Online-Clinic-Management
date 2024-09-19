@@ -7,21 +7,13 @@ import Navbar from './components/Navbar';
 import vets from './components/data/vets';
 import AllVetMembers from './pages/AllVetMembers';
 import Appointments from './pages/AppointmentPage/Appointments';
-import MedicalRecords from './pages/MedicalRec/MedicalRecords'
-import EducationalResource from './pages/EducationalResource'
+import EducationalResource from './pages/EducationalResource';
 import HomePage from './pages/HomePage';
 import Login from './pages/Login';
-<<<<<<< HEAD
-import MedicalRecords from './pages/MedicalRecords';
-import Prescription from './pages/Prescriptionrefill/Prescription.js';
+import MedicalRecords from './pages/MedicalRec/MedicalRecords';
+import Prescription from './pages/Prescriptionrefill/prescription';
 import SignUp from './pages/SignUp';
 import VetProfilePage from './pages/VetProfilePage';
-=======
-import SignUp from './pages/SignUp';
-import VetProfilePage from './pages/VetProfilePage'; // Adjusted relative path
-// Import the Prescription page
-import Prescription from './pages/Prescriptionrefill/prescription'; // Import Prescription.js
->>>>>>> origin/HEAD
 
 function App() {
     const [isLoggedIn, setIsLoggedIn] = useState(Boolean(localStorage.getItem('isLoggedIn')));
