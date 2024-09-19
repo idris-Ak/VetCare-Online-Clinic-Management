@@ -194,7 +194,7 @@ const Prescription = () => {
                             <option value="Pharmacy 2">Pharmacy 2</option>
                             <option value="Pharmacy 3">Pharmacy 3</option>
                             <option value="Pharmacy 4">Pharmacy 4</option>
-                            <option value="Pharmacy 5">Pharmacy 5</option>
+                            <option value="Pharmacy 5">Home delivry</option>
                         </select>
                     </div>
 
