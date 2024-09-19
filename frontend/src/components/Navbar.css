@@ -24,6 +24,14 @@
   margin-right: 70px; /* Equal spacing between links */
   padding: 10px; /* Padding to create the outline box effect */
   border: 1px solid transparent; /* Initial transparent border */
+  display: flex;
+  align-items: center;
+}
+
+@media (max-width: 768px) {
+  .navbar-item {
+    margin-right: 20px; /* Less margin for smaller screens */
+  }
 }
 
 .navbar-item:last-child {
@@ -38,20 +46,42 @@
   box-sizing: border-box; /* Ensures padding and border are included in the element's dimensions */
 }
 
-.navbar-link:hover {
+.navbar-link img {
+  border: 2px solid white; /* A border to make it stand out */
+  margin-left: 10px; /* Spacing between image and text */
+}
+
+.welcome-text {
+  color: white; /* Ensure the text is visible */
+  margin-right: 10px; /* Spacing between welcome text and logout button */
+  font-size: 16px; 
+}
+
+.navbar-link:hover, .logout-button:hover, .login-button:hover {
   background-color: #68cdd486; /* Lighter shade of the original navbar color */
   border-radius: 20px;
 }
 
+.navbar-link.active {
+  background-color: #007bff;
+  border-radius: 10px;
+}
 
 .user-links {
   display: flex;
   justify-content: flex-end; /* Aligns user links to the right */
 }
 
-.logout-button {
+.logout-button, .login-button {
   background: none;
   border: none;
-  color: white; /* Ensures button text is visible */
+  color: white;
+  font-size: 16px;
+  padding: 10px; /* Ensure consistent padding with other navbar items */
   cursor: pointer;
+}
+
+.logout-button:hover, .login-button:hover {
+  background-color: #68cdd486; /* Lighter shade matching other links */
+  border-radius: 20px; /* Same border-radius for a consistent look */
 }

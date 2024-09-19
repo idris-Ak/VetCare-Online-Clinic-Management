@@ -15,6 +15,7 @@ import SignUp from './pages/SignUp';
 import VetProfilePage from './pages/VetProfilePage'; // Adjusted relative path
 // Import the Prescription page
 import Prescription from './pages/Prescriptionrefill/prescription'; // Import Prescription.js
+import MyProfile from './pages/MyProfile';
 
 function App() {
     const [isLoggedIn, setIsLoggedIn] = useState(Boolean(localStorage.getItem('isLoggedIn')));
@@ -52,6 +53,7 @@ function App() {
           <Route path="/AppointmentPage/Appointments" element={<Appointments />}></Route>
           {/* Add the Prescription route */}
           <Route path="/prescription" element={<Prescription />} />  {/* New route for Prescription page */}
+          <Route path="/myprofile" element={<MyProfile user={user} setUser={setUser} logoutUser={logoutUser}/>} />
         </Routes>
         <Footer />
       </div>
