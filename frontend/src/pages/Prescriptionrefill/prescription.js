@@ -21,6 +21,19 @@ const Prescription = () => {
       { id: 2, name: 'Pookie', image: pet2Image },
       { id: 3, name: 'Dogie', image: pet3Image },
     ];
+
+     // Payment Form State
+    const [paymentDetails, setPaymentDetails] = useState({
+      cardNumber: '',
+      expiryDate: '',
+      cvv: ''
+    });
+
+    const [errors, setErrors] = useState({
+      cardNumberError: '',
+      expiryDateError: '',
+      cvvError: ''
+    });
   
     const handlePetSelect = (petId) => {
       const selectedPet = pets.find(pet => pet.id === petId); // Find the selected pet
@@ -155,19 +168,15 @@ const Prescription = () => {
           <form onSubmit={handleSubmit}>
             <div className="form-group">
               <label htmlFor="prescriptionDetail">Prescription Detail:</label>
-              <select
-  id="prescriptionDetail"
-  className="form-input"
-  value={prescriptionDetail}
-  onChange={(e) => setPrescriptionDetail(e.target.value)}
-  required
->
-  <option value="">Select a prescription</option>
-  <option value="Antibiotics">Antibiotics</option>
-  <option value="Painkillers">Painkillers</option>
-  <option value="Vitamins">Vitamins</option>
-</select>
-
+              <textarea
+                id="prescriptionDetail"
+                className="form-input"
+                value={prescriptionDetail}
+                onChange={(e) => setPrescriptionDetail(e.target.value)}
+                placeholder="Enter details about the prescription"
+                rows="4"
+                required
+              />
             </div>
   
             <div className="form-group">
