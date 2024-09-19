@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button, Table, Container, Modal, Alert, Form } from 'react-bootstrap';
 import { jsPDF } from 'jspdf';  // Import jsPDF library
 // Importing pet images
@@ -15,7 +15,10 @@ function MedicalRecords() {
     { id: 2, name: 'Pookie', image: pet2Image, age: '1 year', breed: 'Cat' },
     { id: 3, name: 'Dogie', image: pet3Image, age: '3 years', breed: 'Dog' }
   ];
-
+  // State for storing vets and medical records
+  const [vets, setVets] = useState([]);
+  const [selectedVet, setSelectedVet] = useState(null);
+  const [showVetModal, setShowVetModal] = useState(false);
   // Expanded medical records with vaccination and treatment plans
   const [allRecords] = useState([
     { petId: 1, date: '01/01/2023', service: 'Annual Check-up', vet: 'Dr. Doofenshmirtz', id: 1 },
@@ -34,6 +37,13 @@ function MedicalRecords() {
   // Modal state for viewing medical record, vaccination, or treatment plan
   const [selectedRecord, setSelectedRecord] = useState(null);
   const [showRecordModal, setShowRecordModal] = useState(false);
+  
+
+  useEffect(() => {
+    // Load vets from localStorage
+    const storedVets = JSON.parse(localStorage.getItem('users'))?.filter(user => user.role === 'Vet') || [];
+    setVets(storedVets);
+  }, []);
 
   // Handle filtering based on selected pet and search term
   const filteredRecords = allRecords
@@ -69,6 +79,34 @@ function MedicalRecords() {
   const handleEmail = (record) => {
     alert(`Record of ${record.service} sent via email.`);
   };
+  
+  const handleSendToVet = () => {
+    if (!selectedVet || !selectedRecord) return;
+
+    console.log(selectedRecord)
+    const existingUsers = JSON.parse(localStorage.getItem('users')) || [];
+    // const sender = existingUsers.find(user => user.email === selectedRecord.sender);
+    
+    // if (!sender) {
+    //   alert('Sender information not found.');
+    //   return;
+    // }
+
+    const sharedRecords = JSON.parse(localStorage.getItem('sharedRecords')) || [];
+    sharedRecords.push({
+      recordId: selectedRecord.id,
+      vetEmail: selectedVet.email,
+      // sender: sender.email,
+      treatmentPlans: selectedRecord.treatment || {},
+      pdfFile: `medical-record-${selectedRecord.id}.pdf`, // This should be handled differently in practice
+      dateShared: new Date().toISOString(),
+    });
+    localStorage.setItem('sharedRecords', JSON.stringify(sharedRecords));
+
+    setShowVetModal(false);
+    alert(`Record shared with ${selectedVet.email}`);
+  };
+
 
   // Format record details for display in modal
   const formatRecordDetails = (record) => {
@@ -141,8 +179,8 @@ function MedicalRecords() {
                     <Button variant="success" onClick={() => handleDownload(record)}>
                       Download
                     </Button>
-                    <Button variant="warning" onClick={() => handleEmail(record)}>
-                      Share via Email
+                    <Button variant="warning" onClick={() => { setSelectedRecord(record); setShowVetModal(true); }}>
+                      Share to Vet
                     </Button>
                   </td>
                 </tr>
@@ -170,6 +208,36 @@ function MedicalRecords() {
           <Modal.Footer>
             <Button variant="secondary" onClick={() => setShowRecordModal(false)}>
               Close
+            </Button>
+          </Modal.Footer>
+        </Modal>
+      )}
+      {/* Modal for Sharing to Vet */}
+      {showVetModal && (
+        <Modal show={showVetModal} onHide={() => setShowVetModal(false)} centered>
+          <Modal.Header closeButton>
+            <Modal.Title>Select Vet to Share Record</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <Form>
+              <Form.Group controlId="formVetSelect">
+                <Form.Label>Select a Vet</Form.Label>
+                <Form.Control as="select" onChange={(e) => setSelectedVet(vets.find(vet => vet.email === e.target.value))}>
+                  <option value="">Select a Vet</option>
+                  {vets.map(vet => (
+                    <option key={vet.email} value={vet.email}>{vet.email}</option>
+                  ))}
+                </Form.Control>
+
+              </Form.Group>
+            </Form>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={() => setShowVetModal(false)}>
+              Cancel
+            </Button>
+            <Button variant="primary" onClick={handleSendToVet}>
+              Share Record
             </Button>
           </Modal.Footer>
         </Modal>
