@@ -1,6 +1,6 @@
 import React, {useState} from 'react';
 import { Button, Form, Alert, Container, ToggleButtonGroup, ToggleButton } from 'react-bootstrap';
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useLocation } from "react-router-dom";
 
 
 function Login({loginUser}) {
@@ -9,6 +9,7 @@ function Login({loginUser}) {
   const [showErrorMessage, setShowErrorMessage] = useState(false);
   const [showSuccessAlert, setShowSuccessAlert] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
   
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -46,12 +47,18 @@ function Login({loginUser}) {
       setTimeout(() => {
         setShowSuccessAlert(false);
         loginUser(storedUser);
-        if(storedUser.role === 'Vet'){
-          navigate('/AdminDashboard');
-        }
-        else {
-          navigate('/');
-        }
+
+        // if(storedUser.role === 'Vet'){
+        //   navigate('/AdminDashboard');
+        // }
+        // else {
+        //   navigate('/');
+        // }
+
+        // Check if the user was redirected here with a "from" state
+        const redirectTo = location.state?.from || '/';
+        console.log('Redirecting from:', location.state?.from);
+        navigate(redirectTo);
       }, 3000);
     } else {
       setErrorMessage('Invalid email, password, or role selection.');
