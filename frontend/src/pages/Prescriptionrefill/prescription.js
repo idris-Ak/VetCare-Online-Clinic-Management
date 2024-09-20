@@ -255,7 +255,7 @@ const Prescription = () => {
               <div className="vertical-line"></div>
               <div className="payment-option" onClick={handlePayPalPayment}>
                 <i className="fa fa-paypal" aria-hidden="true"></i>
-                <p>Pay with PayPal</p>
+                <p>Pay With PayPal</p>
               </div>
             </div>
             <button
@@ -351,13 +351,14 @@ const Prescription = () => {
         {showPayPal && (
         <div className="modal">
           <div className="modal-content paypal-modal">
-            <h3>Pay with PayPal</h3>
+            <h3>Pay With PayPal</h3>
             <div className="paypal-button-container">
               <PayPalScriptProvider
                 options={{
                   'client-id': 'AZn8taJF_Ktmts23FNW52kiR-RsyxG45Ps-vyDWgs2hje7Jv9EYFbpytQpUlyDndo_egQkb-IzD0p4jP',
                   currency: 'AUD',
                   intent: 'capture',
+                  'disable-funding': 'card', // Disable credit/debit card option
                 }}
               >
                 <PayPalButtons
@@ -375,15 +376,11 @@ const Prescription = () => {
                   }}
                   onApprove={(data, actions) => {
                     return actions.order.capture().then((details) => {
-                      console.log(
-                        'Transaction completed by ' + details.payer.name.given_name
-                      );
                       setShowPayPal(false);
                       setShowConfirmationModal(true);
                     });
                   }}
                   onCancel={() => {
-                    console.log('Payment cancelled');
                     setShowPayPal(false);
                     setShowPaymentMethodModal(true);
                   }}

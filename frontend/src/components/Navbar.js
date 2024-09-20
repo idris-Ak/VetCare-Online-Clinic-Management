@@ -14,6 +14,7 @@ function Navbar({ logoutUser, isLoggedIn, user }) {
   };
 
   const handleNavigation= (link) => {
+    console.log('Navigating to:', link);
     if (!isLoggedIn) {
       //Navigate to the login page with the intended destination as state
       navigate('/login', { state: { from: link } });

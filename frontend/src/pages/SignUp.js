@@ -89,8 +89,8 @@ const emailExists = users.some(existingUser => existingUser.email === user.email
 
     //Save the new user in localStorage
     const newUser = {
-      name: user.name,
-      email: user.email,
+      name: user.name.trim(),
+      email: user.email.trim(),
       password: user.password,
       role: user.role,
     };
