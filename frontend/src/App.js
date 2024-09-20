@@ -49,7 +49,7 @@ function App() {
           <Route path="/login" element={<Login loginUser={loginUser} />} />
           <Route path="/signup" element={<SignUp loginUser={loginUser} />} />
           <Route path="/educational" element={<EducationalResource />} />
-          <Route path="/myprofile" element = {<MyProfile />} />
+          <Route path="/myprofile" element = {<MyProfile user={user} setUser={setUser} logoutUser={logoutUser}/>} />
           {/* Wrap protected routes with PrivateRoute */}
           <Route 
             path="/AppointmentPage/Appointments" 
