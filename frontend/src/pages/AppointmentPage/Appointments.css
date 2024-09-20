@@ -194,6 +194,14 @@ button:hover {
   width: 300px;
 }
 
+.modal-content button {
+  background-color: aqua;
+  color: black;
+  border: Solid 2px black;
+  padding: 5px;
+  Margin: 5px;
+}
+
 .close-modal {
   background-color: red;
   color: white;

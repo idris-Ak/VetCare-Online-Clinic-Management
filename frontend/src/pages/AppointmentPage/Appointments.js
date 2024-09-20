@@ -5,7 +5,7 @@ import pet3Image from 'frontend/src/components/assets/about1.jpg';
 import pet2Image from 'frontend/src/components/assets/about2.jpg';
 import pet1Image from 'frontend/src/components/assets/blog3.jpg';
 
-
+// Import statements and other components remain the same
 function Appointments() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [daysInMonth, setDaysInMonth] = useState([]);
@@ -13,12 +13,15 @@ function Appointments() {
   const [selectedYear, setSelectedYear] = useState(currentDate.getFullYear());
   const [selectedMonth, setSelectedMonth] = useState(currentDate.getMonth());
   const [selectedDay, setSelectedDay] = useState(null);
+  const [selectedTime, setSelectedTime] = useState("");
   const [appointments, setAppointments] = useState({});
   const [showModal, setShowModal] = useState(false);
   const [petData, setPetData] = useState([]);
   const [selectedPet, setSelectedPet] = useState(null);
+  const [clinics, setClinics] = useState([]);
+  const [selectedClinic, setSelectedClinic] = useState(null);
 
-  // DEFAULT DATA FOR PETS
+
   useEffect(() => {
     const defaultPets = [
       { id: 1, name: 'Goatie', image: pet1Image },
@@ -28,9 +31,18 @@ function Appointments() {
     setPetData(defaultPets);
   }, []);
 
-  const getDaysInMonth = (year, month) => {
-    return new Date(year, month + 1, 0).getDate();
-  };
+  useEffect(() => {
+  const defaultClinics = [
+    { id: 1, name: 'Healthy Paws Clinic' },
+    { id: 2, name: 'Animal Care Center' },
+    { id: 3, name: 'Paw Patrol Vet' },
+    { id: 4, name: 'Furry Friends Hospital' },
+    { id: 5, name: 'Best Care Veterinary' },
+  ];
+  setClinics(defaultClinics);
+  }, []);
+
+  const getDaysInMonth = (year, month) => new Date(year, month + 1, 0).getDate();
 
   const generateCalendar = (year, month) => {
     const days = [];
@@ -40,11 +52,9 @@ function Appointments() {
     for (let i = 0; i < firstDay; i++) {
       days.push(null);
     }
-
     for (let i = 1; i <= totalDays; i++) {
       days.push(i);
     }
-
     return days;
   };
 
@@ -71,9 +81,7 @@ function Appointments() {
     setShowSelector(false);
   };
 
-  const handleGoToToday = () => {
-    setCurrentDate(new Date());
-  };
+  const handleGoToToday = () => setCurrentDate(new Date());
 
   const monthNames = [
     "January", "February", "March", "April", "May", "June",
@@ -81,54 +89,125 @@ function Appointments() {
   ];
 
   const openDayModal = (day) => {
-    if (selectedPet) {
+    if (selectedPet && isDateInFuture(currentDate.getFullYear(), currentDate.getMonth(), day)) {
       if (typeof day === "number") {
         setSelectedDay(day);
-        setShowModal(true); 
+        setShowModal(true);
       }
     } else {
-      alert("Please select a pet first.");
+      alert("Please select a valid pet and future date.");
     }
   };
 
-  const getAppointmentKey = (year, month, day) => {
-    return `${selectedPet?.name || "no-pet"}-${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+  const getAppointmentKey = (year, month, day, time) => {
+    return `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}-${time}`;
   };
 
   const bookAppointment = () => {
-    const key = getAppointmentKey(currentDate.getFullYear(), currentDate.getMonth(), selectedDay);
-    setAppointments({ ...appointments, [key]: true });
+    if (!selectedTime) {
+      alert("Please select a time.");
+      return;
+    }
+
+    const key = getAppointmentKey(currentDate.getFullYear(), currentDate.getMonth(), selectedDay, selectedTime);
+
+    setAppointments(prevAppointments => {
+      const updatedAppointments = { ...prevAppointments };
+
+      if (!updatedAppointments[selectedPet.id]) {
+        updatedAppointments[selectedPet.id] = {};
+      }
+
+      if (!updatedAppointments[selectedPet.id][selectedDay]) {
+        updatedAppointments[selectedPet.id][selectedDay] = [];
+      }
+
+      updatedAppointments[selectedPet.id][selectedDay].push(selectedTime);
+
+      return updatedAppointments;
+    });
+
     setShowModal(false);
   };
 
   const cancelAppointment = () => {
-    const key = getAppointmentKey(currentDate.getFullYear(), currentDate.getMonth(), selectedDay);
-    const newAppointments = { ...appointments };
-    delete newAppointments[key];
-    setAppointments(newAppointments);
+    const key = getAppointmentKey(currentDate.getFullYear(), currentDate.getMonth(), selectedDay, selectedTime);
+
+    setAppointments(prevAppointments => {
+      const updatedAppointments = { ...prevAppointments };
+      const petAppointments = updatedAppointments[selectedPet.id] || {};
+      const dayAppointments = petAppointments[selectedDay] || [];
+
+      const index = dayAppointments.indexOf(selectedTime);
+      if (index > -1) {
+        dayAppointments.splice(index, 1);
+        if (dayAppointments.length === 0) {
+          delete petAppointments[selectedDay];
+        } else {
+          updatedAppointments[selectedPet.id][selectedDay] = dayAppointments;
+        }
+        if (Object.keys(petAppointments).length === 0) {
+          delete updatedAppointments[selectedPet.id];
+        }
+      }
+
+      return updatedAppointments;
+    });
+
     setShowModal(false);
   };
 
   const currentMonth = monthNames[currentDate.getMonth()];
   const currentYear = currentDate.getFullYear();
 
+  const generateTimeSlots = () => {
+    const times = [];
+    for (let hour = 9; hour < 17; hour++) {
+      times.push(`${hour}:00`);
+      times.push(`${hour}:30`);
+    }
+    return times;
+  };
+
+  const timeSlots = generateTimeSlots();
+
+  const isTimeSlotBooked = (day, time) => {
+    if (!selectedPet) return false;
+
+    const petAppointments = appointments[selectedPet.id] || {};
+    const dayAppointments = petAppointments[day] || [];
+    return dayAppointments.includes(time);
+  };
+
+  const isDateInFuture = (year, month, day) => {
+    const today = new Date();
+    const selectedDate = new Date(year, month, day);
+    return selectedDate >= today;
+  };
+
+  const isTimeSlotBookedForPet = (day, time, petId) => {
+    const petAppointments = appointments[petId] || {};
+    const dayAppointments = petAppointments[day] || [];
+    return dayAppointments.includes(time);
+  };
+
   return (
     <>
       <section className="appointment-pet-selection">
         <h2>Select Pet Profile</h2>
         <div className="appointment-pet-profiles">
-        {petData.map((pet) => (
-          <div key={pet.id} className="pet">
-            <img src={pet.image} alt={pet.name} />
-            <p className="pet-name">{pet.name}</p> 
-            <button
-              className={selectedPet === pet ? 'selected' : 'select'}
-              onClick={() => setSelectedPet(pet)}
-            >
-              {selectedPet === pet ? 'Selected' : 'Select'}
-            </button>
-          </div>
-        ))}
+          {petData.map((pet) => (
+            <div key={pet.id} className="pet">
+              <img src={pet.image} alt={pet.name} />
+              <p className="pet-name">{pet.name}</p>
+              <button
+                className={selectedPet === pet ? 'selected' : 'select'}
+                onClick={() => setSelectedPet(pet)}
+              >
+                {selectedPet === pet ? 'Selected' : 'Select'}
+              </button>
+            </div>
+          ))}
         </div>
       </section>
 
@@ -136,13 +215,9 @@ function Appointments() {
         <h1 className="title">Make OR Cancel Appointments</h1>
         <div className="calendar-header">
           <button onClick={handlePreviousMonth}>Previous</button>
-          <span>
-            {currentMonth} {currentYear}
-          </span>
+          <span>{currentMonth} {currentYear}</span>
           <button onClick={handleNextMonth}>Next</button>
-          <button onClick={() => setShowSelector(!showSelector)}>
-            Select Month & Year
-          </button>
+          <button onClick={() => setShowSelector(!showSelector)}>Select Month & Year</button>
           <button onClick={handleGoToToday}>Today</button>
         </div>
 
@@ -176,20 +251,16 @@ function Appointments() {
 
         <div className="calendar-grid">
           {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day, index) => (
-            <div key={index} className="calendar-cell day-names">
-              {day}
-            </div>
+            <div key={index} className="calendar-cell day-names">{day}</div>
           ))}
 
           {daysInMonth.map((day, index) => {
-            const appointmentKey = getAppointmentKey(currentYear, currentDate.getMonth(), day);
+            const isFutureDate = isDateInFuture(currentDate.getFullYear(), currentDate.getMonth(), day);
             return (
               <div
                 key={index}
-                className={`calendar-cell ${
-                  appointments[appointmentKey] ? "has-appointment" : ""
-                }`}
-                onClick={() => openDayModal(day)}
+                className={`calendar-cell ${day && isTimeSlotBooked(day, selectedTime) ? "has-appointment" : ""} ${!isFutureDate ? "past-date" : ""}`}
+                onClick={() => isFutureDate && openDayModal(day)}
               >
                 {day || ""}
               </div>
@@ -199,21 +270,52 @@ function Appointments() {
       </div>
 
       {showModal && (
-        <div className="modal-overlay">
+        <div className="modal">
           <div className="modal-content">
-            <h3>Day: {selectedDay} {currentMonth} {currentYear}</h3>
-            {appointments[getAppointmentKey(currentYear, currentDate.getMonth(), selectedDay)] ? (
+          <h3>Select a Clinic and Time Slot for {selectedDay} {currentMonth} {currentYear}</h3>
+            <label>
+              Select Clinic:
+              <select
+                value={selectedClinic?.id || ""}
+                onChange={(e) => {
+                  const clinic = clinics.find(cl => cl.id === parseInt(e.target.value));
+                  setSelectedClinic(clinic);
+                }}
+              >
+                <option value="">Select a clinic</option>
+                {clinics.map(clinic => (
+                  <option key={clinic.id} value={clinic.id}>
+                    {clinic.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label>
+              Select Time Slot:
+              <select
+                value={selectedTime}
+                onChange={(e) => setSelectedTime(e.target.value)}
+              >
+                <option value="">Select a time slot</option>
+                {timeSlots.map((time) => (
+                  <option key={time} value={time}>
+                    {time} {isTimeSlotBooked(selectedDay, time) ? "(Booked)" : ""}
+                  </option>
+                ))}
+              </select>
+            </label>
+
+            {isTimeSlotBookedForPet(selectedDay, selectedTime, selectedPet?.id) ? (
               <div>
-                <p>{selectedPet?.name} has an appointment on this day.</p>
                 <button onClick={cancelAppointment}>Cancel Appointment</button>
               </div>
             ) : (
               <div>
-                <p>No appointment on this day for {selectedPet?.name}.</p>
                 <button onClick={bookAppointment}>Book Appointment</button>
               </div>
             )}
-            <button className="close-modal" onClick={() => setShowModal(false)}>Close</button>
+
+            <button onClick={() => setShowModal(false)}>Close</button>
           </div>
         </div>
       )}
