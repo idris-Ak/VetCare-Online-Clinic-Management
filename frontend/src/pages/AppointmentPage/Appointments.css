@@ -109,7 +109,7 @@ button .selected {
   font-weight: bold;
 }
 
-.calendar-cell.has-appointment {
+.calendar-cell.highlighted {
   background-color: #90ee90;
   color: #fff;
   font-weight: bold;
@@ -192,14 +192,60 @@ button:hover {
   border-radius: 10px;
   text-align: center;
   width: 300px;
+  padding: 0px;
+  margin: 5px;
 }
 
-.modal-content button {
-  background-color: aqua;
+.appointment-modal-actions button {
+  background-color: grey;
   color: black;
   border: Solid 2px black;
   padding: 5px;
   Margin: 5px;
+}
+
+.appointment-modal-actions .appointment-book{
+  background-color: rgb(91, 213, 91);
+  color: white;
+  font-weight: bold;
+}
+
+.appointment-modal-actions .appointment-book:hover{
+  background-color: white;
+  color: black;
+  font-weight: bold;
+}
+
+.appointment-modal-actions .appointment-cancel{
+  background-color:red;
+  color: white;
+  font-weight: bold;
+}
+
+.appointment-modal-actions .appointment-cancel:hover{
+  background-color: white;
+  color: black;
+  font-weight: bold;
+}
+
+.appointment-time-slots button {
+  background-color: white;
+  color: black;
+  border: Solid 4px black;
+  padding: 5px;
+  Margin: 5px;
+}
+
+.appointment-time-slots button:hover {
+background-color: aqua;
+color: White;
+}
+
+.appointment-time-slots button.selected{
+  background-color: aqua;
+  color: white;
+  width: 20%;
+  font-weight: bold;
 }
 
 .close-modal {
@@ -214,3 +260,5 @@ button:hover {
 .close-modal:hover {
   background-color: darkred;
 }
+
+
