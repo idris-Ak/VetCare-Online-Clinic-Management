@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Form, Container, Modal, Card, Row, Col } from 'react-bootstrap';
+import { Button, Form, Container, Modal, Card, Row, Col, Alert } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import profilepic from '../components/assets/profilepic.png';
 
@@ -13,6 +13,11 @@ function MyProfile({ user, setUser, logoutUser }) {
   // State for pet details modal
   const [showPetModal, setShowPetModal] = useState(false);
   const [currentPet, setCurrentPet] = useState(null);
+  const[showAlert, setAlert] = useState(false);
+  //State for the alert messages 
+  const[alertContent, setAlertContent] = useState('');
+  const[alertContentDanger, setAlertContentDanger] = useState('');
+  const[showAlertDanger, setAlertDanger] = useState(false);
 
   // State for edit profile modal
   const [showEditProfileModal, setShowEditProfileModal] = useState(false);
@@ -176,20 +181,72 @@ function MyProfile({ user, setUser, logoutUser }) {
     const confirmPassword = form.elements.confirmPassword.value;
 
      // Validate current password
-    if (currentPassword !== user.password) {
-      alert('Current password is incorrect.');
-      return;
+    if (currentPassword && currentPassword !== user.password) {
+        setAlertContentDanger("Current Password is incorrect.");
+        setAlertDanger(true);
+        setTimeout(() => {
+        setAlertDanger(false);
+        }, 2500);
+        return;
+    }
+
+    if (currentPassword && (!newPassword || !confirmPassword)) {
+        setAlertContentDanger("Please enter and confirm your new password.");
+        setAlertDanger(true);
+        setTimeout(() => {
+        setAlertDanger(false);
+        }, 2500);
+        return;
+    }
+
+    //Handle case where new password and confirm new password is entered but current password is not yet provided
+    if (newPassword && confirmPassword && (!currentPassword)) {
+        setAlertContentDanger("Please enter your current password.");
+        setAlertDanger(true);
+        setTimeout(() => {
+        setAlertDanger(false);
+        }, 2500);
+        return;
+    }
+
+    //Handle case where confirm new password is entered but new password or current password is not yet provided
+    if (confirmPassword && (!newPassword || !currentPassword)) {
+        setAlertContentDanger("Please enter your current and new password.");
+        setAlertDanger(true);
+        setTimeout(() => {
+        setAlertDanger(false);
+        }, 2500);
+        return;
+    }
+
+  
+    //Handle case where new password is entered but confirm new password or current password is not yet provided
+    if (newPassword && (!confirmPassword|| !currentPassword)) {
+        setAlertContentDanger("Please enter your current password and confirm your new password.");
+        setAlertDanger(true);
+        setTimeout(() => {
+        setAlertDanger(false);
+        }, 2500);
+        return;
     }
 
     // Validate that new password and the new confirm password match
     if (newPassword && newPassword !== confirmPassword) {
-      alert("Passwords do not match.");
-      return;
+        setAlertContentDanger("Passwords do not match.");
+        setAlertDanger(true);
+        setTimeout(() => {
+        setAlertDanger(false);
+        }, 2500);
+        return;
     }
 
     // Email validation for Vet role
     if (user.role === 'Vet' && !newEmail.endsWith('@vetcare.com')) {
-        alert("As a Vet, your email must end with '@vetcare.com'.");
+        setAlertContentDanger("As a Vet, your email must end with '@vetcare.com'");
+        setAlertDanger(true);
+        setTimeout(() => {
+        setAlertDanger(false);
+        }, 2500);
         return;
     }
 
@@ -198,7 +255,11 @@ function MyProfile({ user, setUser, logoutUser }) {
       const users = JSON.parse(localStorage.getItem('users')) || [];
       const emailExists = users.some((u) => u.email === newEmail);
       if (emailExists) {
-        alert("This email is already registered with another account.");
+        setAlertContentDanger("The email entered is already registered.");
+        setAlertDanger(true);
+        setTimeout(() => {
+        setAlertDanger(false);
+        }, 2500);
         return;
       }
     }
@@ -211,8 +272,12 @@ function MyProfile({ user, setUser, logoutUser }) {
 
     setUser(updatedUser);
     updateUserInLocalStorage(updatedUser);
+    setAlertContent('Profile Successfully Updated!');
+      setAlert(true);
+      setTimeout(() => {
+        setAlert(false);
+      }, 2500);
     setShowEditProfileModal(false);
-    alert("Profile updated successfully.");
   };
 
   // Handle account deletion
@@ -224,10 +289,16 @@ function MyProfile({ user, setUser, logoutUser }) {
     localStorage.removeItem('user');
     localStorage.removeItem('isLoggedIn');
     setUser(null);
+    setAlertContent('Profile Successfully Deleted!');
     setShowDeleteAccountModal(false);
-    // Call logoutUser function
-    logoutUser(); 
-    navigate('/');
+    setAlert(true);
+      setTimeout(() => {
+        //This function will logout the user after the profile is successfully deleted
+        logoutUser();
+        setAlert(false);
+        //Navigate back to login page after successful deletion
+        navigate('/');
+      }, 2500);
   };
 
    // Handle pet profile picture upload
@@ -249,6 +320,7 @@ function MyProfile({ user, setUser, logoutUser }) {
 
   return (
     <Container style={{ marginTop: '50px', marginBottom: '50px', fontFamily: 'Lato, sans-serif' }}>
+        {showAlert && alertContent &&(<Alert variant="success">{alertContent}</Alert>)}
       <div
         className="d-flex flex-column align-items-center p-5"
         style={{
@@ -521,15 +593,7 @@ function MyProfile({ user, setUser, logoutUser }) {
         </Modal.Header>
         <Form onSubmit={handleProfileUpdate}>
           <Modal.Body>
-             <Form.Group controlId="currentPassword" className="mb-3">
-              <Form.Label>Current Password</Form.Label>
-              <Form.Control
-                type="password"
-                name="currentPassword"
-                placeholder="Enter current password"
-                required
-              />
-            </Form.Group>
+            {showAlertDanger && alertContentDanger && <Alert variant="danger">{alertContentDanger}</Alert>}
             <Form.Group controlId="userName" className="mb-3">
               <Form.Label>Name</Form.Label>
               <Form.Control
@@ -546,6 +610,14 @@ function MyProfile({ user, setUser, logoutUser }) {
                 name="email"
                 defaultValue={user.email}
                 required
+              />
+            </Form.Group>
+               <Form.Group controlId="currentPassword" className="mb-3">
+              <Form.Label>Current Password</Form.Label>
+              <Form.Control
+                type="password"
+                name="currentPassword"
+                placeholder="Enter current password"
               />
             </Form.Group>
             <Form.Group controlId="userPassword" className="mb-3">
