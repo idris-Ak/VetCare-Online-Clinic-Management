@@ -5,14 +5,17 @@ import pet3Image from 'frontend/src/components/assets/about1.jpg';
 import pet2Image from 'frontend/src/components/assets/about2.jpg';
 import pet1Image from 'frontend/src/components/assets/blog3.jpg';
 import successfulPaymentCheck from 'frontend/src/components/assets/check.png';
+import { PayPalScriptProvider, PayPalButtons } from '@paypal/react-paypal-js'; // PayPalButton Component
 
 const Prescription = () => {
     const [selectedPet, setSelectedPet] = useState(null);
     const [prescriptionDetail, setPrescriptionDetail] = useState('');
     const [preferredPharmacy, setPreferredPharmacy] = useState('');
     const [preferredPickupDate, setPreferredPickupDate] = useState('');
+    const [showPaymentMethodModal, setShowPaymentMethodModal] = useState(false);
     const [preferredPickupTime, setPreferredPickupTime] = useState('');
     const [showPaymentModal, setShowPaymentModal] = useState(false); // State to control payment modal
+      const [showPayPal, setShowPayPal] = useState(false); // For PayPal payment
     const [showConfirmationModal, setShowConfirmationModal] = useState(false); // State to control confirmation modal  
     
     // Pet images and names
@@ -42,8 +45,8 @@ const Prescription = () => {
   
     const handleSubmit = (e) => {
       e.preventDefault();
-      // Show payment modal on submit
-      setShowPaymentModal(true);
+      // Show payment method modal on submit
+      setShowPaymentMethodModal(true);
     };
 
     // Handle Payment Form Changes
@@ -124,6 +127,12 @@ const Prescription = () => {
     }
   };
 
+  // Handle PayPal Payment
+  const handlePayPalPayment = () => {
+    setShowPaymentMethodModal(false);
+    setShowPayPal(true);
+  };
+
   const handleCloseConfirmationModal = () => {
     // Reset form or navigate to home page
     setShowConfirmationModal(false);
@@ -142,7 +151,9 @@ const Prescription = () => {
       expiryDateError: '',
       cvvError: ''
     });
+    setShowPayPal(false);
   };
+
     return (
       <div className="prescription-page">
         <h1>Request Prescription for Your Pet</h1>
@@ -224,7 +235,39 @@ const Prescription = () => {
             <button type="submit" className="submit-btn">Proceed To Payment</button>
           </form>
         </div>
-  
+        
+      {/* Payment Method Selection Modal */}
+      {showPaymentMethodModal && (
+        <div className="modal">
+          <div className="modal-content payment-method-modal">
+            <h3>Select Payment Method</h3>
+            <div className="payment-options">
+              <div
+                className="payment-option"
+                onClick={() => {
+                  setShowPaymentMethodModal(false);
+                  setShowPaymentModal(true);
+                }}
+              >
+                <i className="fa fa-credit-card" aria-hidden="true"></i>
+                <p>Credit/Debit Card</p>
+              </div>
+              <div className="vertical-line"></div>
+              <div className="payment-option" onClick={handlePayPalPayment}>
+                <i className="fa fa-paypal" aria-hidden="true"></i>
+                <p>Pay with PayPal</p>
+              </div>
+            </div>
+            <button
+              onClick={() => setShowPaymentMethodModal(false)}
+              className="cancel-btn"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Payment Modal */}
       {showPaymentModal && (
         <div className="modal">
@@ -295,11 +338,69 @@ const Prescription = () => {
                 </div>
               </div>
 
-              <div className="button-row">
+              <div className="button-row two-buttons">
                 <button type="submit" className="submit-btn">Pay Now</button>
-                <button onClick={() => setShowPaymentModal(false)} className="cancel-btn">Cancel</button>
+                <button onClick={() => { setShowPaymentModal(false); setShowPaymentMethodModal(true);}} className="back-btn">Back</button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+       {/* PayPal Payment Modal */}
+        {showPayPal && (
+        <div className="modal">
+          <div className="modal-content paypal-modal">
+            <h3>Pay with PayPal</h3>
+            <div className="paypal-button-container">
+              <PayPalScriptProvider
+                options={{
+                  'client-id': 'AZn8taJF_Ktmts23FNW52kiR-RsyxG45Ps-vyDWgs2hje7Jv9EYFbpytQpUlyDndo_egQkb-IzD0p4jP',
+                  currency: 'AUD',
+                  intent: 'capture',
+                }}
+              >
+                <PayPalButtons
+                  style={{ layout: 'vertical' }}
+                  createOrder={(data, actions) => {
+                    return actions.order.create({
+                      purchase_units: [
+                        {
+                          amount: {
+                            value: '50.00', // Set the amount here
+                          },
+                        },
+                      ],
+                    });
+                  }}
+                  onApprove={(data, actions) => {
+                    return actions.order.capture().then((details) => {
+                      console.log(
+                        'Transaction completed by ' + details.payer.name.given_name
+                      );
+                      setShowPayPal(false);
+                      setShowConfirmationModal(true);
+                    });
+                  }}
+                  onCancel={() => {
+                    console.log('Payment cancelled');
+                    setShowPayPal(false);
+                    setShowPaymentMethodModal(true);
+                  }}
+                />
+              </PayPalScriptProvider>
+            </div>
+            <div className="button-row">
+              <button
+                onClick={() => {
+                  setShowPayPal(false);
+                  setShowPaymentMethodModal(true);
+                }}
+                className="back-btn"
+              >
+                Back
+              </button>
+            </div>
           </div>
         </div>
       )}
