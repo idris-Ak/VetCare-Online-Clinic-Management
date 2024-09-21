@@ -82,7 +82,23 @@ const Prescription = () => {
       [name]: formattedValue
     }));
   };
+
+    // Validate credit card expiry date
+    const validateExpiryDate = (expiryDate) => {
+    const [month, year] = expiryDate.split('/').map(Number);
+    if (!month || !year) return false;
   
+    const currentDate = new Date();
+    const currentYear = currentDate.getFullYear() % 100; // Last two digits of the year
+    const currentMonth = currentDate.getMonth() + 1;
+
+    // Expired if year is less than current or same year with month less than current month
+    if (year < currentYear || (year === currentYear && month < currentMonth)) {
+    return false;
+    }
+    return true;
+  };
+
     // Validate Payment Form
     const validatePaymentForm = () => {
     const { cardNumber, expiryDate, cvv } = paymentDetails;
@@ -101,8 +117,8 @@ const Prescription = () => {
     }
 
     // Validate expiry date (MM/YY)
-    if (!/^(0[1-9]|1[0-2])\/([0-9]{2})$/.test(expiryDate)) {
-      newErrors.expiryDateError = "Invalid expiry date. Use MM/YY format.";
+    if (!validateExpiryDate(expiryDate)) {
+      newErrors.expiryDateError = "Invalid or expired date. Use MM/YY format.";
       isValid = false;
     }
 

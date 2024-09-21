@@ -35,6 +35,22 @@ function Appointments() {
     cvvError: ''
   });
 
+  // Validate credit card expiry date
+  const validateExpiryDate = (expiryDate) => {
+  const [month, year] = expiryDate.split('/').map(Number);
+  if (!month || !year) return false;
+  
+  const currentDate = new Date();
+  const currentYear = currentDate.getFullYear() % 100; // Last two digits of the year
+  const currentMonth = currentDate.getMonth() + 1;
+
+  // Expired if year is less than current or same year with month less than current month
+  if (year < currentYear || (year === currentYear && month < currentMonth)) {
+    return false;
+  }
+  return true;
+};
+
   // Payment Validation
   const validatePaymentForm = () => {
     const { cardNumber, expiryDate, cvv } = paymentDetails;
@@ -45,16 +61,16 @@ function Appointments() {
       cvvError: ''
     };
 
-    // Validate card number
+    // Validate card number (16 digits)
     const cardNumberDigits = cardNumber.replace(/\D/g, '');
     if (cardNumberDigits.length !== 16) {
       newErrors.cardNumberError = "Card number must be 16 digits.";
       isValid = false;
     }
 
-    // Validate expiry date
-    if (!/^(0[1-9]|1[0-2])\/([0-9]{2})$/.test(expiryDate)) {
-      newErrors.expiryDateError = "Invalid expiry date. Use MM/YY format.";
+    // Validate expiry date (MM/YY)
+    if (!validateExpiryDate(expiryDate)) {
+      newErrors.expiryDateError = "Invalid or expired date. Use MM/YY format.";
       isValid = false;
     }
 
@@ -68,25 +84,35 @@ function Appointments() {
     return isValid;
   };
 
-  const handlePaymentChange = (event) => {
+ const handlePaymentChange = (event) => {
     const { name, value } = event.target;
-    let formattedValue = value;
 
+    let formattedValue = value;
     if (name === 'cardNumber') {
-      formattedValue = formattedValue.replace(/\D/g, '').substring(0, 16);
+      // Remove all non-digit characters
+      formattedValue = formattedValue.replace(/\D/g, '');
+      // Insert dashes after every 4 digits
+      formattedValue = formattedValue.substring(0, 16); // Limit to 16 digits
       formattedValue = formattedValue.replace(/(.{4})/g, '$1-').trim();
+      // Remove trailing dash if any
+      if (formattedValue.endsWith('-')) {
+        formattedValue = formattedValue.slice(0, -1);
+      }
     } else if (name === 'expiryDate') {
+      // Auto-format expiry date as MM/YY
       formattedValue = formattedValue.replace(/\D/g, '');
       if (formattedValue.length > 2) {
         formattedValue = formattedValue.substring(0, 4);
         formattedValue = formattedValue.replace(/(\d{2})(\d{1,2})/, '$1/$2');
       }
     } else if (name === 'cvv') {
-      formattedValue = formattedValue.replace(/\D/g, '').substring(0, 3);
+      // Only digits, limit to 3
+      formattedValue = formattedValue.replace(/\D/g, '');
+      formattedValue = formattedValue.substring(0, 3);
     }
 
-    setPaymentDetails((prev) => ({
-      ...prev,
+    setPaymentDetails(prevDetails => ({
+      ...prevDetails,
       [name]: formattedValue
     }));
   };
@@ -216,7 +242,7 @@ function Appointments() {
   e.preventDefault();
   if (validatePaymentForm()) {
     setShowPaymentModal(false); // Close the payment modal
-    finaliseAppointmentBooking(); // Finalize the booking after payment
+    finaliseAppointmentBooking(); // Finalise the booking after payment
   }
 };
 
