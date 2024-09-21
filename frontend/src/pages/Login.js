@@ -2,7 +2,6 @@ import React, {useState} from 'react';
 import { Button, Form, Alert, Container, ToggleButtonGroup, ToggleButton } from 'react-bootstrap';
 import { useNavigate, Link, useLocation } from "react-router-dom";
 
-
 function Login({loginUser}) {
   const [userDetails, setUserDetails] = useState({ email: '', password: '', role: 'Pet Owner' });
   const [errorMessage, setErrorMessage] = useState('');
@@ -29,7 +28,7 @@ function Login({loginUser}) {
     setShowErrorMessage(false);
 
     //Check if the Vet's email ends with @vetcare.com
-    if (userDetails.role === 'Vet' && !userDetails.email.endsWith('@vetcare.com')) {
+    if (userDetails.role === 'Vet' && !userDetails.email.endsWith('@vetcare.com').trim()) {
       setErrorMessage("Vets must use an email that ends with '@vetcare.com'.");
       setShowErrorMessage(true);
       setTimeout(() => setShowErrorMessage(false), 3000);
@@ -40,9 +39,9 @@ function Login({loginUser}) {
     const users = JSON.parse(localStorage.getItem('users')) || [];
 
     //Store the user details in local storage temporarily 
-    const storedUser = users.find(user => user.email === userDetails.email && user.role === userDetails.role);
+    const storedUser = users.find(user => user.email.trim() === userDetails.email && user.role === userDetails.role);
     
-    if (storedUser && storedUser.password === userDetails.password && storedUser.role === userDetails.role) {
+    if (storedUser && storedUser.password.trim() === userDetails.password && storedUser.role === userDetails.role) {
       setShowSuccessAlert(true);
       setTimeout(() => {
         setShowSuccessAlert(false);
@@ -57,10 +56,10 @@ function Login({loginUser}) {
 
         // Check if the user was redirected here with a "from" state
         const redirectTo = location.state?.from || '/';
-        console.log('Redirecting from:', location.state?.from);
         navigate(redirectTo);
       }, 3000);
     } else {
+      //Show an error message if the user enters any invalid details
       setErrorMessage('Invalid email, password, or role selection.');
       setShowErrorMessage(true);
       setTimeout(() => setShowErrorMessage(false), 3000);

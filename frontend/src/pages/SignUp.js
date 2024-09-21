@@ -58,6 +58,7 @@ function SignUp({loginUser}) {
       newErrors.confirmPasswordError = 'Passwords do not match.';
       isValid = false; 
     }
+    
     //If password is not strong, output the error message
     if (!isPasswordStrong(user.password)) {
       newErrors.passwordError = 'Your password must be at least 8 characters long and include uppercase letters, lowercase letters, numbers, and special characters.';

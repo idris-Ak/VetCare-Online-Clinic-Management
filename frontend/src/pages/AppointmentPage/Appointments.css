@@ -362,7 +362,7 @@ color: White;
   .confirmation-modal ul {
     list-style-type: none;
     padding: 0;
-    text-align: left;
+    text-align: center;
     margin-top: 20px;
     margin-bottom: 20px;
   }
@@ -371,6 +371,7 @@ color: White;
     color: #555;
     font-size: 16px;
     margin-bottom: 10px;
+    display: block;
   }
   
   /* Add a vertical line between the payment options */
