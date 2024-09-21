@@ -260,6 +260,10 @@
     flex-wrap: wrap;
     margin-top: 5px;
   }
+
+  .button-row button {
+    width: 48%; /* Ensure equal width for both buttons */
+  }
   
   .button-row.two-buttons {
     justify-content: space-between;
@@ -338,9 +342,11 @@
 
   .payment-options {
     display: flex;
-    justify-content: space-around;
+    justify-content: center;
     align-items: center;
-    margin-bottom: 30px;
+    gap: 20px; /* Add space between options */
+    margin-bottom: 30px; /* Add spacing below the payment options */
+
   }
 
   .payment-option {
@@ -357,37 +363,31 @@
 
   .payment-option:hover {
     border-color: #007bff;
-    background-color: #f4f7fc;
+    background-color: #e0f1ff;
   }
 
   .payment-option i {
-    font-size: 60px;
+    font-size: 50px;
     color: #007bff;
-    margin-bottom: 15px;
+    margin-bottom: 10px;
   }
 
   .payment-option p {
-    font-size: 18px;
+    font-size: 16px;
     color: #333;
     font-weight: bold;
+    margin-top: 5px;
   }
 
   /* PayPal Modal */
   .paypal-modal .paypal-button-container {
     width: 100%;
-  }
-
-  .paypal-modal {
     display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
-
-  .paypal-modal h3 {
+    justify-content: center;
     margin-bottom: 20px;
   }
-
-  .paypal-button-container {
-    width: 100%;
-    margin-bottom: 20px;
+  
+  .paypal-button-container iframe {
+    transform: scale(1.05); /* Scale up the PayPal button */
+    transform-origin: center; /* Keep it centered */
   }
