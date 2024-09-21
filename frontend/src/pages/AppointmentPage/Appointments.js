@@ -21,7 +21,6 @@ function Appointments() {
   const [highlightedDays, setHighlightedDays] = useState({});
   const [showPaymentMethodModal, setShowPaymentMethodModal] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
-  const [showPayPalButtons, setShowPayPalButtons] = useState(false);
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
 
   // Payment States
@@ -269,7 +268,6 @@ const handleCloseConfirmationModal = () => {
   const handlePayPalApprove = () => {
     setShowConfirmationModal(true);
     setShowPaymentMethodModal(false);
-    setShowPayPalButtons(false);
     // Book the appointment after PayPal payment is approved
     bookAppointment();
   };
@@ -476,34 +474,32 @@ const handleCloseConfirmationModal = () => {
                     }}
                     onApprove={handlePayPalApprove}
                     onCancel={() => {
-                      setShowPayPalButtons(false);
                       setShowPaymentMethodModal(true);
                     }}
                   />
                 </PayPalScriptProvider>
               </div>
             </div>
-            {!showPayPalButtons ? (
-              <button
-                onClick={() => setShowPaymentMethodModal(false)}
-                className="cancel-btn"
-              >
-                Cancel
-              </button>
-            ) : (
-              <button
-                onClick={() => {
-                  setShowPayPalButtons(false);
-                  setShowPaymentMethodModal(true);
-                }}
-                className="back-btn"
-              >
-                Back
-              </button>
-            )}
-          </div>
+      <div className="button-row two-buttons">
+        <button
+          onClick={() => {
+            setShowPaymentMethodModal(false); 
+            setShowModal(true); 
+          }}
+          className="back-btn"
+        >
+          Back
+        </button>
+        <button
+          onClick={() => setShowPaymentMethodModal(false)}
+          className="cancel-btn"
+        >
+            Cancel
+          </button>
         </div>
-      )}
+      </div>
+    </div>
+  )}
 
       {/* Payment Modal */}
       {showPaymentModal && (

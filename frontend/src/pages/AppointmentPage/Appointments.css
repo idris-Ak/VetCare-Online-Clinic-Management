@@ -261,6 +261,21 @@ color: White;
   background-color: darkred;
 }
 
+.modal-content .cancel-btn {
+  background-color: red;
+  color: white;
+  padding: 12px 20px;
+  border-radius: 25px;
+  font-size: 18px;
+  cursor: pointer;
+  border: none;
+  transition: background-color 0.3s ease;
+}
+
+.modal-content .cancel-btn:hover {
+  background-color: darkred;
+}
+
 /* Payment Modal Styling */
  .payment-modal h3 {
     color: #007bff;
