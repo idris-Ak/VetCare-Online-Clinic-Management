@@ -5,6 +5,7 @@ import pet3Image from 'frontend/src/components/assets/about1.jpg';
 import pet2Image from 'frontend/src/components/assets/about2.jpg';
 import pet1Image from 'frontend/src/components/assets/blog3.jpg';
 import successfulPaymentCheck from 'frontend/src/components/assets/check.png';
+import { PayPalScriptProvider, PayPalButtons } from '@paypal/react-paypal-js'; // PayPalButton Component
 
 const Prescription = () => {
     const [selectedPet, setSelectedPet] = useState(null);
@@ -13,6 +14,7 @@ const Prescription = () => {
     const [preferredPickupDate, setPreferredPickupDate] = useState('');
     const [preferredPickupTime, setPreferredPickupTime] = useState('');
     const [showPaymentModal, setShowPaymentModal] = useState(false); // State to control payment modal
+    const [showPayPalButtons, setShowPayPalButtons] = useState(false);
     const [showConfirmationModal, setShowConfirmationModal] = useState(false); // State to control confirmation modal  
     
     // State for payment details and errors
@@ -28,11 +30,24 @@ const Prescription = () => {
       cvvError: ''
     });
     const pets = [
-        { id: 1, name: 'Goatie', image: pet1Image },
-        { id: 2, name: 'Pookie', image: pet2Image },
-        { id: 3, name: 'Dogie', image: pet3Image },
+      { id: 1, name: 'Goatie', image: pet1Image },
+      { id: 2, name: 'Pookie', image: pet2Image },
+      { id: 3, name: 'Dogie', image: pet3Image },
     ];
 
+     // Payment Form State
+    const [paymentDetails, setPaymentDetails] = useState({
+      cardNumber: '',
+      expiryDate: '',
+      cvv: ''
+    });
+
+    const [errors, setErrors] = useState({
+      cardNumberError: '',
+      expiryDateError: '',
+      cvvError: ''
+    });
+  
     const handlePetSelect = (petId) => {
         const selectedPet = pets.find(pet => pet.id === petId);
         setSelectedPet(selectedPet);
@@ -62,7 +77,7 @@ const Prescription = () => {
 
     // Handle Payment Form Changes
     const handlePaymentChange = (event) => {
-        const { name, value } = event.target;
+    const { name, value } = event.target;
 
         let formattedValue = value;
         if (name === 'cardNumber') {
@@ -83,39 +98,65 @@ const Prescription = () => {
             formattedValue = formattedValue.substring(0, 3);
         }
 
-        setPaymentDetails(prevDetails => ({
-            ...prevDetails,
-            [name]: formattedValue
-        }));
-    };
+    setPaymentDetails(prevDetails => ({
+      ...prevDetails,
+      [name]: formattedValue
+    }));
+  };
+
+    // Validate credit card expiry date
+    const validateExpiryDate = (expiryDate) => {
+    const [month, year] = expiryDate.split('/').map(Number);
+    if (!month || !year) return false;
+  
+    const currentDate = new Date();
+    const currentYear = currentDate.getFullYear() % 100; // Last two digits of the year
+    const currentMonth = currentDate.getMonth() + 1;
+
+    // Expired if year is less than current or same year with month less than current month
+    if (year < currentYear || (year === currentYear && month < currentMonth)) {
+    return false;
+    }
+    return true;
+  };
+
+    // Validate Payment Form
     const validatePaymentForm = () => {
-        const { cardNumber, expiryDate, cvv } = paymentDetails;
-        let isValid = true;
-        let newErrors = {
-            cardNumberError: '',
-            expiryDateError: '',
-            cvvError: ''
-        };
-        const cardNumberDigits = cardNumber.replace(/\D/g, '');
-        if (cardNumberDigits.length !== 16) {
-            newErrors.cardNumberError = "Card number must be 16 digits.";
-            isValid = false;
-        }
+    const { cardNumber, expiryDate, cvv } = paymentDetails;
+    let isValid = true;
+    let newErrors = {
+      cardNumberError: '',
+      expiryDateError: '',
+      cvvError: ''
+    };
 
-        if (!/^(0[1-9]|1[0-2])\/([0-9]{2})$/.test(expiryDate)) {
-            newErrors.expiryDateError = "Invalid expiry date. Use MM/YY format.";
-            isValid = false;
-        }
+    // Validate card number (16 digits)
+    const cardNumberDigits = cardNumber.replace(/\D/g, '');
+    if (cardNumberDigits.length !== 16) {
+      newErrors.cardNumberError = "Card number must be 16 digits.";
+      isValid = false;
+    }
 
-        if (cvv.length !== 3) {
-            newErrors.cvvError = "CVV must be 3 digits.";
-            isValid = false;
-        }
+    // Validate expiry date (MM/YY)
+    if (!validateExpiryDate(expiryDate)) {
+      newErrors.expiryDateError = "Invalid or expired date. Use MM/YY format.";
+      isValid = false;
+    }
+
+    // Validate CVV (3 digits)
+    if (cvv.length !== 3) {
+      newErrors.cvvError = "CVV must be 3 digits.";
+      isValid = false;
+    }
 
         setErrors(newErrors);
 
         return isValid;
     };
+    setErrors(newErrors);
+
+    return isValid;
+  };
 
     const handlePaymentSubmit = (e) => {
         e.preventDefault();
@@ -256,79 +297,80 @@ const Prescription = () => {
                                 )}
                             </div>
 
-                            <div className="form-row">
-                                <div className="form-group half-width">
-                                    <label htmlFor="expiryDate">Expiry Date (MM/YY):</label>
-                                    <div className="input-icon">
-                                        <i className="fa fa-calendar" aria-hidden="true"></i>
-                                        <input
-                                            type="text"
-                                            id="expiryDate"
-                                            name="expiryDate"
-                                            className="form-input"
-                                            value={paymentDetails.expiryDate}
-                                            onChange={handlePaymentChange}
-                                            placeholder="MM/YY"
-                                            required
-                                        />
-                                    </div>
-                                    {errors.expiryDateError && (
-                                        <div className="error">{errors.expiryDateError}</div>
-                                    )}
-                                </div>
+             <div className="form-row">
+                <div className="form-group half-width">
+                  <label htmlFor="expiryDate">Expiry Date (MM/YY):</label>
+                  <div className="input-icon">
+                    <i className="fa fa-calendar" aria-hidden="true"></i>
+                    <input
+                      type="text"
+                      id="expiryDate"
+                      name="expiryDate"
+                      className="form-input"
+                      value={paymentDetails.expiryDate}
+                      onChange={handlePaymentChange}
+                      placeholder="MM/YY"
+                      required
+                    />
+                  </div>
+                {errors.expiryDateError && (
+                  <div className="error">{errors.expiryDateError}</div>
+                )}
+              </div>
 
-                                <div className="form-group half-width">
-                                    <label htmlFor="cvv">CVV:</label>
-                                    <div className="input-icon">
-                                        <i className="fa fa-lock" aria-hidden="true"></i>
-                                        <input
-                                            type="text"
-                                            id="cvv"
-                                            name="cvv"
-                                            className="form-input"
-                                            value={paymentDetails.cvv}
-                                            onChange={handlePaymentChange}
-                                            placeholder="123"
-                                            maxLength="3"
-                                            required
-                                        />
-                                    </div>
-                                    {errors.cvvError && (
-                                        <div className="error">{errors.cvvError}</div>
-                                    )}
-                                </div>
-                            </div>
+              <div className="form-group half-width">
+                  <label htmlFor="cvv">CVV:</label>
+                  <div className="input-icon">
+                    <i className="fa fa-lock" aria-hidden="true"></i>
+                    <input
+                      type="text"
+                      id="cvv"
+                      name="cvv"
+                      className="form-input"
+                      value={paymentDetails.cvv}
+                      onChange={handlePaymentChange}
+                      placeholder="123"
+                      maxLength="3"
+                      required
+                    />
+                  </div>
+                  {errors.cvvError && (
+                    <div className="error">{errors.cvvError}</div>
+                  )}
+                </div>
+              </div>
 
-                            <div className="button-row">
+                            <div className="button-row two-buttons">
                                 <button type="submit" className="submit-btn">Pay Now</button>
-                                <button onClick={() => setShowPaymentModal(false)} className="cancel-btn">Cancel</button>
+                                <button onClick={() => { setShowPaymentModal(false); setShowPaymentMethodModal(true);}} className="back-btn">Back</button>
                             </div>
                         </form>
                     </div>
                 </div>
             )}
 
-            {/* Confirmation Modal */}
-            {showConfirmationModal && (
-                <div className="modal">
-                    <div className="modal-content confirmation-modal">
-                        <h3>Payment Successful!</h3>
-                        <img src={successfulPaymentCheck} alt="payment successful" className="checkmark" />
-                        <p>Thank you for your submission and payment!</p>
-                        <p>Here is a summary of your request:</p>
-                        <ul>
-                            <li><strong>Pet:</strong> {selectedPet?.name || 'N/A'}</li>
-                            <li><strong>Prescription Detail:</strong> {prescriptionDetail}</li>
-                            <li><strong>Preferred Pharmacy:</strong> {preferredPharmacy}</li>
-                            <li><strong>Preferred Pickup Date:</strong> {preferredPickupDate}</li>
-                            <li><strong>Preferred Pickup Time:</strong> {preferredPickupTime}</li>
-                        </ul>
-                        <button onClick={handleCloseConfirmationModal} className="close-btn">Close</button>
-                    </div>
-                </div>
-            )}
+      {/* Confirmation Modal */}
+      {showConfirmationModal && (
+        <div className="modal">
+          <div className="modal-content confirmation-modal">
+            <h3>Payment Successful!</h3>
+            {/*<a href="https://www.flaticon.com/free-icons/yes" title="yes icons">Yes icons created by hqrloveq - Flaticon</a> */}
+            <img src={successfulPaymentCheck} alt="payment successful" className="checkmark" />
+            <p>Thank you for your submission and payment!</p>
+            <p>Here is a summary of your request:</p>
+            <ul>
+              <li><strong>Pet:</strong> {selectedPet?.name || 'N/A'}</li>
+              <li><strong>Prescription Detail:</strong> {prescriptionDetail}</li>
+              <li><strong>Preferred Pharmacy:</strong> {preferredPharmacy}</li>
+              <li><strong>Preferred Pickup Date:</strong> {preferredPickupDate}</li>
+              <li><strong>Preferred Pickup Time:</strong> {preferredPickupTime}</li>
+            </ul>
+            <button onClick={handleCloseConfirmationModal} className="close-btn">Close</button>
+          </div>
         </div>
-    );
+      )}
+    </div>
+  );
 };
-
-export default Prescription;
+  
+  export default Prescription;

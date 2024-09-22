@@ -7,7 +7,8 @@ import Navbar from './components/Navbar';
 import vets from './components/data/vets';
 import AllVetMembers from './pages/AllVetMembers';
 import Appointments from './pages/AppointmentPage/Appointments';
-import EducationalResource from './pages/EducationalResource';
+import MedicalRecords from './pages/MedicalRec/MedicalRecords'
+import EducationalResource from './pages/EducationalResource'
 import HomePage from './pages/HomePage';
 import Login from './pages/Login';
 import MedicalRecords from './pages/MedicalRec/MedicalRecords';
