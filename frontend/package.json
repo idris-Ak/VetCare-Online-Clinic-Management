@@ -5,6 +5,7 @@
   "dependencies": {
     "@emotion/react": "^11.13.3",
     "@emotion/styled": "^11.13.0",
+    "@mui/icons-material": "^6.1.1",
     "@mui/material": "^6.1.1",
     "@mui/x-date-pickers": "^7.18.0",
     "@paypal/react-paypal-js": "^8.7.0",
@@ -22,20 +23,25 @@
     "react-router-dom": "^6.26.2",
     "react-scripts": "^5.0.1",
     "swiper": "^11.1.12",
+    "test": "jest",
     "web-vitals": "^2.1.4"
+    
   },
-  "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
-  },
+  
+    "scripts": {
+      "start": "react-scripts start",
+      "build": "react-scripts build",
+      "test": "jest",
+      "eject": "react-scripts eject"
+    },
+  
   "eslintConfig": {
     "extends": [
       "react-app",
       "react-app/jest"
     ]
   },
+  
   "browserslist": {
     "production": [
       ">0.2%",
@@ -47,13 +53,17 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+    
   },
   "devDependencies": {
     "@pmmmwh/react-refresh-webpack-plugin": "^0.5.15",
     "@testing-library/jest-dom": "^6.5.0",
     "@testing-library/react": "^16.0.1",
+    "html-webpack-plugin": "^5.6.0",
     "jest": "^27.5.1",
     "react-refresh": "^0.14.2",
     "source-map-loader": "^5.0.0"
   }
+ 
 }
+
