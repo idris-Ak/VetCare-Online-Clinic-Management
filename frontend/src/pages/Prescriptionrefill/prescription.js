@@ -1,3 +1,4 @@
+import axios from 'axios';
 import React, { useState } from 'react';
 import './prescription.css';
 
@@ -32,97 +33,107 @@ const Prescription = () => {
         { id: 3, name: 'Dogie', image: pet3Image },
     ];
 
+    // Handle pet selection
     const handlePetSelect = (petId) => {
-        const selectedPet = pets.find(pet => pet.id === petId); // Find the selected pet
-        setSelectedPet(selectedPet); // Update the selected pet
+        const selectedPet = pets.find(pet => pet.id === petId);
+        setSelectedPet(selectedPet); // Update selected pet
     };
 
+    // Handle the form submission
     const handleSubmit = (e) => {
         e.preventDefault();
         // Show payment modal on submit
         setShowPaymentModal(true);
     };
 
-    // Handle Payment Form Changes
+    // Handle changes in the payment form
     const handlePaymentChange = (event) => {
         const { name, value } = event.target;
 
         let formattedValue = value;
         if (name === 'cardNumber') {
-            // Remove all non-digit characters
-            formattedValue = formattedValue.replace(/\D/g, '');
-            // Insert dashes after every 4 digits
-            formattedValue = formattedValue.substring(0, 16); // Limit to 16 digits
-            formattedValue = formattedValue.replace(/(.{4})/g, '$1-').trim();
-            // Remove trailing dash if any
+            formattedValue = formattedValue.replace(/\D/g, '').substring(0, 16).replace(/(.{4})/g, '$1-').trim();
             if (formattedValue.endsWith('-')) {
                 formattedValue = formattedValue.slice(0, -1);
             }
         } else if (name === 'expiryDate') {
-            // Auto-format expiry date as MM/YY
-            formattedValue = formattedValue.replace(/\D/g, '');
-            if (formattedValue.length > 2) {
-                formattedValue = formattedValue.substring(0, 4);
-                formattedValue = formattedValue.replace(/(\d{2})(\d{1,2})/, '$1/$2');
-            }
+            formattedValue = formattedValue.replace(/\D/g, '').substring(0, 4).replace(/(\d{2})(\d{1,2})/, '$1/$2');
         } else if (name === 'cvv') {
-            // Only digits, limit to 3
-            formattedValue = formattedValue.replace(/\D/g, '');
-            formattedValue = formattedValue.substring(0, 3);
+            formattedValue = formattedValue.replace(/\D/g, '').substring(0, 3);
         }
 
         setPaymentDetails(prevDetails => ({
             ...prevDetails,
-            [name]: formattedValue
+            [name]: formattedValue,
         }));
     };
 
-    // Validate Payment Form
+    // Validate the payment form fields
     const validatePaymentForm = () => {
         const { cardNumber, expiryDate, cvv } = paymentDetails;
         let isValid = true;
         let newErrors = {
             cardNumberError: '',
             expiryDateError: '',
-            cvvError: ''
+            cvvError: '',
         };
 
         // Validate card number (16 digits)
         const cardNumberDigits = cardNumber.replace(/\D/g, '');
         if (cardNumberDigits.length !== 16) {
-            newErrors.cardNumberError = "Card number must be 16 digits.";
+            newErrors.cardNumberError = 'Card number must be 16 digits.';
             isValid = false;
         }
 
         // Validate expiry date (MM/YY)
         if (!/^(0[1-9]|1[0-2])\/([0-9]{2})$/.test(expiryDate)) {
-            newErrors.expiryDateError = "Invalid expiry date. Use MM/YY format.";
+            newErrors.expiryDateError = 'Invalid expiry date. Use MM/YY format.';
             isValid = false;
         }
 
         // Validate CVV (3 digits)
         if (cvv.length !== 3) {
-            newErrors.cvvError = "CVV must be 3 digits.";
+            newErrors.cvvError = 'CVV must be 3 digits.';
             isValid = false;
         }
 
         setErrors(newErrors);
-
         return isValid;
     };
 
-    // Handle Payment Submission
-    const handlePaymentSubmit = (e) => {
-        e.preventDefault();
-        if (validatePaymentForm()) {
-            // Close payment modal and open confirmation modal
-            setShowPaymentModal(false);
-            setShowConfirmationModal(true);
-        }
-    };
+    
 
+// Handle Payment Submission
+const handlePaymentSubmit = async (e) => {
+    e.preventDefault();
+
+    if (validatePaymentForm()) {
+        // Close payment modal and show confirmation modal
+        setShowPaymentModal(false);
+        setShowConfirmationModal(true);
+
+        // Send prescription details to backend to add to medical history
+        const prescriptionData = {
+            userId: 1, // Replace with actual user ID (from session, context, or auth system)
+            petName: selectedPet?.name,
+            prescriptionDetail: prescriptionDetail,
+            pharmacy: preferredPharmacy,
+            pickupDate: preferredPickupDate,
+            pickupTime: preferredPickupTime,
+        };
+
+        try {
+            await axios.post('http://localhost:5000/api/medical-history', prescriptionData);
+            console.log('Prescription added to medical history');
+        } catch (error) {
+            console.error('Error adding prescription to medical history:', error);
+        }
+    }
+};
+
+
+    // Handle closing of the confirmation modal
     const handleCloseConfirmationModal = () => {
-        // Reset form or navigate to home page
         setShowConfirmationModal(false);
         setSelectedPet(null);
         setPrescriptionDetail('');
@@ -132,12 +143,12 @@ const Prescription = () => {
         setPaymentDetails({
             cardNumber: '',
             expiryDate: '',
-            cvv: ''
+            cvv: '',
         });
         setErrors({
             cardNumberError: '',
             expiryDateError: '',
-            cvvError: ''
+            cvvError: '',
         });
     };
 
@@ -194,7 +205,7 @@ const Prescription = () => {
                             <option value="Pharmacy 2">Pharmacy 2</option>
                             <option value="Pharmacy 3">Pharmacy 3</option>
                             <option value="Pharmacy 4">Pharmacy 4</option>
-                            <option value="Pharmacy 5">Home delivry</option>
+                            <option value="Home Delivery">Home Delivery</option>
                         </select>
                     </div>
 
