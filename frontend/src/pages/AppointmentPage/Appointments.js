@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import './Appointments.css';
+import { PayPalScriptProvider, PayPalButtons } from '@paypal/react-paypal-js';
+import successfulPaymentCheck from 'frontend/src/components/assets/check.png'; 
 
 function Appointments() {
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -8,41 +10,149 @@ function Appointments() {
   const [selectedYear, setSelectedYear] = useState(currentDate.getFullYear());
   const [selectedMonth, setSelectedMonth] = useState(currentDate.getMonth());
   const [selectedDay, setSelectedDay] = useState(null);
+  const [selectedTime, setSelectedTime] = useState("");
   const [appointments, setAppointments] = useState({});
   const [showModal, setShowModal] = useState(false);
   const [petData, setPetData] = useState([]);
   const [selectedPet, setSelectedPet] = useState(null);
+  const [clinics, setClinics] = useState([]);
+  const [selectedClinic, setSelectedClinic] = useState(null);
+  const [selectedTimeSlot, setSelectedTimeSlot] = useState("");
+  const [highlightedDays, setHighlightedDays] = useState({});
+  const [showPaymentMethodModal, setShowPaymentMethodModal] = useState(false);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [showConfirmationModal, setShowConfirmationModal] = useState(false);
 
-  // DEFAULT DATA FOR PETS
-  useEffect(() => {
-    const defaultPets = [
-      { name: "Buddy", age: 3 },
-      { name: "Mittens", age: 2 },
-    ];
-    setPetData(defaultPets);
-  }, []);
+  // Payment States
+  const [paymentDetails, setPaymentDetails] = useState({
+    cardNumber: '',
+    expiryDate: '',
+    cvv: ''
+  });
+  const [errors, setErrors] = useState({
+    cardNumberError: '',
+    expiryDateError: '',
+    cvvError: ''
+  });
 
-  // Helper function to get the number of days in a month
-  const getDaysInMonth = (year, month) => {
-    return new Date(year, month + 1, 0).getDate();
+  // Validate credit card expiry date
+  const validateExpiryDate = (expiryDate) => {
+  const [month, year] = expiryDate.split('/').map(Number);
+  if (!month || !year) return false;
+  
+  const currentDate = new Date();
+  const currentYear = currentDate.getFullYear() % 100; // Last two digits of the year
+  const currentMonth = currentDate.getMonth() + 1;
+
+  // Expired if year is less than current or same year with month less than current month
+  if (year < currentYear || (year === currentYear && month < currentMonth)) {
+    return false;
+  }
+  return true;
+};
+
+  // Payment Validation
+  const validatePaymentForm = () => {
+    const { cardNumber, expiryDate, cvv } = paymentDetails;
+    let isValid = true;
+    let newErrors = {
+      cardNumberError: '',
+      expiryDateError: '',
+      cvvError: ''
+    };
+
+    // Validate card number (16 digits)
+    const cardNumberDigits = cardNumber.replace(/\D/g, '');
+    if (cardNumberDigits.length !== 16) {
+      newErrors.cardNumberError = "Card number must be 16 digits.";
+      isValid = false;
+    }
+
+    // Validate expiry date (MM/YY)
+    if (!validateExpiryDate(expiryDate)) {
+      newErrors.expiryDateError = "Invalid or expired date. Use MM/YY format.";
+      isValid = false;
+    }
+
+    // Validate CVV
+    if (cvv.length !== 3) {
+      newErrors.cvvError = "CVV must be 3 digits.";
+      isValid = false;
+    }
+
+    setErrors(newErrors);
+    return isValid;
   };
 
-  // Function to generate an array representing the days of the current month
+ const handlePaymentChange = (event) => {
+    const { name, value } = event.target;
+
+    let formattedValue = value;
+    if (name === 'cardNumber') {
+      // Remove all non-digit characters
+      formattedValue = formattedValue.replace(/\D/g, '');
+      // Insert dashes after every 4 digits
+      formattedValue = formattedValue.substring(0, 16); // Limit to 16 digits
+      formattedValue = formattedValue.replace(/(.{4})/g, '$1-').trim();
+      // Remove trailing dash if any
+      if (formattedValue.endsWith('-')) {
+        formattedValue = formattedValue.slice(0, -1);
+      }
+    } else if (name === 'expiryDate') {
+      // Auto-format expiry date as MM/YY
+      formattedValue = formattedValue.replace(/\D/g, '');
+      if (formattedValue.length > 2) {
+        formattedValue = formattedValue.substring(0, 4);
+        formattedValue = formattedValue.replace(/(\d{2})(\d{1,2})/, '$1/$2');
+      }
+    } else if (name === 'cvv') {
+      // Only digits, limit to 3
+      formattedValue = formattedValue.replace(/\D/g, '');
+      formattedValue = formattedValue.substring(0, 3);
+    }
+
+    setPaymentDetails(prevDetails => ({
+      ...prevDetails,
+      [name]: formattedValue
+    }));
+  };
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      const user = JSON.parse(storedUser);
+      const userPets = user.pets || [];
+      setPetData(userPets);
+    } else {
+      setPetData([]);
+    }
+
+    // Load appointments from local storage
+    const storedAppointments = JSON.parse(localStorage.getItem("appointments")) || {};
+    setAppointments(storedAppointments);
+  }, []);
+
+  useEffect(() => {
+    const defaultClinics = Array.from({ length: 5 }, (_, i) => ({
+      id: i + 1,
+      name: `Clinic ${i + 1}`
+    }));
+    setClinics(defaultClinics);
+  }, []);
+
+  const getDaysInMonth = (year, month) => new Date(year, month + 1, 0).getDate();
+
   const generateCalendar = (year, month) => {
     const days = [];
     const firstDay = new Date(year, month, 1).getDay();
     const totalDays = getDaysInMonth(year, month);
 
-    // Add empty cells for days before the 1st of the month
     for (let i = 0; i < firstDay; i++) {
       days.push(null);
     }
-
-    // Add the days of the month
     for (let i = 1; i <= totalDays; i++) {
       days.push(i);
     }
-
     return days;
   };
 
@@ -53,15 +163,11 @@ function Appointments() {
   }, [currentDate]);
 
   const handlePreviousMonth = () => {
-    setCurrentDate(
-      new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1)
-    );
+    setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1));
   };
 
   const handleNextMonth = () => {
-    setCurrentDate(
-      new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1)
-    );
+    setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1));
   };
 
   const handleSelect = () => {
@@ -69,82 +175,168 @@ function Appointments() {
     setShowSelector(false);
   };
 
-  const handleGoToToday = () => {
-    setCurrentDate(new Date());
+  const handleGoToToday = () => setCurrentDate(new Date());
+
+  const isDateInFuture = (year, month, day) => {
+    const today = new Date();
+    const selectedDate = new Date(year, month, day);
+    return selectedDate >= today;
   };
 
-  const monthNames = [
-    "January", "February", "March", "April", "May", "June",
-    "July", "August", "September", "October", "November", "December"
-  ];
-
   const openDayModal = (day) => {
-    if (selectedPet) {
-      if (typeof day === "number") {
-        setSelectedDay(day);
-        setShowModal(true);  // Show the modal when a day is clicked
-      }
+    if (selectedPet && isDateInFuture(currentDate.getFullYear(), currentDate.getMonth(), day)) {
+      setSelectedDay(day);
+      setShowModal(true);
     } else {
-      alert("Please select a pet first.");
+      alert("Please select a Your pet.");
     }
   };
 
-  // Generate a unique key for an appointment using year, month, and day
-  const getAppointmentKey = (year, month, day) => {
-    return `${selectedPet?.name || "no-pet"}-${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+  const getExistingAppointments = (time) => {
+    return Object.values(appointments).filter(
+      (appointment) =>
+        appointment.petId === selectedPet?.id &&
+        appointment.day === selectedDay &&
+        appointment.clinicId === selectedClinic?.id &&
+        appointment.time === time
+    );
   };
+  
 
   const bookAppointment = () => {
-    const key = getAppointmentKey(currentDate.getFullYear(), currentDate.getMonth(), selectedDay);
-    setAppointments({ ...appointments, [key]: true });
+    if (!selectedTime || !selectedClinic) {
+      alert("Please select a time and clinic.");
+      return;
+    }
+
+      setShowModal(false);
+      // Show the payment method modal
+      setShowPaymentMethodModal(true);
+    }
+    
+    const finaliseAppointmentBooking = () => {
+    const key = `${selectedPet.id}-${currentDate.getFullYear()}-${currentDate.getMonth()}-${selectedDay}-${selectedTime}-${selectedClinic.id}`;
+  
+    setAppointments((prevAppointments) => {
+      const updatedAppointments = { ...prevAppointments };
+  
+      if (!updatedAppointments[key]) {
+        updatedAppointments[key] = { petId: selectedPet.id, clinicId: selectedClinic.id, time: selectedTime, day: selectedDay };
+        localStorage.setItem("appointments", JSON.stringify(updatedAppointments));
+      }
+  
+      return updatedAppointments;
+    });
+  
+    // Highlight the day on the calendar after booking
+    setHighlightedDays((prev) => ({
+      ...prev,
+      [selectedDay]: true
+    }));
+  
     setShowModal(false);
+    setShowConfirmationModal(true); // Show the confirmation modal
   };
 
-  const cancelAppointment = () => {
-    const key = getAppointmentKey(currentDate.getFullYear(), currentDate.getMonth(), selectedDay);
-    const newAppointments = { ...appointments };
-    delete newAppointments[key];
-    setAppointments(newAppointments);
-    setShowModal(false);
+  const handlePaymentSubmit = (e) => {
+  e.preventDefault();
+  if (validatePaymentForm()) {
+    setShowPaymentModal(false); // Close the payment modal
+    finaliseAppointmentBooking(); // Finalise the booking after payment
+  }
+};
+
+const handleCloseConfirmationModal = () => {
+  setShowConfirmationModal(false);
+  setPaymentDetails({
+    cardNumber: '',
+    expiryDate: '',
+    cvv: ''
+  });
+  setErrors({
+    cardNumberError: '',
+    expiryDateError: '',
+    cvvError: ''
+  });
+  setSelectedDay(null);
+  setSelectedTime('');
+  setSelectedClinic(null);
+};
+  
+  const cancelAppointment = (time) => {
+    const keyToRemove = `${selectedPet.id}-${currentDate.getFullYear()}-${currentDate.getMonth()}-${selectedDay}-${time}-${selectedClinic.id}`;
+  
+    setAppointments((prevAppointments) => {
+      const updatedAppointments = { ...prevAppointments };
+      delete updatedAppointments[keyToRemove]; // Remove the appointment from state
+      localStorage.setItem("appointments", JSON.stringify(updatedAppointments)); // Update local storage
+  
+      // Check if there are any remaining appointments on the selected day
+      const hasAppointmentsLeft = Object.values(updatedAppointments).some(
+        (app) =>
+          app.day === selectedDay && app.petId === selectedPet.id && app.clinicId === selectedClinic.id
+      );
+  
+      // Update highlightedDays state based on remaining appointments
+      setHighlightedDays((prev) => {
+        const updatedHighlightedDays = { ...prev };
+        if (!hasAppointmentsLeft) {
+          delete updatedHighlightedDays[selectedDay]; // Remove the highlight if no appointments are left
+        }
+        return updatedHighlightedDays;
+      });
+  
+      return updatedAppointments;
+    });
+  };
+  
+
+  const handlePayPalApprove = () => {
+    setShowConfirmationModal(true);
+    setShowPaymentMethodModal(false);
+    // Book the appointment after PayPal payment is approved
+    bookAppointment();
   };
 
-  const currentMonth = monthNames[currentDate.getMonth()];
-  const currentYear = currentDate.getFullYear();
+  const timeSlots = Array.from({ length: 16 }, (_, i) => `${9 + Math.floor(i / 2)}:${i % 2 === 0 ? "00" : "30"}`);
+
+  const isTimeSlotBooked = (time) => {
+    return Object.values(appointments).some(appointment => appointment.day === selectedDay && appointment.time === time && appointment.clinicId === selectedClinic?.id);
+  };
 
   return (
     <>
-      {/* Pet Selection Section */}
-      <section className="pet-selection">
+      <section className="appointment-pet-selection">
         <h2>Select Pet Profile</h2>
-        <div className="pet-profiles">
-          {petData.length > 0 ? (
-            petData.map((pet, index) => (
-              <div key={index} className={`pet-card ${selectedPet?.name === pet.name ? "selected" : ""}`}>
-                <p>{pet.name}</p>
-                <p>Age: {pet.age}</p>
-                <button onClick={() => setSelectedPet(pet)}>
-                  {selectedPet?.name === pet.name ? "Selected" : "Select"}
+        <div className="appointment-pet-profiles">
+          {petData.length > 0 ? 
+            (petData.map((pet) => (
+              <div key={pet.id} className="pet">
+                <img src={pet.profilePicture} alt={pet.name} />
+                <p className="pet-name">{pet.name}</p>
+                <button
+                  className={selectedPet === pet ? 'selected' : 'select'}
+                  onClick={() => {
+                    setSelectedPet(selectedPet === pet ? null : pet);
+                  }}
+                >
+                  {selectedPet === pet ? 'Selected' : 'Select'}
                 </button>
               </div>
-            ))
-          ) : (
-            <p>No pets available. Please add pets to your profile.</p>
-          )}
+            )))
+            :
+            (<h2>Please Add Your pets on the Profile Page</h2>)
+          }
         </div>
       </section>
 
-      {/* Calendar Section */}
       <div className="calendar">
         <h1 className="title">Make OR Cancel Appointments</h1>
         <div className="calendar-header">
           <button onClick={handlePreviousMonth}>Previous</button>
-          <span>
-            {currentMonth} {currentYear}
-          </span>
+          <span>{currentDate.toLocaleString('default', { month: 'long' })} {currentDate.getFullYear()}</span>
           <button onClick={handleNextMonth}>Next</button>
-          <button onClick={() => setShowSelector(!showSelector)}>
-            Select Month & Year
-          </button>
+          <button onClick={() => setShowSelector(!showSelector)}>Select Month & Year</button>
           <button onClick={handleGoToToday}>Today</button>
         </div>
 
@@ -165,9 +357,9 @@ function Appointments() {
                 value={selectedMonth}
                 onChange={(e) => setSelectedMonth(Number(e.target.value))}
               >
-                {monthNames.map((month, index) => (
+                {Array.from({ length: 12 }, (_, index) => (
                   <option key={index} value={index}>
-                    {month}
+                    {new Date(0, index).toLocaleString('default', { month: 'long' })}
                   </option>
                 ))}
               </select>
@@ -177,48 +369,266 @@ function Appointments() {
         )}
 
         <div className="calendar-grid">
-          {/* Days of the Week Headers */}
           {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day, index) => (
-            <div key={index} className="calendar-cell day-names">
-              {day}
-            </div>
+            <div key={index} className="calendar-cell day-names">{day}</div>
           ))}
 
-          {/* Days of the Month */}
           {daysInMonth.map((day, index) => {
-            const appointmentKey = getAppointmentKey(currentYear, currentDate.getMonth(), day);
+            const isFutureDate = isDateInFuture(currentDate.getFullYear(), currentDate.getMonth(), day);
+            const isHighlighted = highlightedDays[day];
+
             return (
               <div
                 key={index}
-                className={`calendar-cell ${
-                  appointments[appointmentKey] ? "has-appointment" : ""
-                }`}
-                onClick={() => openDayModal(day)}
+                className={`calendar-cell ${day ? (isHighlighted ? "highlighted" : "") : "empty"} ${isFutureDate ? "future" : "past"}`}
+                onClick={() => day && isFutureDate && openDayModal(day)}
               >
-                {day || ""}
+                {day}
               </div>
             );
           })}
         </div>
       </div>
 
-      {/* Day Status Modal */}
       {showModal && (
-        <div className="modal-overlay">
+        <div className="modal">
           <div className="modal-content">
-            <h3>Day: {selectedDay} {currentMonth} {currentYear}</h3>
-            {appointments[getAppointmentKey(currentYear, currentDate.getMonth(), selectedDay)] ? (
-              <div>
-                <p>{selectedPet?.name} has an appointment on this day.</p>
-                <button onClick={cancelAppointment}>Cancel Appointment</button>
+            <h2>{getExistingAppointments().length > 0 ? "Cancel Appointment" : "Book Appointment"}</h2>
+            <p>
+              {currentDate.toLocaleString('default', { month: 'long' })} {selectedDay}, {currentDate.getFullYear()}
+            </p>
+            <label>
+              Select Clinic:
+              <select
+                value={selectedClinic?.id || ""}
+                onChange={(e) => {
+                  const clinic = clinics.find(cl => cl.id === parseInt(e.target.value));
+                  setSelectedClinic(clinic);
+                }}
+              >
+                <option value="">Select a clinic</option>
+                {clinics.map(clinic => (
+                  <option key={clinic.id} value={clinic.id}>
+                    {clinic.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <h3>Available Times:</h3>
+            <div className="appointment-time-slots">
+            {timeSlots.map((time, index) => {
+              const isBooked = isTimeSlotBooked(time);
+              const existingAppointments = getExistingAppointments(time);
+              const isSelected = selectedTimeSlot === time;
+
+              return (
+                <button
+                  key={index}
+                  className={isBooked ? "booked" : (isSelected ? "selected" : "")}
+                  onClick={() => {
+                    if (!isBooked) {
+                      // Toggle the selected time for booking
+                      setSelectedTimeSlot(prev => (prev === time ? "" : time));
+                      setSelectedTime(prev => (prev === time ? "" : time));
+                    } else if (existingAppointments.length > 0) {
+                      // Cancel the appointment if it's already booked
+                      cancelAppointment(time);
+                    }
+                  }}
+                  disabled={isBooked}
+                >
+                  {time}
+                </button>
+              );
+            })}
+
+            </div>
+            <div className="appointment-modal-actions">
+              {getExistingAppointments(selectedTime).length > 0 ? (
+                <button className="appointment-cancel" onClick={() => cancelAppointment(selectedTime)}>
+                  Cancel Appointment
+                </button>
+              ) : (
+                <button className="appointment-book" onClick={bookAppointment}>
+                  Book Appointment
+                </button>
+              )}
+              <button className="appointment-close" onClick={() => setShowModal(false)}>
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+  {/* Payment Method Selection Modal */}
+      {showPaymentMethodModal && (
+        <div className="modal">
+          <div className="modal-content payment-method-modal">
+            <h3>Select Payment Method</h3>
+            <div className="payment-options">
+              <div
+                className="payment-option"
+                onClick={() => {
+                  setShowPaymentMethodModal(false);
+                  setShowPaymentModal(true);
+                }}
+              >
+                <i className="fa fa-credit-card" aria-hidden="true"></i>
+                <p>Credit/Debit Card</p>
               </div>
-            ) : (
-              <div>
-                <p>No appointment on this day for {selectedPet?.name}.</p>
-                <button onClick={bookAppointment}>Book Appointment</button>
+              <div className="vertical-line"></div>
+              <div className="paypal-button-container">
+                <PayPalScriptProvider
+                  options={{
+                    'client-id': 'AZn8taJF_Ktmts23FNW52kiR-RsyxG45Ps-vyDWgs2hje7Jv9EYFbpytQpUlyDndo_egQkb-IzD0p4jP',
+                    currency: 'AUD',
+                    intent: 'capture',
+                    'disable-funding': 'card', // Disable credit/debit card option
+                  }}
+                >
+                  <PayPalButtons
+                    style={{ layout: 'vertical' }}
+                    createOrder={(data, actions) => {
+                      return actions.order.create({
+                        purchase_units: [
+                          {
+                            amount: { value: '50.00' },
+                          },
+                        ],
+                      });
+                    }}
+                    onApprove={handlePayPalApprove}
+                    onCancel={() => {
+                      setShowPaymentMethodModal(true);
+                    }}
+                  />
+                </PayPalScriptProvider>
               </div>
-            )}
-            <button className="close-modal" onClick={() => setShowModal(false)}>Close</button>
+            </div>
+      <div className="button-row two-buttons">
+        <button
+          onClick={() => {
+            setShowPaymentMethodModal(false); 
+            setShowModal(true); 
+          }}
+          className="back-btn"
+        >
+          Back
+        </button>
+        <button
+          onClick={() => setShowPaymentMethodModal(false)}
+          className="cancel-btn"
+        >
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+  )}
+
+      {/* Payment Modal */}
+      {showPaymentModal && (
+        <div className="modal">
+          <div className="modal-content payment-modal">
+            <h3>Payment Details</h3>
+            <form onSubmit={handlePaymentSubmit}>
+              <div className="form-group">
+                <label htmlFor="cardNumber">Card Number:</label>
+                <div className="input-icon">
+                  <i className="fa fa-credit-card" aria-hidden="true"></i>
+                  <input
+                    type="text"
+                    id="cardNumber"
+                    name="cardNumber"
+                    className="form-input"
+                    value={paymentDetails.cardNumber}
+                    onChange={handlePaymentChange}
+                    placeholder="1234-5678-9012-3456"
+                    maxLength="19"
+                    required
+                  />
+                </div>
+                {errors.cardNumberError && (
+                  <div className="error">{errors.cardNumberError}</div>
+                )}
+              </div>
+
+              <div className="form-row">
+                <div className="form-group half-width">
+                  <label htmlFor="expiryDate">Expiry Date (MM/YY):</label>
+                  <div className="input-icon">
+                    <i className="fa fa-calendar" aria-hidden="true"></i>
+                    <input
+                      type="text"
+                      id="expiryDate"
+                      name="expiryDate"
+                      className="form-input"
+                      value={paymentDetails.expiryDate}
+                      onChange={handlePaymentChange}
+                      placeholder="MM/YY"
+                      required
+                    />
+                  </div>
+                  {errors.expiryDateError && (
+                    <div className="error">{errors.expiryDateError}</div>
+                  )}
+                </div>
+
+                <div className="form-group half-width">
+                  <label htmlFor="cvv">CVV:</label>
+                  <div className="input-icon">
+                    <i className="fa fa-lock" aria-hidden="true"></i>
+                    <input
+                      type="text"
+                      id="cvv"
+                      name="cvv"
+                      className="form-input"
+                      value={paymentDetails.cvv}
+                      onChange={handlePaymentChange}
+                      placeholder="123"
+                      maxLength="3"
+                      required
+                    />
+                  </div>
+                  {errors.cvvError && (
+                    <div className="error">{errors.cvvError}</div>
+                  )}
+                </div>
+              </div>
+
+              <div className="button-row two-buttons">
+                <button type="submit" className="submit-btn">Pay Now</button>
+                <button
+                  onClick={() => {
+                    setShowPaymentModal(false);
+                    setShowPaymentMethodModal(true);
+                  }}
+                  className="back-btn"
+                >
+                  Back
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Confirmation Modal */}
+      {showConfirmationModal && (
+        <div className="modal">
+          <div className="modal-content confirmation-modal">
+            <h3>Payment Successful!</h3>
+            <img src={successfulPaymentCheck} alt="payment successful" className="checkmark" />
+            <p>Thank you for your appointment booking!</p>
+            <p>Here is a summary of your request:</p>
+            <ul>
+              <li><strong>Pet:</strong> {selectedPet?.name || 'N/A'}</li>
+              <li><strong>Date:</strong> {currentDate.toLocaleString('default', { month: 'long' })} {selectedDay}, {currentDate.getFullYear()}</li>
+              <li><strong>Time:</strong> {selectedTime}</li>
+              <li><strong>Clinic:</strong> {selectedClinic?.name || 'N/A'}</li>
+            </ul>
+            <button onClick={handleCloseConfirmationModal} className="close-btn">Close</button>
           </div>
         </div>
       )}

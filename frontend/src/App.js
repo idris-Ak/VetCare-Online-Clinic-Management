@@ -7,13 +7,15 @@ import Navbar from './components/Navbar';
 import vets from './components/data/vets';
 import AllVetMembers from './pages/AllVetMembers';
 import Appointments from './pages/AppointmentPage/Appointments';
+import MedicalRecords from './pages/MedicalRec/MedicalRecords'
+import EducationalResource from './pages/EducationalResource'
 import HomePage from './pages/HomePage';
 import Login from './pages/Login';
-import MedicalRecords from './pages/MedicalRec/MedicalRecords';
 import SignUp from './pages/SignUp';
 import VetProfilePage from './pages/VetProfilePage'; // Adjusted relative path
-// Import the Prescription page
-import Prescription from './pages/Prescriptionrefill/Prescription'; // Import Prescription.js
+import Prescription from './pages/Prescriptionrefill/prescription'; // Import Prescription.js
+import MyProfile from './pages/MyProfile';
+import PrivateRoute from './components/PrivateRoute';
 
 function App() {
     const [isLoggedIn, setIsLoggedIn] = useState(Boolean(localStorage.getItem('isLoggedIn')));
@@ -22,8 +24,8 @@ function App() {
     const loginUser = (userData) => {
     localStorage.setItem('isLoggedIn', 'true');
     localStorage.setItem('user', JSON.stringify(userData));
-    setUser(userData);  
     setIsLoggedIn(true); 
+    setUser(userData);  
   };
 
     const logoutUser = async () => {
@@ -46,10 +48,33 @@ function App() {
           ))}
           <Route path="/login" element={<Login loginUser={loginUser} />} />
           <Route path="/signup" element={<SignUp loginUser={loginUser} />} />
-          <Route path="/MedicalRecords" element={<MedicalRecords />} />
-          <Route path="/AppointmentPage/Appointments" element={<Appointments />}></Route>
-          {/* Add the Prescription route */}
-          <Route path="/prescription" element={<Prescription />} />  {/* New route for Prescription page */}
+          <Route path="/educational" element={<EducationalResource />} />
+          <Route path="/myprofile" element = {<MyProfile user={user} setUser={setUser} logoutUser={logoutUser}/>} />
+          {/* Wrap protected routes with PrivateRoute */}
+          <Route 
+            path="/AppointmentPage/Appointments" 
+            element={
+              <PrivateRoute isLoggedIn={isLoggedIn}>
+                <Appointments />
+              </PrivateRoute>
+            } 
+          />
+          <Route 
+            path="/MedicalRecords" 
+            element={
+              <PrivateRoute isLoggedIn={isLoggedIn}>
+                <MedicalRecords />
+              </PrivateRoute>
+            } 
+          />
+          <Route 
+            path="/prescription" 
+            element={
+              <PrivateRoute isLoggedIn={isLoggedIn}>
+                <Prescription />
+              </PrivateRoute>
+            } 
+          />
         </Routes>
         <Footer />
       </div>

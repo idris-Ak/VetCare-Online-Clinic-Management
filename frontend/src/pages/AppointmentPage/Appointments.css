@@ -3,14 +3,25 @@
 }
 
 /* Pet Selection Section */
-.pet-selection {
+.appointment-pet-selection {
+  display: flex;
+  flex-direction: column;
   background-color: #333;
   color: white;
   padding: 20px;
   text-align: center;
 }
 
-.pet-profiles {
+button .selected {
+  background-color: #28a745;
+  color: white;
+}
+
+.appointment-pet-selection h2 {
+  color: white;
+}
+
+.appointment-pet-profiles {
   display: flex;
   justify-content: center;
   gap: 20px;
@@ -98,7 +109,7 @@
   font-weight: bold;
 }
 
-.calendar-cell.has-appointment {
+.calendar-cell.highlighted {
   background-color: #90ee90;
   color: #fff;
   font-weight: bold;
@@ -181,6 +192,60 @@ button:hover {
   border-radius: 10px;
   text-align: center;
   width: 300px;
+  padding: 0px;
+  margin: 5px;
+}
+
+.appointment-modal-actions button {
+  background-color: grey;
+  color: black;
+  border: Solid 2px black;
+  padding: 5px;
+  Margin: 5px;
+}
+
+.appointment-modal-actions .appointment-book{
+  background-color: rgb(91, 213, 91);
+  color: white;
+  font-weight: bold;
+}
+
+.appointment-modal-actions .appointment-book:hover{
+  background-color: white;
+  color: black;
+  font-weight: bold;
+}
+
+.appointment-modal-actions .appointment-cancel{
+  background-color:red;
+  color: white;
+  font-weight: bold;
+}
+
+.appointment-modal-actions .appointment-cancel:hover{
+  background-color: white;
+  color: black;
+  font-weight: bold;
+}
+
+.appointment-time-slots button {
+  background-color: white;
+  color: black;
+  border: Solid 4px black;
+  padding: 5px;
+  Margin: 5px;
+}
+
+.appointment-time-slots button:hover {
+background-color: aqua;
+color: White;
+}
+
+.appointment-time-slots button.selected{
+  background-color: aqua;
+  color: white;
+  width: 20%;
+  font-weight: bold;
 }
 
 .close-modal {
@@ -195,3 +260,183 @@ button:hover {
 .close-modal:hover {
   background-color: darkred;
 }
+
+.modal-content .cancel-btn {
+  background-color: red;
+  color: white;
+  padding: 12px 20px;
+  border-radius: 25px;
+  font-size: 18px;
+  cursor: pointer;
+  border: none;
+  transition: background-color 0.3s ease;
+}
+
+.modal-content .cancel-btn:hover {
+  background-color: darkred;
+}
+
+/* Payment Modal Styling */
+ .payment-modal h3 {
+    color: #007bff;
+    font-size: 28px;
+  }
+  
+  .payment-modal .form-group {
+    text-align: left;
+    margin-bottom: 20px;
+  }
+  
+  .input-icon {
+    position: relative;
+  }
+  
+  .input-icon i {
+    position: absolute;
+    top: 50%;
+    left: 14px;
+    transform: translateY(-50%);
+    color: #555;
+    font-size: 18px;
+  }
+  
+  .input-icon input.form-input {
+    padding-left: 50px;
+  }
+  
+  .form-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+  }
+  
+  .half-width {
+    width: 48%;
+  }
+  
+  .error {
+    color: red;
+    font-size: 14px;
+    margin-top: 5px;
+  }
+  
+  .button-row {
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 5px;
+  }
+
+  .button-row button {
+    width: 48%; /* Ensure equal width for both buttons */
+  }
+  
+  .button-row.two-buttons {
+    justify-content: space-between;
+  }
+  
+  .button-row.two-buttons button {
+    width: 48%;
+  }
+  
+  .submit-btn {
+    width: 48%;
+  }
+  
+  /* Confirmation Modal Styling */
+  .confirmation-modal h3 {
+    color: #28a745;
+    font-size: 28px;
+  }
+  
+  .checkmark {
+    width: 100px;
+    margin: 20px auto;
+  }
+  
+  .confirmation-modal p {
+    color: #333;
+    font-size: 18px;
+    margin-top: 10px;
+  }
+  
+  .confirmation-modal ul {
+    list-style-type: none;
+    padding: 0;
+    text-align: center;
+    margin-top: 20px;
+    margin-bottom: 20px;
+  }
+
+  .confirmation-modal ul li {
+    color: #555;
+    font-size: 16px;
+    margin-bottom: 10px;
+    display: block;
+  }
+  
+  /* Add a vertical line between the payment options */
+  .vertical-line {
+    width: 2px;
+    background-color: #ccc;
+    height: 100px;
+    align-self: center;
+  }
+
+  /* Payment Method Modal Styling */
+  .payment-method-modal h3 {
+    color: #333;
+    font-size: 28px;
+    margin-bottom: 30px;
+  }
+
+  .payment-options {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px; /* Add space between options */
+    margin-bottom: 30px; /* Add spacing below the payment options */
+
+  }
+
+  .payment-option {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+    width: 40%;
+    padding: 20px;
+    border: 2px solid #ccc;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+  }
+
+  .payment-option:hover {
+    border-color: #007bff;
+    background-color: #e0f1ff;
+  }
+
+  .payment-option i {
+    font-size: 50px;
+    color: #007bff;
+    margin-bottom: 10px;
+  }
+
+  .payment-option p {
+    font-size: 16px;
+    color: #333;
+    font-weight: bold;
+    margin-top: 5px;
+  }
+
+  /* PayPal Modal */
+  .paypal-modal .paypal-button-container {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+  }
+  
+  .paypal-button-container iframe {
+    transform: scale(1.05); /* Scale up the PayPal button */
+    transform-origin: center; /* Keep it centered */
+  }
