@@ -11,8 +11,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import VetProfilePage from '../src/pages/VetProfilePage'; // Make sure to create this component
 import vets from '../src/components/data/vets';
 import Appointments from './pages/AppointmentPage/Appointments';
-import PaymentSuccess from './pages/PaymentSuccess';
-
+import AllVetMembers from './pages/AllVetMembers';
 
 
 function App() {
@@ -35,10 +34,11 @@ function App() {
   return (
     <Router>
       <div className="App">
-      <div className="navbar-spacer" style={{ height: '50px', backgroundColor: '#68ccd4' }}></div> {/* Spacer div */}
+      <div className="navbar-spacer" style={{ height: '65px', backgroundColor: '#68ccd4' }}></div> {/* Spacer div */}
         <Navbar logoutUser={logoutUser} isLoggedIn={isLoggedIn} user={user} />
         <Routes>
           <Route path="/" element={<HomePage />} />
+          <Route path="/all-vets" element={<AllVetMembers vets={vets} />} />
           {vets.map(vet => (
             <Route key={vet.id} path={vet.detailPath} element={<VetProfilePage vet={vet} />} />
           ))}
@@ -46,7 +46,6 @@ function App() {
           <Route path="/signup" element={<SignUp loginUser={loginUser} />} />
           <Route path="/VetCareDashboard" element={<VetCareDashboard />} />
           <Route path="/AppointmentPage/Appointments" element={<Appointments />}></Route>
-          <Route path="/payment-success" element={<PaymentSuccess />} />
         </Routes>
         <Footer />
       </div>

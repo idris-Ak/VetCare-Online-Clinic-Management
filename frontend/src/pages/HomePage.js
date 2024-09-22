@@ -16,13 +16,13 @@ import vets from '../components/data/vets';
 import about1 from "../components/assets/about1.jpg";
 import about2 from "../components/assets/about2.jpg";
 
+import CustomerReviews from "../components/CustomerReviews";
 import "./HomePage.css";
 
 function HomePage() {
   return (
     <div>
-      <h1>Welcome to My React App</h1>
-      <p>This is a basic home page.</p>
+     
       <div>
         <div className="swiper-container" style={{ marginTop: '0px' }}>
           <Swiper
@@ -91,14 +91,14 @@ function HomePage() {
             </SwiperSlide>
           </Swiper>
         </div>
-
+        <h1>About Us</h1>
         <div className="AboutUs">
           <div className="about-images">
             <img src={about1} alt="A friendly dog" className="dog-image" />
             <img src={about2} alt="A serene cat" className="cat-image" />
           </div>
           <div className="about-content">
-            <h1>About Us</h1>
+          
             <p>
               At VetCare, our mission is to enhance the well-being of pets and ease the responsibilities of their owners through our innovative Online Vet Clinic Management System.
               Founded by a team of dedicated veterinary professionals and tech enthusiasts, we blend cutting-edge technology with deep veterinary expertise to bring you a comprehensive,
@@ -118,11 +118,14 @@ function HomePage() {
 
 
         <div className="VetTeam">
-          <h1>Meet our talented Veterinary Team</h1>
-          <div className="vet-team-container">
-            {vets.map(vet => <VetCard key={vet.id} vet={vet} />)}
-          </div>
-        </div>
+  <h1>Meet our talented Veterinary Team</h1>
+  <div className="vet-team-container">
+    {vets.slice(0, 4).map(vet => <VetCard key={vet.id} vet={vet} />)}
+  </div>
+</div>
+
+<CustomerReviews />
+
 
       </div>
     </div>
