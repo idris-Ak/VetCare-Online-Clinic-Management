@@ -58,6 +58,7 @@ function SignUp({loginUser}) {
       newErrors.confirmPasswordError = 'Passwords do not match.';
       isValid = false; 
     }
+    
     //If password is not strong, output the error message
     if (!isPasswordStrong(user.password)) {
       newErrors.passwordError = 'Your password must be at least 8 characters long and include uppercase letters, lowercase letters, numbers, and special characters.';
@@ -89,8 +90,8 @@ const emailExists = users.some(existingUser => existingUser.email === user.email
 
     //Save the new user in localStorage
     const newUser = {
-      name: user.name,
-      email: user.email,
+      name: user.name.trim(),
+      email: user.email.trim(),
       password: user.password,
       role: user.role,
     };

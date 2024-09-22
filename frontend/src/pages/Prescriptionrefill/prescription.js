@@ -1,4 +1,3 @@
-import axios from 'axios';
 import React, { useState } from 'react';
 import './prescription.css';
 
@@ -12,20 +11,11 @@ const Prescription = () => {
     const [prescriptionDetail, setPrescriptionDetail] = useState('');
     const [preferredPharmacy, setPreferredPharmacy] = useState('');
     const [preferredPickupDate, setPreferredPickupDate] = useState('');
+    const [showPaymentMethodModal, setShowPaymentMethodModal] = useState(false);
     const [preferredPickupTime, setPreferredPickupTime] = useState('');
     const [showPaymentModal, setShowPaymentModal] = useState(false); // State to control payment modal
-    const [showConfirmationModal, setShowConfirmationModal] = useState(false); // State to control confirmation modal
-    const [paymentDetails, setPaymentDetails] = useState({
-        cardNumber: '',
-        expiryDate: '',
-        cvv: '',
-    });
-    const [errors, setErrors] = useState({
-        cardNumberError: '',
-        expiryDateError: '',
-        cvvError: '',
-    });
-
+    const [showConfirmationModal, setShowConfirmationModal] = useState(false); // State to control confirmation modal  
+    
     // Pet images and names
     const pets = [
         { id: 1, name: 'Goatie', image: pet1Image },
@@ -41,9 +31,9 @@ const Prescription = () => {
 
     // Handle the form submission
     const handleSubmit = (e) => {
-        e.preventDefault();
-        // Show payment modal on submit
-        setShowPaymentModal(true);
+      e.preventDefault();
+      // Show payment modal on submit
+      setShowPaymentModal(true);
     };
 
     // Handle changes in the payment form
@@ -62,13 +52,13 @@ const Prescription = () => {
             formattedValue = formattedValue.replace(/\D/g, '').substring(0, 3);
         }
 
-        setPaymentDetails(prevDetails => ({
-            ...prevDetails,
-            [name]: formattedValue,
-        }));
-    };
-
-    // Validate the payment form fields
+    setPaymentDetails(prevDetails => ({
+      ...prevDetails,
+      [name]: formattedValue
+    }));
+  };
+  
+    // Validate Payment Form
     const validatePaymentForm = () => {
         const { cardNumber, expiryDate, cvv } = paymentDetails;
         let isValid = true;
@@ -85,11 +75,11 @@ const Prescription = () => {
             isValid = false;
         }
 
-        // Validate expiry date (MM/YY)
-        if (!/^(0[1-9]|1[0-2])\/([0-9]{2})$/.test(expiryDate)) {
-            newErrors.expiryDateError = 'Invalid expiry date. Use MM/YY format.';
-            isValid = false;
-        }
+    // Validate expiry date (MM/YY)
+    if (!/^(0[1-9]|1[0-2])\/([0-9]{2})$/.test(expiryDate)) {
+      newErrors.expiryDateError = "Invalid expiry date. Use MM/YY format.";
+      isValid = false;
+    }
 
         // Validate CVV (3 digits)
         if (cvv.length !== 3) {
@@ -108,161 +98,139 @@ const handlePaymentSubmit = async (e) => {
     e.preventDefault();
 
     if (validatePaymentForm()) {
-        // Close payment modal and show confirmation modal
-        setShowPaymentModal(false);
-        setShowConfirmationModal(true);
-
-        // Send prescription details to backend to add to medical history
-        const prescriptionData = {
-            userId: 1, // Replace with actual user ID (from session, context, or auth system)
-            petName: selectedPet?.name,
-            prescriptionDetail: prescriptionDetail,
-            pharmacy: preferredPharmacy,
-            pickupDate: preferredPickupDate,
-            pickupTime: preferredPickupTime,
-        };
-
-        try {
-            await axios.post('http://localhost:5000/api/medical-history', prescriptionData);
-            console.log('Prescription added to medical history');
-        } catch (error) {
-            console.error('Error adding prescription to medical history:', error);
-        }
+      // Close payment modal and open confirmation modal
+      setShowPaymentModal(false);
+      setShowConfirmationModal(true);
     }
-};
+  };
 
-
-    // Handle closing of the confirmation modal
-    const handleCloseConfirmationModal = () => {
-        setShowConfirmationModal(false);
-        setSelectedPet(null);
-        setPrescriptionDetail('');
-        setPreferredPharmacy('');
-        setPreferredPickupDate('');
-        setPreferredPickupTime('');
-        setPaymentDetails({
-            cardNumber: '',
-            expiryDate: '',
-            cvv: '',
-        });
-        setErrors({
-            cardNumberError: '',
-            expiryDateError: '',
-            cvvError: '',
-        });
-    };
-
+  const handleCloseConfirmationModal = () => {
+    // Reset form or navigate to home page
+    setShowConfirmationModal(false);
+    setSelectedPet(null);
+    setPrescriptionDetail('');
+    setPreferredPharmacy('');
+    setPreferredPickupDate('');
+    setPreferredPickupTime('');
+    setPaymentDetails({
+      cardNumber: '',
+      expiryDate: '',
+      cvv: ''
+    });
+    setErrors({
+      cardNumberError: '',
+      expiryDateError: '',
+      cvvError: ''
+    });
+  };
     return (
-        <div className="prescription-page">
-            <h1>Request Prescription for Your Pet</h1>
-            <div className="pet-selection">
-                {pets.map((pet) => (
-                    <div key={pet.id} className="pet">
-                        <img src={pet.image} alt={pet.name} />
-                        <p className="pet-name">{pet.name}</p>
-                        <button
-                            className={selectedPet?.id === pet.id ? 'selected' : 'select'}
-                            onClick={() => handlePetSelect(pet.id)}
-                        >
-                            {selectedPet?.id === pet.id ? 'Selected' : 'Select'}
-                        </button>
-                    </div>
-                ))}
+      <div className="prescription-page">
+        <h1>Request Prescription for Your Pet</h1>
+        <div className="pet-selection">
+          {pets.map((pet) => (
+            <div key={pet.id} className="pet">
+              <img src={pet.image} alt={pet.name} />
+              <p className="pet-name">{pet.name}</p>
+              <button
+                className={selectedPet?.id === pet.id ? 'selected' : 'select'}
+                onClick={() => handlePetSelect(pet.id)}
+              >
+                {selectedPet?.id === pet.id ? 'Selected' : 'Select'}
+              </button>
             </div>
-
-            <div className="prescription-form">
-                <h2>
-                    Prescription Request {selectedPet ? `for ${selectedPet.name}` : ''}
-                </h2>
-                <form onSubmit={handleSubmit}>
-                    <div className="form-group">
-                        <label htmlFor="prescriptionDetail">Prescription Detail:</label>
-                        <select
-                            id="prescriptionDetail"
-                            className="form-input"
-                            value={prescriptionDetail}
-                            onChange={(e) => setPrescriptionDetail(e.target.value)}
-                            required
-                        >
-                            <option value="">Select a prescription</option>
-                            <option value="Antibiotics">Antibiotics</option>
-                            <option value="Painkillers">Painkillers</option>
-                            <option value="Vitamins">Vitamins</option>
-                        </select>
-                    </div>
-
-                    <div className="form-group">
-                        <label htmlFor="preferredPharmacy">Preferred Pharmacy:</label>
-                        <select
-                            id="preferredPharmacy"
-                            className="form-input"
-                            value={preferredPharmacy}
-                            onChange={(e) => setPreferredPharmacy(e.target.value)}
-                            required
-                        >
-                            <option value="">Select a pharmacy</option>
-                            <option value="Pharmacy 1">Pharmacy 1</option>
-                            <option value="Pharmacy 2">Pharmacy 2</option>
-                            <option value="Pharmacy 3">Pharmacy 3</option>
-                            <option value="Pharmacy 4">Pharmacy 4</option>
-                            <option value="Home Delivery">Home Delivery</option>
-                        </select>
-                    </div>
-
-                    <div className="form-group">
-                        <label htmlFor="preferredPickupDate">Preferred Pickup Date:</label>
-                        <input
-                            type="date"
-                            id="preferredPickupDate"
-                            className="form-input"
-                            value={preferredPickupDate}
-                            onChange={(e) => setPreferredPickupDate(e.target.value)}
-                            required
-                        />
-                    </div>
-
-                    <div className="form-group">
-                        <label htmlFor="preferredPickupTime">Preferred Pickup Time:</label>
-                        <input
-                            type="time"
-                            id="preferredPickupTime"
-                            className="form-input"
-                            value={preferredPickupTime}
-                            onChange={(e) => setPreferredPickupTime(e.target.value)}
-                            required
-                        />
-                    </div>
-
-                    <button type="submit" className="submit-btn">Proceed To Payment</button>
-                </form>
+          ))}
+        </div>
+  
+        <div className="prescription-form">
+          <h2>
+            Prescription Request {selectedPet ? `for ${selectedPet.name}` : ''}
+          </h2>
+          <form onSubmit={handleSubmit}>
+            <div className="form-group">
+              <label htmlFor="prescriptionDetail">Prescription Detail:</label>
+              <textarea
+                id="prescriptionDetail"
+                className="form-input"
+                value={prescriptionDetail}
+                onChange={(e) => setPrescriptionDetail(e.target.value)}
+                placeholder="Enter details about the prescription"
+                rows="4"
+                required
+              />
             </div>
-
-            {/* Payment Modal */}
-            {showPaymentModal && (
-                <div className="modal">
-                    <div className="modal-content payment-modal">
-                        <h3>Payment Details</h3>
-                        <form onSubmit={handlePaymentSubmit}>
-                            <div className="form-group">
-                                <label htmlFor="cardNumber">Card Number:</label>
-                                <div className="input-icon">
-                                    <i className="fa fa-credit-card" aria-hidden="true"></i>
-                                    <input
-                                        type="text"
-                                        id="cardNumber"
-                                        name="cardNumber"
-                                        className="form-input"
-                                        value={paymentDetails.cardNumber}
-                                        onChange={handlePaymentChange}
-                                        placeholder="1234-5678-9012-3456"
-                                        maxLength="19"
-                                        required
-                                    />
-                                </div>
-                                {errors.cardNumberError && (
-                                    <div className="error">{errors.cardNumberError}</div>
-                                )}
-                            </div>
+  
+            <div className="form-group">
+              <label htmlFor="preferredPharmacy">Preferred Pharmacy:</label>
+              <select
+                id="preferredPharmacy"
+                className="form-input"
+                value={preferredPharmacy}
+                onChange={(e) => setPreferredPharmacy(e.target.value)}
+                required
+              >
+                <option value="">Select a pharmacy</option>
+                <option value="Pharmacy 1">Pharmacy 1</option>
+                <option value="Pharmacy 2">Pharmacy 2</option>
+                <option value="Pharmacy 3">Pharmacy 3</option>
+                <option value="Pharmacy 4">Pharmacy 4</option>
+                <option value="Pharmacy 5">Pharmacy 5</option>
+              </select>
+            </div>
+  
+            <div className="form-group">
+              <label htmlFor="preferredPickupDate">Preferred Pickup Date:</label>
+              <input
+                type="date"
+                id="preferredPickupDate"
+                className="form-input"
+                value={preferredPickupDate}
+                onChange={(e) => setPreferredPickupDate(e.target.value)}
+                required
+              />
+            </div>
+  
+            <div className="form-group">
+              <label htmlFor="preferredPickupTime">Preferred Pickup Time:</label>
+              <input
+                type="time"
+                id="preferredPickupTime"
+                className="form-input"
+                value={preferredPickupTime}
+                onChange={(e) => setPreferredPickupTime(e.target.value)}
+                required
+              />
+            </div>
+  
+            <button type="submit" className="submit-btn">Proceed To Payment</button>
+          </form>
+        </div>
+  
+      {/* Payment Modal */}
+      {showPaymentModal && (
+        <div className="modal">
+          <div className="modal-content payment-modal">
+            <h3>Payment Details</h3>
+            <form onSubmit={handlePaymentSubmit}>
+              <div className="form-group">
+                <label htmlFor="cardNumber">Card Number:</label>
+                 <div className="input-icon">
+                  <i className="fa fa-credit-card" aria-hidden="true"></i>
+                  <input
+                    type="text"
+                    id="cardNumber"
+                    name="cardNumber"
+                    className="form-input"
+                    value={paymentDetails.cardNumber}
+                    onChange={handlePaymentChange}
+                    placeholder="1234-5678-9012-3456"
+                    maxLength="19"
+                    required
+                  />
+                </div>
+                {errors.cardNumberError && (
+                  <div className="error">{errors.cardNumberError}</div>
+                )}
+              </div>
 
                             <div className="form-row">
                                 <div className="form-group half-width">
@@ -307,14 +275,14 @@ const handlePaymentSubmit = async (e) => {
                                 </div>
                             </div>
 
-                            <div className="button-row">
-                                <button type="submit" className="submit-btn">Pay Now</button>
-                                <button onClick={() => setShowPaymentModal(false)} className="cancel-btn">Cancel</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            )}
+              <div className="button-row">
+                <button type="submit" className="submit-btn">Pay Now</button>
+                <button onClick={() => setShowPaymentModal(false)} className="cancel-btn">Cancel</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
             {/* Confirmation Modal */}
             {showConfirmationModal && (
