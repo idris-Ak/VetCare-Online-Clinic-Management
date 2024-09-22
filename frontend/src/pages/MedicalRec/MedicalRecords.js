@@ -145,12 +145,12 @@ function MedicalRecords() {
     setErrors(newErrors);
 
     if (valid) {
-      const updatedRecords = [...allRecords, { id: allRecords.length + 1, ...newRecord, petId: selectedPet }];
+      const formattedDate = newRecord.date ? dayjs(newRecord.date).format('MM/DD/YYYY') : null;
+      const updatedRecords = [...allRecords, { id: allRecords.length + 1, ...newRecord, date: formattedDate, petId: selectedPet }];
       setAllRecords(updatedRecords);
       localStorage.setItem('medicalRecords', JSON.stringify(updatedRecords));
       setShowAddModal(false);
       setNewRecord({ date: null, service: "", vet: "" });
-      setNewRecord({ ...newRecord, date: dayjs(newRecord.date) }); 
     }
   };
 
@@ -178,12 +178,12 @@ function MedicalRecords() {
     setErrors(newErrors);
   
     if (valid) {
-      const updatedRecords = allRecords.map((record) =>
+      const formattedDate = editRecord.date ? dayjs(editRecord.date).format('MM/DD/YYYY') : null;
+      const updatedRecords = allRecords.map(record =>
         record.id === editRecord.id
-          ? { ...record, ...editRecord, date: dayjs(editRecord.date).format('YYYY-MM-DD') }
+          ? { ...record, ...editRecord, date: formattedDate }
           : record
       );
-  
       setAllRecords(updatedRecords);
       localStorage.setItem('medicalRecords', JSON.stringify(updatedRecords));
       setShowEditModal(false);
@@ -276,7 +276,7 @@ function MedicalRecords() {
           <Table striped bordered hover className="table-container">
             <thead>
               <tr>
-                <th>Date</th>
+                <td>Date</td>
                 <th>Service</th>
                 <th>Veterinarian</th>
                 <th>Actions</th>
@@ -285,7 +285,7 @@ function MedicalRecords() {
             <tbody>
               {filteredRecords.map(record => (
                 <tr key={record.id}>
-                  <td>{record.date}</td>
+                  <td>{dayjs(record.date).format('MM/DD/YYYY')}</td>
                   <td>{record.service}</td>
                   <td>{record.vet}</td>
                   <td>
