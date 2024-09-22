@@ -1,6 +1,6 @@
 /* eslint-disable jsx-a11y/img-redundant-alt */
 import React from 'react';
-import './Footer.css';  
+import './Footer.css';
 
 function Footer() {
   return (
@@ -10,9 +10,9 @@ function Footer() {
       </div>
       <div className="footer-section contact">
         <h3>Contact Us:</h3>
-        <p>Address: 123 Example Street 3000</p>
-        <p>03 9999 9999</p>
-        <p>example@email.com.au</p>
+        <p>Address: 19 Latrob Street 3000</p>
+        <p>03 6783 83843 </p>
+        <p>Goup02@class06.com.au</p>
       </div>
       <div className="footer-section hours">
         <h3>Opening Hours:</h3>

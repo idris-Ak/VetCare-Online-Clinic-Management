@@ -58,6 +58,7 @@ function SignUp({loginUser}) {
       newErrors.confirmPasswordError = 'Passwords do not match.';
       isValid = false; 
     }
+    
     //If password is not strong, output the error message
     if (!isPasswordStrong(user.password)) {
       newErrors.passwordError = 'Your password must be at least 8 characters long and include uppercase letters, lowercase letters, numbers, and special characters.';
@@ -89,11 +90,15 @@ const emailExists = users.some(existingUser => existingUser.email === user.email
 
     //Save the new user in localStorage
     const newUser = {
-      name: user.name,
-      email: user.email,
+      name: user.name.trim(),
+      email: user.email.trim(),
       password: user.password,
       role: user.role,
     };
+
+    if (user.role === 'Vet') {
+      newUser.medRecSent = []; // Array to hold multiple medical records
+    }
 
     //Add the new user to the users array and store it in localStorage
     users.push(newUser);
@@ -120,7 +125,7 @@ const emailExists = users.some(existingUser => existingUser.email === user.email
   );
 
   return (
-    <Container className="d-flex justify-content-center align-items-center" style={{ minHeight: '100vh', fontFamily: 'Lato, sans-serif'}}>
+    <Container className="d-flex justify-content-center align-items-center" style={{ marginTop: '25px', marginBottom: '25px', minHeight: '100vh', fontFamily: 'Lato, sans-serif'}}>
        <div className="w-100 p-4" style={{ maxWidth: '600px', background: '#fff', borderRadius: '20px', boxShadow: '0 4px 8px rgba(0,0,0,0.1)'}}>
         <br></br>
         {showSuccessAlert && <Alert variant="success">SignUp Successful!</Alert>}

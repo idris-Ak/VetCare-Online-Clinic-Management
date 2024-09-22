@@ -1,0 +1,214 @@
+import { jsPDF } from 'jspdf'; // Import jsPDF library
+import React, { useEffect, useState } from 'react';
+import { Alert, Button, Container, Form, Modal, Table } from 'react-bootstrap';
+import './MedicalRecords.css';
+
+import pet3Image from 'frontend/src/components/assets/about1.jpg';
+import pet2Image from 'frontend/src/components/assets/about2.jpg';
+import pet1Image from 'frontend/src/components/assets/blog3.jpg';
+
+function MedicalRecords() {
+  // Mock user data with multiple pets
+  const pets = [
+    { id: 1, name: 'Goatie', image: pet1Image, age: '2 years', breed: 'Goat' },
+    { id: 2, name: 'Pookie', image: pet2Image, age: '1 year', breed: 'Cat' },
+    { id: 3, name: 'Dogie', image: pet3Image, age: '3 years', breed: 'Dog' }
+  ];
+
+  // State for storing medical records and prescriptions
+  const [allRecords, setAllRecords] = useState([
+    { petId: 1, date: '01/01/2023', service: 'Annual Check-up', vet: 'Dr. Doofenshmirtz', id: 1 },
+    { petId: 1, date: '01/06/2023', service: 'Vaccination', vet: 'Dr. Perry', id: 2, vaccine: 'Rabies', dose: '10mg', nextDose: '06/06/2023' },
+    { petId: 1, date: '01/10/2023', service: 'Treatment Plan', vet: 'Dr. Doofenshmirtz', id: 5, treatment: 'Allergy Treatment', medications: 'Antihistamine', duration: '2 weeks' },
+    { petId: 2, date: '02/01/2023', service: 'Surgery', vet: 'Dr. Doofenshmirtz', id: 3 },
+    { petId: 3, date: '03/10/2023', service: 'General Check-up', vet: 'Dr. Perry', id: 4 },
+    { petId: 2, date: '03/15/2023', service: 'Vaccination', vet: 'Dr. Perry', id: 6, vaccine: 'Distemper', dose: '5mg', nextDose: '09/15/2023' },
+    { petId: 3, date: '04/10/2023', service: 'Treatment Plan', vet: 'Dr. Perry', id: 7, treatment: 'Post-Surgery Recovery', medications: 'Painkillers', duration: '1 month' }
+  ]);
+
+  const [selectedPet, setSelectedPet] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedRecord, setSelectedRecord] = useState(null);
+  const [showRecordModal, setShowRecordModal] = useState(false);
+
+  // useEffect to automatically add prescriptions when the component mounts
+  useEffect(() => {
+    const storedPrescriptions = JSON.parse(localStorage.getItem('prescriptions')) || [];
+
+    if (storedPrescriptions.length > 0) {
+      // Check if the prescription already exists in the records to avoid duplicates
+      const newRecords = storedPrescriptions
+        .filter(prescription => {
+          return !allRecords.some(record =>
+            record.petId === prescription.petId &&
+            record.prescriptionDetail === prescription.prescriptionDetail &&
+            record.date === prescription.date
+          );
+        })
+        .map((prescription, index) => ({
+          id: allRecords.length + index + 1,  // Assign a new id
+          petId: prescription.petId,  // Add prescription for the pet
+          date: prescription.date,  // Add the prescription date
+          service: 'Prescription',  // Service is Prescription
+          vet: prescription.pharmacy,  // Display the selected clinic/pharmacy as vet
+          prescriptionDetail: prescription.prescriptionDetail,
+          pharmacy: prescription.pharmacy,
+          pickupDate: prescription.pickupDate,
+          pickupTime: prescription.pickupTime
+        }));
+
+      // Only update the state if there are new records to add
+      if (newRecords.length > 0) {
+        setAllRecords(prevRecords => [...prevRecords, ...newRecords]);
+      }
+    }
+  }, []); // Empty dependency array to run only on mount
+
+  // Handle Download Record (PDF)
+  const handleDownload = (record) => {
+    const doc = new jsPDF();
+    doc.setFontSize(16);
+    doc.text('Medical Record', 10, 10);
+    doc.setFontSize(12);
+    doc.text(`Date: ${record.date}`, 10, 20);
+    doc.text(`Service: ${record.service}`, 10, 30);
+    doc.text(`Veterinarian: ${record.vet}`, 10, 40);
+
+    if (record.vaccine) {
+      doc.text(`Vaccine: ${record.vaccine}`, 10, 50);
+      doc.text(`Dose: ${record.dose}`, 10, 60);
+      doc.text(`Next Dose: ${record.nextDose}`, 10, 70);
+    }
+
+    if (record.treatment) {
+      doc.text(`Treatment: ${record.treatment}`, 10, 50);
+      doc.text(`Medications: ${record.medications}`, 10, 60);
+      doc.text(`Duration: ${record.duration}`, 10, 70);
+    }
+
+    if (record.prescriptionDetail) {
+      doc.text(`Prescription: ${record.prescriptionDetail}`, 10, 50);
+      doc.text(`Pharmacy: ${record.pharmacy}`, 10, 60);
+      doc.text(`Pickup Date: ${record.pickupDate}`, 10, 70);
+      doc.text(`Pickup Time: ${record.pickupTime}`, 10, 80);
+    }
+
+    doc.save(`medical-record-${record.id}.pdf`);
+  };
+
+  // Filter records by selected pet and search term
+  const filteredRecords = allRecords
+    .filter(record =>
+      (!selectedPet || record.petId === selectedPet) &&
+      (record.service.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      record.date.includes(searchTerm))
+    );
+
+  const formatRecordDetails = (record) => {
+    let details = `Date: ${record.date}\nService: ${record.service}\nVeterinarian: ${record.vet}`;
+    if (record.vaccine) {
+      details += `\n\nVaccine: ${record.vaccine}\nDose: ${record.dose}\nNext Dose: ${record.nextDose}`;
+    }
+    if (record.treatment) {
+      details += `\n\nTreatment: ${record.treatment}\nMedications: ${record.medications}\nDuration: ${record.duration}`;
+    }
+    if (record.prescriptionDetail) {
+      details += `\n\nPrescription: ${record.prescriptionDetail}\nPharmacy: ${record.pharmacy}\nPickup Date: ${record.pickupDate}\nPickup Time: ${record.pickupTime}`;
+    }
+    return details;
+  };
+
+  return (
+    <Container className='medicarecords-page'>
+      <div className='pet-section'>
+        <h1>Select Pet Profile</h1>
+        <div className="pet-selection">
+          <div className="pet-list">
+            {pets.map(pet => (
+              <div key={pet.id} className="pet">
+                <img src={pet.image} alt={pet.name} className="pet-image" />
+                <p className="pet-name">{pet.name}</p>
+                <Button
+                  className={selectedPet === pet.id ? 'selected' : 'select'}
+                  onClick={() => setSelectedPet(selectedPet === pet.id ? null : pet.id)}
+                >
+                  {selectedPet === pet.id ? 'Selected' : 'Select'}
+                </Button>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Medical Records Table */}
+      <div>
+        <h2>{selectedPet ? `${pets.find(pet => pet.id === selectedPet).name}'s Medical Records` : 'All Pets Medical Records'}</h2>
+
+        {/* Search Bar */}
+        <div className="search-bar">
+          <Form.Control
+            type="text"
+            placeholder="Search records by date or service..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+
+        {filteredRecords.length > 0 ? (
+          <Table striped bordered hover>
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Type of Service</th>
+                <th>Veterinarian</th> {/* Update: Veterinarian now includes clinic */}
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredRecords.map((record) => (
+                <tr key={record.id}>
+                  <td>{record.date}</td>
+                  <td>{record.service}</td>
+                  <td>{record.vet}</td> {/* Clinic will be shown for prescriptions */}
+                  <td>
+                    <Button variant="primary" onClick={() => { setSelectedRecord(record); setShowRecordModal(true); }}>
+                      View
+                    </Button>
+                    <Button variant="success" onClick={() => handleDownload(record)}>
+                      Download
+                    </Button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </Table>
+        ) : (
+          <p>No records available for the selected pet or search term.</p>
+        )}
+      </div>
+
+      {/* Modal for Viewing Medical Record */}
+      {selectedRecord && (
+        <Modal show={showRecordModal} onHide={() => setShowRecordModal(false)} centered>
+          <Modal.Header closeButton>
+            <Modal.Title>Record Details for {selectedRecord.service}</Modal.Title>
+          </Modal.Header>
+          <Modal.Body className="modal-body">
+            <div className="modal-content">
+              <Alert variant="info" className="modal-alert">Veterinarian: {selectedRecord.vet}</Alert>
+              <h5>Details</h5>
+              <pre>{formatRecordDetails(selectedRecord)}</pre>
+            </div>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={() => setShowRecordModal(false)}>
+              Close
+            </Button>
+          </Modal.Footer>
+        </Modal>
+      )}
+    </Container>
+  );
+}
+
+export default MedicalRecords;

@@ -1,56 +1,45 @@
-import React, { useState } from 'react';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import HomePage from './pages/HomePage';
-import Navbar from './components/Navbar';
-import Footer from './components/Footer';
-import Login from './pages/Login';
-import SignUp from './pages/SignUp';
-import VetCareDashboard from './pages/VetCareDashboard';
-import './App.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import VetProfilePage from '../src/pages/VetProfilePage'; // Make sure to create this component
-import vets from '../src/components/data/vets';
-import Appointments from './pages/AppointmentPage/Appointments';
+import React, { useState } from 'react';
+import { Navigate, Route, BrowserRouter as Router, Routes } from 'react-router-dom'; // Imported Navigate for redirect
+import './App.css';
+import Footer from './components/Footer';
+import Navbar from './components/Navbar';
+import vets from './components/data/vets';
 import AllVetMembers from './pages/AllVetMembers';
+import Appointments from './pages/AppointmentPage/Appointments';
+import MedicalRecords from './pages/MedicalRec/MedicalRecords'
+import EducationalResource from './pages/EducationalResource'
+import HomePage from './pages/HomePage';
+import Login from './pages/Login';
+import MedicalRecords from './pages/MedicalRec/MedicalRecords';
+import MyProfile from './pages/MyProfile'; // Assuming MyProfile is located in the 'pages' directory
+import Prescription from './pages/Prescriptionrefill/prescription';
+import SignUp from './pages/SignUp';
 
+// PrivateRoute component to protect certain routes
+function PrivateRoute({ children, isLoggedIn }) {
+  return isLoggedIn ? children : <Navigate to="/login" />;
+}
 
 function App() {
     const [isLoggedIn, setIsLoggedIn] = useState(Boolean(localStorage.getItem('isLoggedIn')));
     const [user, setUser] = useState(localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')) : null);
 
     const loginUser = (userData) => {
-    localStorage.setItem('isLoggedIn', 'true');
-    localStorage.setItem('user', JSON.stringify(userData));
-    setUser(userData);  
-    setIsLoggedIn(true); 
-  };
-    const logoutUser = async () => {
-    localStorage.removeItem('user');
-    localStorage.removeItem('isLoggedIn');
-    setIsLoggedIn(false);
-    setUser(null);  
-  };
+      localStorage.setItem('isLoggedIn', 'true');
+      localStorage.setItem('user', JSON.stringify(userData));
+      setIsLoggedIn(true); 
+      setUser(userData);  
+    };
 
-  return (
-    <Router>
-      <div className="App">
-      <div className="navbar-spacer" style={{ height: '65px', backgroundColor: '#68ccd4' }}></div> {/* Spacer div */}
-        <Navbar logoutUser={logoutUser} isLoggedIn={isLoggedIn} user={user} />
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/all-vets" element={<AllVetMembers vets={vets} />} />
-          {vets.map(vet => (
-            <Route key={vet.id} path={vet.detailPath} element={<VetProfilePage vet={vet} />} />
-          ))}
-          <Route path="/login" element={<Login loginUser={loginUser} />} />
-          <Route path="/signup" element={<SignUp loginUser={loginUser} />} />
-          <Route path="/VetCareDashboard" element={<VetCareDashboard />} />
-          <Route path="/AppointmentPage/Appointments" element={<Appointments />}></Route>
-        </Routes>
-        <Footer />
-      </div>
-    </Router>
-  );
+    const logoutUser = async () => {
+      localStorage.removeItem('user');
+      localStorage.removeItem('isLoggedIn');
+      setIsLoggedIn(false);
+      setUser(null);  
+    };
+
+
 }
 
 export default App;
