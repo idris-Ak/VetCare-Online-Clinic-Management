@@ -45,11 +45,11 @@ function HomePage() {
                   style={{ width: '100%', height: '100%' }} // Adjusted style
                 />
                 <div className="home-content-sec-one">
-                  <h2>content</h2>
-                  <h1>content</h1>
-                  <h3>content</h3>
-                  <Link to="/">
-                    <button className="explore-btn">content</button>
+                  <h2>Book an</h2>
+                  <h1>Appointment</h1>
+                  <h3>with us today</h3>
+                  <Link to="/AppointmentPage/Appointments">
+                    <button className="explore-btn">Book Online</button>
                   </Link>
                 </div>
               </div>
@@ -63,12 +63,12 @@ function HomePage() {
                 alt="Landscape2"
                 style={{ width: '110%', height: '100%', objectFit: 'cover' }}
               />
-              <div className="home-content-sec-one">
-                <h2>content</h2>
-                <h1>content</h1>
-                <h3>content</h3>
-                <Link to="/">
-                  <button className="explore-btn">content</button>
+              <div className="home-content-sec-two">
+                <h2>Don't have an account yet?</h2>
+                <h1>Sign Up Today</h1>
+                <h3>For Free</h3>
+                <Link to="/SignUp">
+                  <button className="explore-btn">Sign up</button>
                 </Link>
               </div>
             </SwiperSlide>
@@ -80,12 +80,12 @@ function HomePage() {
                 alt="Landscape3"
                 style={{ width: '110%', height: '100%', objectFit: 'cover' }}
               />
-              <div className="home-content-sec-one">
-                <h2>content</h2>
-                <h1>content</h1>
-                <h3>content</h3>
-                <Link to="/">
-                  <button className="explore-btn">content</button>
+              <div className="home-content-sec-three">
+                <h2>Check out our</h2>
+                <h1>extensive</h1>
+                <h3>resources page</h3>
+                <Link to="/educational">
+                  <button className="explore-btn">Learn More</button>
                 </Link>
               </div>
             </SwiperSlide>
