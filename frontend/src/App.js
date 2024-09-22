@@ -15,7 +15,6 @@ import MedicalRecords from './pages/MedicalRec/MedicalRecords';
 import MyProfile from './pages/MyProfile'; // Assuming MyProfile is located in the 'pages' directory
 import Prescription from './pages/Prescriptionrefill/prescription';
 import SignUp from './pages/SignUp';
-import VetProfilePage from './pages/VetProfilePage'; // Adjusted relative path
 
 // PrivateRoute component to protect certain routes
 function PrivateRoute({ children, isLoggedIn }) {
@@ -40,55 +39,7 @@ function App() {
       setUser(null);  
     };
 
-    return (
-      <Router>
-        <div className="App">
-          <div className="navbar-spacer" style={{ height: '65px', backgroundColor: '#68ccd4' }}></div> {/* Spacer div */}
-          <Navbar logoutUser={logoutUser} isLoggedIn={isLoggedIn} user={user} />
-          <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/all-vets" element={<AllVetMembers vets={vets} />} />
-            {vets.map(vet => (
-              <Route key={vet.id} path={vet.detailPath} element={<VetProfilePage vet={vet} />} />
-            ))}
-            <Route path="/login" element={<Login loginUser={loginUser} />} />
-            <Route path="/signup" element={<SignUp loginUser={loginUser} />} />
-            <Route path="/educational" element={<EducationalResource />} />
-            <Route 
-              path="/myprofile" 
-              element={<MyProfile user={user} setUser={setUser} logoutUser={logoutUser} />} 
-            />
-            
-            {/* Protected Routes */}
-            <Route 
-              path="/AppointmentPage/Appointments" 
-              element={
-                <PrivateRoute isLoggedIn={isLoggedIn}>
-                  <Appointments />
-                </PrivateRoute>
-              } 
-            />
-            <Route 
-              path="/MedicalRecords" 
-              element={
-                <PrivateRoute isLoggedIn={isLoggedIn}>
-                  <MedicalRecords />
-                </PrivateRoute>
-              } 
-            />
-            <Route 
-              path="/prescription" 
-              element={
-                <PrivateRoute isLoggedIn={isLoggedIn}>
-                  <Prescription />
-                </PrivateRoute>
-              } 
-            />
-          </Routes>
-          <Footer />
-        </div>
-      </Router>
-    );
+
 }
 
 export default App;
