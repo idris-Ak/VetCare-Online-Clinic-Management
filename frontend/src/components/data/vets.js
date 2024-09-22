@@ -2,11 +2,11 @@ import vet1 from "../assets/vet1.jpg";
 import vet2 from "../assets/vet2.jpg";
 import vet3 from "../assets/vet3.jpg";
 import vet4 from "../assets/vet4.jpg";
-//import vet5 from "../assets/vet5.jpg";
-//import vet6 from "../assets/vet6.jpg";
-//import vet7 from "../assets/vet7.jpg";
-//import vet8 from "../assets/vet8.jpg";
-//import vet9 from "../assets/vet9.jpg";
+import vet5 from "../assets/vet5.jpg";
+import vet6 from "../assets/vet6.jpg";
+import vet7 from "../assets/vet7.jpg";
+import vet8 from "../assets/vet8.jpg";
+import vet9 from "../assets/vet9.jpg";
 
 const vets = [
   {
@@ -51,7 +51,7 @@ const vets = [
     title: 'Canine Behavior Specialist',
     short_description: 'Dr. Rachel is dedicated to improving canine behavior and well-being at VetCare...',
     long_description: 'Dr. Rachel is a University of Sydney alumna whose interest in animal behavior has led her to become a leading canine behavior specialist at VetCare. She works closely with pet owners to develop behavioral modification plans that address issues ranging from simple obedience problems to complex anxiety disorders. Dr. Rachel’s approach combines behavioral science with holistic well-being practices to foster healthier relationships between pets and their families. Her free time is often spent hiking and volunteering in dog behavior workshops and seminars.',
-    imagePath: vet1,
+    imagePath: vet5,
     detailPath: '/dr-rachel'
   },
   {
@@ -60,7 +60,7 @@ const vets = [
     title: 'Avian and Exotic Pet Specialist',
     short_description: 'Dr. Omar treats a variety of avian and exotic pets at VetCare, providing specialized care...',
     long_description: 'Dr. Omar graduated from Cornell University with a focus on avian and exotic animals. His deep understanding and passion for birds and exotic pets make him a unique specialist at VetCare, where he is committed to providing comprehensive care tailored to the needs of less common pets. Dr. Omar’s clinic is equipped with state-of-the-art facilities designed to cater to the unique requirements of these animals. He is also an enthusiastic birdwatcher and wildlife photographer, often traveling to remote locations to capture the beauty of wildlife.',
-    imagePath: vet2,
+    imagePath: vet6,
     detailPath: '/dr-omar'
   },
   {
@@ -69,7 +69,7 @@ const vets = [
     title: 'Equine Specialist',
     short_description: 'With a focus on equine medicine, Dr. Lisa brings her expert care to VetCare\'s equine patients...',
     long_description: 'A graduate from the University of California, Davis, Dr. Lisa has dedicated her career to equine medicine, specializing in performance issues and rehabilitative therapy. At VetCare, she applies her extensive knowledge to help enhance the health and performance of competition horses and pleasure equines. Dr. Lisa’s expertise is also sought after in equine nutrition and preventive care, making her a beloved figure in the equine community. Her competitive spirit finds an outlet in equestrian sports, where she regularly competes at a national level.',
-    imagePath: vet3,
+    imagePath: vet7,
     detailPath: '/dr-lisa'
   },
   {
@@ -78,7 +78,7 @@ const vets = [
     title: 'Senior Veterinarian',
     short_description: 'Dr. Bruce oversees complex medical cases at VetCare, bringing decades of experience...',
     long_description: 'Dr. Bruce, a distinguished graduate from the University of Queensland, brings over thirty years of veterinary experience to VetCare, where he oversees complex medical cases and provides mentorship to the veterinary team. His areas of expertise include internal medicine and geriatric care, ensuring that senior pets live their later years with quality and dignity. Outside of his professional life, Dr. Bruce is an avid mentor to young vets and enjoys family trips exploring Australia’s natural wonders.',
-    imagePath: vet4,
+    imagePath: vet8,
     detailPath: '/dr-bruce'
   },
   {
@@ -87,7 +87,7 @@ const vets = [
     title: 'Pediatric Veterinary Specialist',
     short_description: 'Dr. Anita specializes in pediatric care for young pets at VetCare...',
     long_description: 'Dr. Anita, who hails from Murdoch University, is a pediatric veterinary specialist at VetCare. Her practice focuses on the developmental stages of puppies and kittens, ensuring they receive the best start in life through comprehensive health plans that include vaccinations, nutrition, and early socialization techniques. Dr. Anita is passionate about animal welfare, dedicating much of her time to volunteer work and educational outreach programs. Her hobbies include pottery and landscape gardening, which she finds therapeutic.',
-    imagePath: vet1,
+    imagePath: vet9,
     detailPath: '/dr-anita'
   }
 ];

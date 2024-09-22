@@ -88,7 +88,57 @@
 .home-content-sec-one {
   position: absolute;
   top: 50%; /* Place it in the middle vertically */
-  left: 50%; /* Place it in the middle horizontally */
+  left: 70%; /* Place it in the middle horizontally */
+  transform: translate(-50%, -20%); /* Center it precisely */
+  text-align: center; /* Center text */
+  color: rgb(0, 0, 0);
+}
+
+.home-content-sec-one h2 {
+  font-size: 50px;
+}
+
+.home-content-sec-one h1 {
+  font-size: 50px;
+  font-weight: 600;
+  line-height: 65px;
+}
+
+.home-content-sec-one h3 {
+  font-size: 45px;
+  font-weight: 800;
+  line-height: 70px;
+}
+
+.home-content-sec-two {
+  position: absolute;
+  top: 50%; /* Place it in the middle vertically */
+  left: 40%; /* Place it in the middle horizontally */
+  transform: translate(-50%, -20%); /* Center it precisely */
+  text-align: center; /* Center text */
+  color: rgb(0, 0, 0);
+}
+
+.home-content-sec-one h2 {
+  font-size: 50px;
+}
+
+.home-content-sec-one h1 {
+  font-size: 50px;
+  font-weight: 600;
+  line-height: 65px;
+}
+
+.home-content-sec-one h3 {
+  font-size: 45px;
+  font-weight: 800;
+  line-height: 70px;
+}
+
+.home-content-sec-three {
+  position: absolute;
+  top: 50%; /* Place it in the middle vertically */
+  left: 70%; /* Place it in the middle horizontally */
   transform: translate(-50%, -20%); /* Center it precisely */
   text-align: center; /* Center text */
   color: rgb(0, 0, 0);
