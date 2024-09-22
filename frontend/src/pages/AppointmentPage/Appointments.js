@@ -461,158 +461,159 @@ const handleCloseConfirmationModal = () => {
         </div>
       )}
 
-  {/* Payment Method Selection Modal */}
-      {showPaymentMethodModal && (
-        <div className="modal">
-          <div className="modal-content payment-method-modal">
-            <h3>Select Payment Method</h3>
-            <div className="payment-options">
-              <div
-                className="payment-option"
-                onClick={() => {
-                  setShowPaymentMethodModal(false);
-                  setShowPaymentModal(true);
-                }}
-              >
-                <i className="fa fa-credit-card" aria-hidden="true"></i>
-                <p>Credit/Debit Card</p>
-              </div>
-              <div className="vertical-line"></div>
-              <div className="paypal-button-container">
-                <PayPalScriptProvider
-                  options={{
-                    'client-id': 'AZn8taJF_Ktmts23FNW52kiR-RsyxG45Ps-vyDWgs2hje7Jv9EYFbpytQpUlyDndo_egQkb-IzD0p4jP',
-                    currency: 'AUD',
-                    intent: 'capture',
-                    'disable-funding': 'card', // Disable credit/debit card option
-                  }}
-                >
-                  <PayPalButtons
-                    style={{ layout: 'vertical' }}
-                    createOrder={(data, actions) => {
-                      return actions.order.create({
-                        purchase_units: [
-                          {
-                            amount: { value: '50.00' },
-                          },
-                        ],
-                      });
+      {/* Payment Method Selection Modal */}
+          {showPaymentMethodModal && (
+            <div className="modal">
+              <div className="modal-content payment-method-modal">
+                <h3>Select Payment Method</h3>
+                <div className="payment-options">
+                  <div
+                    className="payment-option"
+                    onClick={() => {
+                      setShowPaymentMethodModal(false);
+                      setShowPaymentModal(true);
                     }}
-                    onApprove={handlePayPalApprove}
-                    onCancel={() => {
-                      setShowPaymentMethodModal(true);
+                  >
+                    <i className="fa fa-credit-card" aria-hidden="true"></i>
+                    <p>Credit/Debit Card</p>
+                  </div>
+                  <div className="vertical-line"></div>
+                  <div className="paypal-button-container">
+                  <PayPalScriptProvider
+                    options={{
+                      'client-id': 'AZn8taJF_Ktmts23FNW52kiR-RsyxG45Ps-vyDWgs2hje7Jv9EYFbpytQpUlyDndo_egQkb-IzD0p4jP',
+                      currency: 'AUD',
+                      intent: 'capture',
+                      'disable-funding': 'card', // Disable credit/debit card option
                     }}
-                  />
-                </PayPalScriptProvider>
-              </div>
+                  >
+                    <PayPalButtons
+                      style={{ layout: 'vertical' }}
+                      createOrder={(data, actions) => {
+                        return actions.order.create({
+                          purchase_units: [
+                            {
+                              amount: { value: '50.00' },  // Set the appointment price here
+                            },
+                          ],
+                        });
+                      }}
+                      onApprove={handlePayPalApprove}
+                      onCancel={() => {
+                        setShowPaymentMethodModal(true);
+                      }}
+                    />
+                  </PayPalScriptProvider>
+                  </div>
+                </div>
+          <div className="button-row two-buttons">
+            <button
+              onClick={() => {
+                setShowPaymentMethodModal(false); 
+                setShowModal(true); 
+              }}
+              className="back-btn"
+            >
+              Back
+            </button>
+            <button
+              onClick={() => setShowPaymentMethodModal(false)}
+              className="cancel-btn"
+            >
+                Cancel
+              </button>
             </div>
-      <div className="button-row two-buttons">
-        <button
-          onClick={() => {
-            setShowPaymentMethodModal(false); 
-            setShowModal(true); 
-          }}
-          className="back-btn"
-        >
-          Back
-        </button>
-        <button
-          onClick={() => setShowPaymentMethodModal(false)}
-          className="cancel-btn"
-        >
-            Cancel
-          </button>
-        </div>
-      </div>
-    </div>
-  )}
-
-      {/* Payment Modal */}
-      {showPaymentModal && (
-        <div className="modal">
-          <div className="modal-content payment-modal">
-            <h3>Payment Details</h3>
-            <form onSubmit={handlePaymentSubmit}>
-              <div className="form-group">
-                <label htmlFor="cardNumber">Card Number:</label>
-                <div className="input-icon">
-                  <i className="fa fa-credit-card" aria-hidden="true"></i>
-                  <input
-                    type="text"
-                    id="cardNumber"
-                    name="cardNumber"
-                    className="form-input"
-                    value={paymentDetails.cardNumber}
-                    onChange={handlePaymentChange}
-                    placeholder="1234-5678-9012-3456"
-                    maxLength="19"
-                    required
-                  />
-                </div>
-                {errors.cardNumberError && (
-                  <div className="error">{errors.cardNumberError}</div>
-                )}
-              </div>
-
-              <div className="form-row">
-                <div className="form-group half-width">
-                  <label htmlFor="expiryDate">Expiry Date (MM/YY):</label>
-                  <div className="input-icon">
-                    <i className="fa fa-calendar" aria-hidden="true"></i>
-                    <input
-                      type="text"
-                      id="expiryDate"
-                      name="expiryDate"
-                      className="form-input"
-                      value={paymentDetails.expiryDate}
-                      onChange={handlePaymentChange}
-                      placeholder="MM/YY"
-                      required
-                    />
-                  </div>
-                  {errors.expiryDateError && (
-                    <div className="error">{errors.expiryDateError}</div>
-                  )}
-                </div>
-
-                <div className="form-group half-width">
-                  <label htmlFor="cvv">CVV:</label>
-                  <div className="input-icon">
-                    <i className="fa fa-lock" aria-hidden="true"></i>
-                    <input
-                      type="text"
-                      id="cvv"
-                      name="cvv"
-                      className="form-input"
-                      value={paymentDetails.cvv}
-                      onChange={handlePaymentChange}
-                      placeholder="123"
-                      maxLength="3"
-                      required
-                    />
-                  </div>
-                  {errors.cvvError && (
-                    <div className="error">{errors.cvvError}</div>
-                  )}
-                </div>
-              </div>
-
-              <div className="button-row two-buttons">
-                <button type="submit" className="submit-btn">Pay Now</button>
-                <button
-                  onClick={() => {
-                    setShowPaymentModal(false);
-                    setShowPaymentMethodModal(true);
-                  }}
-                  className="back-btn"
-                >
-                  Back
-                </button>
-              </div>
-            </form>
           </div>
         </div>
       )}
+
+          {/* Payment Modal */}
+          {showPaymentModal && (
+            <div className="modal">
+              <div className="modal-content payment-modal">
+                <h3>Payment Details</h3>
+                <p><strong>Total Price: </strong>$50.00</p> {/* Display the price */}
+                <form onSubmit={handlePaymentSubmit}>
+                  <div className="form-group">
+                    <label htmlFor="cardNumber">Card Number:</label>
+                    <div className="input-icon">
+                      <i className="fa fa-credit-card" aria-hidden="true"></i>
+                      <input
+                        type="text"
+                        id="cardNumber"
+                        name="cardNumber"
+                        className="form-input"
+                        value={paymentDetails.cardNumber}
+                        onChange={handlePaymentChange}
+                        placeholder="1234-5678-9012-3456"
+                        maxLength="19"
+                        required
+                      />
+                    </div>
+                    {errors.cardNumberError && (
+                      <div className="error">{errors.cardNumberError}</div>
+                    )}
+                  </div>
+
+                  <div className="form-row">
+                    <div className="form-group half-width">
+                      <label htmlFor="expiryDate">Expiry Date (MM/YY):</label>
+                      <div className="input-icon">
+                        <i className="fa fa-calendar" aria-hidden="true"></i>
+                        <input
+                          type="text"
+                          id="expiryDate"
+                          name="expiryDate"
+                          className="form-input"
+                          value={paymentDetails.expiryDate}
+                          onChange={handlePaymentChange}
+                          placeholder="MM/YY"
+                          required
+                        />
+                      </div>
+                      {errors.expiryDateError && (
+                        <div className="error">{errors.expiryDateError}</div>
+                      )}
+                    </div>
+
+                    <div className="form-group half-width">
+                      <label htmlFor="cvv">CVV:</label>
+                      <div className="input-icon">
+                        <i className="fa fa-lock" aria-hidden="true"></i>
+                        <input
+                          type="text"
+                          id="cvv"
+                          name="cvv"
+                          className="form-input"
+                          value={paymentDetails.cvv}
+                          onChange={handlePaymentChange}
+                          placeholder="123"
+                          maxLength="3"
+                          required
+                        />
+                      </div>
+                      {errors.cvvError && (
+                        <div className="error">{errors.cvvError}</div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="button-row two-buttons">
+                    <button type="submit" className="submit-btn">Pay $50.00</button> {/* Display the price in the button */}
+                    <button
+                      onClick={() => {
+                        setShowPaymentModal(false);
+                        setShowPaymentMethodModal(true);
+                      }}
+                      className="back-btn"
+                    >
+                      Back
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          )}
 
       {/* Confirmation Modal */}
       {showConfirmationModal && (
