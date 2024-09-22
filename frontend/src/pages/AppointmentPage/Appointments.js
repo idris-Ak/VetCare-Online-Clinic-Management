@@ -118,6 +118,7 @@ function Appointments() {
   };
 
   useEffect(() => {
+    // Load user information from local storage and store pet information in variable 
     const storedUser = localStorage.getItem("user");
     if (storedUser) {
       const user = JSON.parse(storedUser);
@@ -132,6 +133,7 @@ function Appointments() {
     setAppointments(storedAppointments);
   }, []);
 
+    // Set clinics into a varrible when component is deployed. 
   useEffect(() => {
     const defaultClinics = Array.from({ length: 5 }, (_, i) => ({
       id: i + 1,
@@ -183,6 +185,8 @@ function Appointments() {
     return selectedDate >= today;
   };
 
+
+  // Function that handles the modal state when clicking the calander.
   const openDayModal = (day) => {
     if (selectedPet && isDateInFuture(currentDate.getFullYear(), currentDate.getMonth(), day)) {
       setSelectedDay(day);
@@ -228,7 +232,7 @@ function Appointments() {
       return updatedAppointments;
     });
   
-    // Highlight the day on the calendar after booking
+    // set Day to highlighted to highlight it on the calander
     setHighlightedDays((prev) => ({
       ...prev,
       [selectedDay]: true
@@ -268,8 +272,8 @@ const handleCloseConfirmationModal = () => {
   
     setAppointments((prevAppointments) => {
       const updatedAppointments = { ...prevAppointments };
-      delete updatedAppointments[keyToRemove]; // Remove the appointment from state
-      localStorage.setItem("appointments", JSON.stringify(updatedAppointments)); // Update local storage
+      delete updatedAppointments[keyToRemove]; 
+      localStorage.setItem("appointments", JSON.stringify(updatedAppointments)); 
   
       // Check if there are any remaining appointments on the selected day
       const hasAppointmentsLeft = Object.values(updatedAppointments).some(
@@ -281,7 +285,7 @@ const handleCloseConfirmationModal = () => {
       setHighlightedDays((prev) => {
         const updatedHighlightedDays = { ...prev };
         if (!hasAppointmentsLeft) {
-          delete updatedHighlightedDays[selectedDay]; // Remove the highlight if no appointments are left
+          delete updatedHighlightedDays[selectedDay]; 
         }
         return updatedHighlightedDays;
       });
@@ -427,11 +431,11 @@ const handleCloseConfirmationModal = () => {
                   className={isBooked ? "booked" : (isSelected ? "selected" : "")}
                   onClick={() => {
                     if (!isBooked) {
-                      // Toggle the selected time for booking
+                      
                       setSelectedTimeSlot(prev => (prev === time ? "" : time));
                       setSelectedTime(prev => (prev === time ? "" : time));
                     } else if (existingAppointments.length > 0) {
-                      // Cancel the appointment if it's already booked
+                      
                       cancelAppointment(time);
                     }
                   }}
@@ -461,7 +465,6 @@ const handleCloseConfirmationModal = () => {
         </div>
       )}
 
-      {/* Payment Method Selection Modal */}
           {showPaymentMethodModal && (
             <div className="modal">
               <div className="modal-content payment-method-modal">
@@ -484,7 +487,7 @@ const handleCloseConfirmationModal = () => {
                       'client-id': 'AZn8taJF_Ktmts23FNW52kiR-RsyxG45Ps-vyDWgs2hje7Jv9EYFbpytQpUlyDndo_egQkb-IzD0p4jP',
                       currency: 'AUD',
                       intent: 'capture',
-                      'disable-funding': 'card', // Disable credit/debit card option
+                      'disable-funding': 'card', 
                     }}
                   >
                     <PayPalButtons
@@ -493,7 +496,7 @@ const handleCloseConfirmationModal = () => {
                         return actions.order.create({
                           purchase_units: [
                             {
-                              amount: { value: '50.00' },  // Set the appointment price here
+                              amount: { value: '50.00' },  
                             },
                           ],
                         });
@@ -527,12 +530,12 @@ const handleCloseConfirmationModal = () => {
         </div>
       )}
 
-          {/* Payment Modal */}
+          
           {showPaymentModal && (
             <div className="modal">
               <div className="modal-content payment-modal">
                 <h3>Payment Details</h3>
-                <p><strong>Total Price: </strong>$50.00</p> {/* Display the price */}
+                <p><strong>Total Price: </strong>$50.00</p> 
                 <form onSubmit={handlePaymentSubmit}>
                   <div className="form-group">
                     <label htmlFor="cardNumber">Card Number:</label>
@@ -599,7 +602,7 @@ const handleCloseConfirmationModal = () => {
                   </div>
 
                   <div className="button-row two-buttons">
-                    <button type="submit" className="submit-btn">Pay $50.00</button> {/* Display the price in the button */}
+                    <button type="submit" className="submit-btn">Pay $50.00</button> 
                     <button
                       onClick={() => {
                         setShowPaymentModal(false);
@@ -615,7 +618,6 @@ const handleCloseConfirmationModal = () => {
             </div>
           )}
 
-      {/* Confirmation Modal */}
       {showConfirmationModal && (
         <div className="modal">
           <div className="modal-content confirmation-modal">
