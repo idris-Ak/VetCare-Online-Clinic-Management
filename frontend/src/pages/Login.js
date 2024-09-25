@@ -28,7 +28,7 @@ function Login({loginUser}) {
     setShowErrorMessage(false);
 
     //Check if the Vet's email ends with @vetcare.com
-    if (userDetails.role === 'Vet' && !userDetails.email.endsWith('@vetcare.com').trim()) {
+    if (userDetails.role === 'Vet' && !userDetails.email.endsWith('@vetcare.com')) {
       setErrorMessage("Vets must use an email that ends with '@vetcare.com'.");
       setShowErrorMessage(true);
       setTimeout(() => setShowErrorMessage(false), 3000);

@@ -40,4 +40,33 @@ public class UserController {
         Optional<User> user = userService.findById(userId);
         return user.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
+    
+    // Update user profile
+    @PutMapping("/{userId}")
+    public ResponseEntity<User> updateUser(@PathVariable Long userId, @RequestBody User updatedUser) {
+        Optional<User> existingUser = userService.findById(userId);
+        if (existingUser.isPresent()) {
+            User user = existingUser.get();
+            user.setName(updatedUser.getName());
+            user.setEmail(updatedUser.getEmail());
+            if (updatedUser.getPassword() != null && !updatedUser.getPassword().isEmpty()) {
+                user.setPassword(updatedUser.getPassword());
+            }
+            user.setProfilePicture(updatedUser.getProfilePicture());
+            User savedUser = userService.signUp(user);
+            return ResponseEntity.ok(savedUser);
+        }
+        return ResponseEntity.notFound().build();
+    }
+
+    // Delete user profile
+    @DeleteMapping("/{userId}")
+    public ResponseEntity<Void> deleteUser(@PathVariable Long userId) {
+        Optional<User> existingUser = userService.findById(userId);
+        if (existingUser.isPresent()) {
+            userService.deleteUser(userId);
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.notFound().build();
+    }
 }
