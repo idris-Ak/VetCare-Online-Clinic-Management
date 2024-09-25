@@ -1,5 +1,5 @@
 import 'bootstrap/dist/css/bootstrap.min.css';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Navigate, Route, BrowserRouter as Router, Routes } from 'react-router-dom'; // Imported Navigate for redirect
 import './App.css';
 import Footer from './components/Footer';
@@ -21,19 +21,49 @@ function PrivateRoute({ children, isLoggedIn }) {
   return isLoggedIn ? children : <Navigate to="/login" />;
 }
 
+// Fetch user details by userId (you'll need an API or service method for this)
+async function fetchUserDetails(userId) {
+  try {
+    const response = await fetch(`http://localhost:8080/api/users/${userId}`);
+    if (response.ok) {
+      const data = await response.json();
+      return data;
+    }
+    return null; // If user is not found or request fails
+  } catch (error) {
+    console.error('Error fetching user details:', error);
+    return null;
+  }
+}
+
 function App() {
     const [isLoggedIn, setIsLoggedIn] = useState(Boolean(localStorage.getItem('isLoggedIn')));
-    const [user, setUser] = useState(localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')) : null);
+    const [userId, setUserId] = useState(localStorage.getItem('userId'));
+    const [user, setUser] = useState(null);
+
+
+    // Fetch the user details when the userId is present in localStorage
+    useEffect(() => {
+    if (userId) {
+    fetchUserDetails(userId).then(fetchedUser => {
+      if (fetchedUser) {
+        setUser(fetchedUser);
+      }
+      });
+    }
+  }, [userId]);
+
 
     const loginUser = (userData) => {
       localStorage.setItem('isLoggedIn', 'true');
-      localStorage.setItem('user', JSON.stringify(userData));
+      localStorage.setItem('userId', userData.id); // Only store userId
       setIsLoggedIn(true); 
+      setUserId(userData.id);
       setUser(userData);  
     };
 
     const logoutUser = async () => {
-      localStorage.removeItem('user');
+      localStorage.removeItem('userId');
       localStorage.removeItem('isLoggedIn');
       setIsLoggedIn(false);
       setUser(null);  

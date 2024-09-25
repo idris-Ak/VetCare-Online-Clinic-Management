@@ -54,9 +54,9 @@ function Navbar({ logoutUser, isLoggedIn, user }) {
       </ul>
 
       <ul className="navbar-list user-links">
-        {isLoggedIn ? (
+        {isLoggedIn && user ? (
           <li className="navbar-item">
-            <span className="welcome-text">Welcome, {user?.name}</span>
+            <span className="welcome-text">Welcome, {user.name}</span>
             <Link to="/myprofile" className="navbar-link">
             {/* <a href="https://www.flaticon.com/free-icons/user" title="user icons">User icons created by Becris - Flaticon</a> */}
               <img 
