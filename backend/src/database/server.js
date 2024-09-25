@@ -130,4 +130,15 @@ app.delete('/api/appointments/:id', (req, res) => {
       res.json({ message: 'Appointment cancelled' });
   });
 });
+
+// Close connection to the database to prevent memory leaks 
+process.on('SIGINT', () => {
+  db.close((err) => {
+    if (err) {
+      console.error(err.message);
+    }
+    console.log('Closed the database connection.');
+    process.exit(0);
+  });
+});
   

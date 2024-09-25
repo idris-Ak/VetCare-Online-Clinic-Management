@@ -23,7 +23,7 @@ function Login({loginUser}) {
     }));
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async(event) => {
     event.preventDefault();
     setShowErrorMessage(false);
 
@@ -35,37 +35,39 @@ function Login({loginUser}) {
       return;
     }
 
-    //Retrieve the users array from localStorage
-    const users = JSON.parse(localStorage.getItem('users')) || [];
+    try {
+    const response = await fetch('http://localhost:8080/api/users/login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        email: userDetails.email.trim(),
+        password: userDetails.password,
+        role: userDetails.role,
+      }),
+    });
 
-    //Store the user details in local storage temporarily 
-    const storedUser = users.find(user => user.email.trim() === userDetails.email && user.role === userDetails.role);
-    
-    if (storedUser && storedUser.password.trim() === userDetails.password && storedUser.role === userDetails.role) {
-      setShowSuccessAlert(true);
-      setTimeout(() => {
-        setShowSuccessAlert(false);
-        loginUser(storedUser);
-
-        // if(storedUser.role === 'Vet'){
-        //   navigate('/AdminDashboard');
-        // }
-        // else {
-        //   navigate('/');
-        // }
-
-        // Check if the user was redirected here with a "from" state
-        const redirectTo = location.state?.from || '/';
-        navigate(redirectTo);
-      }, 3000);
-    } else {
-      //Show an error message if the user enters any invalid details
+    if (response.status === 401) {
       setErrorMessage('Invalid email, password, or role selection.');
       setShowErrorMessage(true);
       setTimeout(() => setShowErrorMessage(false), 3000);
       setUserDetails(prevDetails => ({ ...prevDetails, password: '' }));
+    } else if (response.ok) {
+      const user = await response.json();
+      setShowSuccessAlert(true);
+      setTimeout(() => {
+        setShowSuccessAlert(false);
+        loginUser(user);
+        const redirectTo = location.state?.from || '/';
+        navigate(redirectTo);
+      }, 3000);
     }
-  };
+  } catch (error) {
+    console.error('Error during login:', error);
+  }
+}
+
 
   return (
   <Container className="d-flex justify-content-center align-items-center" style={{ marginTop: '25px', marginBottom: '25px', minHeight: '75vh', fontFamily: 'Lato, sans-serif'}}>
