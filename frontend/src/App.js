@@ -21,7 +21,7 @@ function PrivateRoute({ children, isLoggedIn }) {
   return isLoggedIn ? children : <Navigate to="/login" />;
 }
 
-// Fetch user details by userId (you'll need an API or service method for this)
+// Fetch user details by userId
 async function fetchUserDetails(userId) {
   try {
     const response = await fetch(`http://localhost:8080/api/users/${userId}`);
@@ -29,7 +29,7 @@ async function fetchUserDetails(userId) {
       const data = await response.json();
       return data;
     }
-    return null; // If user is not found or request fails
+    return null; // If user is not found or request fails, return null
   } catch (error) {
     console.error('Error fetching user details:', error);
     return null;
@@ -56,7 +56,7 @@ function App() {
 
     const loginUser = (userData) => {
       localStorage.setItem('isLoggedIn', 'true');
-      localStorage.setItem('userId', userData.id); // Only store userId
+      localStorage.setItem('userId', userData.id); // Only store userId in local storage
       setIsLoggedIn(true); 
       setUserId(userData.id);
       setUser(userData);  

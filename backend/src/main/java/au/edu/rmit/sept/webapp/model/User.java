@@ -17,10 +17,12 @@ public class User {
     private String email;
     private String password;
     private String role;
+    private String profilePicture;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<Pet> pets;
 
+    // Default constructor required by Hibernate
     public User() {
     }
 
@@ -69,5 +71,21 @@ public class User {
 
     public void setRole(String role) {
         this.role = role;
+    }
+
+    public String getProfilePicture() {
+        return profilePicture;
+    }
+
+    public void setProfilePicture(String profilePicture) {
+        this.profilePicture = profilePicture;
+    }
+
+    public List<Pet> getPets() {
+        return pets;
+    }
+
+    public void setPets(List<Pet> pets) {
+        this.pets = pets;
     }
 }

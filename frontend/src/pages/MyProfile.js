@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Form, Container, Modal, Card, Row, Col, Alert } from 'react-bootstrap';
+import { Button, Form, Container, Modal, Card, Row, Col, Alert, Spinner } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import profilepic from '../components/assets/profilepic.png';
 
 function MyProfile({ user, setUser, logoutUser }) {
   const [profilePicPreview, setProfilePicPreview] = useState(null);
+  const [isLoading, setIsLoading] = useState(true); // Loading state
   const navigate = useNavigate();
 
   // Pet profiles state
-  const [pets, setPets] = useState(user.pets || []);
+  const [pets, setPets] = useState(user?.pets || []);
 
   // State for pet details modal
   const [showPetModal, setShowPetModal] = useState(false);
@@ -18,12 +19,47 @@ function MyProfile({ user, setUser, logoutUser }) {
   const[alertContent, setAlertContent] = useState('');
   const[alertContentDanger, setAlertContentDanger] = useState('');
   const[showAlertDanger, setAlertDanger] = useState(false);
+  const [isSavingPet, setIsSavingPet] = useState(false);
 
   // State for edit profile modal
   const [showEditProfileModal, setShowEditProfileModal] = useState(false);
 
   // State for delete account modal
   const [showDeleteAccountModal, setShowDeleteAccountModal] = useState(false);
+
+   useEffect(() => {
+    if (user) {
+      fetchPets();
+    }
+    setTimeout(() => setIsLoading(false), 2000);
+  }, [user]);
+
+// Fetch request with timeout
+const fetchWithTimeout = (url, options = {}, timeout = 5000) => {
+  return Promise.race([
+    fetch(url, options),
+    new Promise((_, reject) => setTimeout(() => reject(new Error('Request timed out')), timeout)),
+  ]);
+};
+
+  // Fetch pets from the backend for the current user
+const fetchPets = async () => {
+  try {
+    const response = await fetchWithTimeout(`http://localhost:8080/api/pets/user/${user.id}`);
+    if (!response.ok) {
+      throw new Error(`Error fetching pets: ${response.statusText}`);
+    }
+    const data = await response.json();
+    setPets(data);
+  } catch (error) {
+    console.error('Error fetching pets:', error);
+    // Display an error alert to the user
+    setAlertContentDanger('Failed to fetch pets, please try again later.');
+    setAlertDanger(true);
+    setTimeout(() => setAlertDanger(false), 3000);
+  }
+};
+
 
   useEffect(() => {
     // Set profile picture preview if the user has a profile picture
@@ -33,41 +69,38 @@ function MyProfile({ user, setUser, logoutUser }) {
   }, [user]);
 
   // Handle profile picture upload
-  const handleProfilePicChange = (event) => {
-    const file = event.target.files[0];
+  const handleProfilePicChange = async(event) => {
+  const file = event.target.files[0];
     if (file) {
-      // Convert image file to base64 string
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const base64String = reader.result;
-        const updatedUser = { ...user, profilePicture: base64String };
-        setUser(updatedUser);
-        setProfilePicPreview(base64String);
-        // Update user in localStorage
-        updateUserInLocalStorage(updatedUser);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
+        const formData = new FormData();
+        formData.append('profilePicture', file);
 
+        try {
+            const response = await fetch(`http://localhost:8080/api/users/${user.id}/profile-picture`, {
+                method: 'POST',
+                body: formData,
+            });
+
+            if (!response.ok) {
+                throw new Error('Error uploading profile picture');
+            }
+
+            const updatedUser = await response.json();
+            setUser(updatedUser);
+            setProfilePicPreview(URL.createObjectURL(file)); // Preview the uploaded image
+        } catch (error) {
+            console.error('Error uploading profile picture:', error);
+            setAlertContentDanger('Failed to upload profile picture, please try again later.');
+            setAlertDanger(true);
+            setTimeout(() => setAlertDanger(false), 3000);
+        }
+    }
+};
 
   const handleRemoveProfilePic = () => {
   const updatedUser = { ...user, profilePicture: null };
     setUser(updatedUser);
     setProfilePicPreview(profilepic);
-    updateUserInLocalStorage(updatedUser);
-  };
-
-  // Update user in localStorage
-  const updateUserInLocalStorage = (updatedUser) => {
-    localStorage.setItem('user', JSON.stringify(updatedUser));
-    // Also update the user in the 'users' array in localStorage
-    const users = JSON.parse(localStorage.getItem('users')) || [];
-    const userIndex = users.findIndex((u) => u.email === updatedUser.email);
-    if (userIndex !== -1) {
-      users[userIndex] = updatedUser;
-      localStorage.setItem('users', JSON.stringify(users));
-    }
   };
 
   // Handle profile picture click
@@ -76,61 +109,50 @@ function MyProfile({ user, setUser, logoutUser }) {
   };
 
   // Handle add/edit pet
-  const handlePetSubmit = (event) => {
+  const handlePetSubmit = async(event) => {
     event.preventDefault();
+    setIsSavingPet(true);  // Set saving state before the operation
     const form = event.target;
-    const pet = {
-      id: currentPet ? currentPet.id : Date.now(),
-      name: form.elements.petName.value,
-      type: form.elements.petType.value,
-      breed: form.elements.petBreed.value,
-      age: form.elements.petAge.value,
-      profilePicture: null,
-    };
+    const petData = new FormData();
+
+    petData.append('name', form.elements.petName.value);
+    petData.append('type', form.elements.petType.value);
+    petData.append('breed', form.elements.petBreed.value);
+    petData.append('age', form.elements.petAge.value);
+
 
     // Handle pet profile picture
     const petProfilePicFile = form.elements.petProfilePicture.files[0];
     if (petProfilePicFile) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        pet.profilePicture = reader.result;
-
-        if (currentPet) {
-          // Edit existing pet
-          const updatedPets = pets.map((p) => (p.id === pet.id ? pet : p));
-          setPets(updatedPets);
-          updateUserPets(updatedPets);
-        } else {
-          // Add new pet
-          const updatedPets = [...pets, pet];
-          setPets(updatedPets);
-          updateUserPets(updatedPets);
-        }
-        setShowPetModal(false);
-        setCurrentPet(null);
-      };
-      reader.readAsDataURL(petProfilePicFile);
-    } else {
-      // No new profile picture
-      if (currentPet && currentPet.profilePicture) {
-        pet.profilePicture = currentPet.profilePicture;
-      }
-
-      if (currentPet) {
-        // Edit existing pet
-        const updatedPets = pets.map((p) => (p.id === pet.id ? pet : p));
-        setPets(updatedPets);
-        updateUserPets(updatedPets);
-      } else {
-        // Add new pet
-        const updatedPets = [...pets, pet];
-        setPets(updatedPets);
-        updateUserPets(updatedPets);
-      }
-      setShowPetModal(false);
-      setCurrentPet(null);
+        petData.append('profilePicture', petProfilePicFile);
     }
-  };
+
+    try {
+      const response = await fetch(`http://localhost:8080/api/pets/user/${user.id}`, {
+        method: 'POST',
+        body: petData,
+      });
+
+    if (!response.ok) {
+      throw new Error(`Error saving pet: ${response.statusText}`);
+    }
+
+    const updatedPet = await response.json();
+    setPets((prevPets) =>
+    currentPet ? prevPets.map((p) => (p.id === updatedPet.id ? updatedPet : p)) : [...prevPets, updatedPet]
+    );
+    setShowPetModal(false);
+    setCurrentPet(null);
+    } catch (error) {
+    console.error('Error saving pet:', error);
+    setAlertContentDanger('Failed to save pet, please try again later.');
+    setAlertDanger(true);
+    setTimeout(() => setAlertDanger(false), 3000);
+    }
+    finally {
+        setIsSavingPet(false);
+    }
+};
 
    const handleRemovePetProfilePic = (petId) => {
     const updatedPets = pets.map((pet) =>
@@ -143,8 +165,6 @@ function MyProfile({ user, setUser, logoutUser }) {
   const updateUserPets = (updatedPets) => {
     const updatedUser = { ...user, pets: updatedPets };
     setUser(updatedUser);
-    // Update user in localStorage
-    updateUserInLocalStorage(updatedUser);
   };
 
   // Handle pet profile picture preview
@@ -164,22 +184,36 @@ function MyProfile({ user, setUser, logoutUser }) {
   };
 
   // Handle pet delete
-  const handlePetDelete = (petId) => {
-    const updatedPets = pets.filter((pet) => pet.id !== petId);
-    setPets(updatedPets);
-    updateUserPets(updatedPets);
+ const handlePetDelete = async (petId) => {
+    try {
+      const response = await fetch(`http://localhost:8080/api/pets/${petId}`, {
+        method: 'DELETE',
+      });
+      if (response.ok) {
+        setPets(pets.filter((pet) => pet.id !== petId));
+      } else {
+        console.error('Error deleting pet');
+      }
+    } catch (error) {
+      console.error('Error deleting pet:', error);
+    }
   };
 
   // Handle profile update
-  const handleProfileUpdate = (event) => {
+  const handleProfileUpdate = async(event) => {
     event.preventDefault();
     const form = event.target;
-    const updatedUser = { ...user };
     const newName = form.elements.name.value.trim();
     const newEmail = form.elements.email.value.trim();
     const currentPassword = form.elements.currentPassword.value;
     const newPassword = form.elements.password.value;
     const confirmPassword = form.elements.confirmPassword.value;
+    const updatedUser = {
+        ...user,
+        name: newName,
+        email: newEmail,
+        password: newPassword ? newPassword : user.password, // Only update password if it's provided
+    };
 
      // Validate current password
     if (currentPassword && currentPassword !== user.password) {
@@ -272,7 +306,7 @@ function MyProfile({ user, setUser, logoutUser }) {
     };
 
      //If password is not strong, output the error message
-    if (!isPasswordStrong(newPassword)) {
+    if (currentPassword && newPassword && confirmPassword && !isPasswordStrong(newPassword)) {
      setAlertContentDanger('Your password must be at least 8 characters long and include uppercase letters, lowercase letters, numbers, and special characters.');
      setAlertDanger(true);
         setTimeout(() => {
@@ -281,29 +315,54 @@ function MyProfile({ user, setUser, logoutUser }) {
      return;
     }
 
-    updatedUser.name = newName;
-    updatedUser.email = newEmail;
-    if (newPassword) {
-      updatedUser.password = newPassword;
+    try {
+      const response = await fetch(`http://localhost:8080/api/users/${user.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updatedUser),
+      });
+
+    if (!response.ok) {
+      throw new Error(`Error updating profile: ${response.statusText}`);
     }
 
-    setUser(updatedUser);
-    updateUserInLocalStorage(updatedUser);
-    setAlertContent('Profile Successfully Updated!');
-      setAlert(true);
-      setTimeout(() => {
-        setAlert(false);
-      }, 2500);
-    setShowEditProfileModal(false);
-  };
+    if (response.status === 409) {
+        setAlertContentDanger("The email entered is already registered.");
+        setAlertDanger(true);
+        setTimeout(() => {
+        setAlertDanger(false);
+        }, 2500);
+        return;
+      }
+        const savedUser = await response.json();
+        setUser(savedUser);
+        setShowEditProfileModal(false);
+        setAlertContent('Profile Successfully Updated!');
+        setAlert(true);
+        setTimeout(() => setAlert(false), 2500);
+      } catch (error) {
+        console.error('Error updating profile:', error);
+        // Show an error alert to the user
+        setAlertContentDanger('Profile update failed, please try again later.');
+        setAlertDanger(true);
+    setTimeout(() => setAlertDanger(false), 3000);
+  } 
+};
 
   // Handle account deletion
-  const handleAccountDeletion = () => {
-    // Remove user from localStorage
-    const users = JSON.parse(localStorage.getItem('users')) || [];
-    const updatedUsers = users.filter((u) => u.email !== user.email);
-    localStorage.setItem('users', JSON.stringify(updatedUsers));
-    localStorage.removeItem('user');
+  const handleAccountDeletion = async() => {
+   try {
+      const response = await fetch(`http://localhost:8080/api/users/${user.id}`, {
+        method: 'DELETE',
+      });
+
+    if (!response.ok) {
+      throw new Error(`Error deleting account: ${response.statusText}`);
+    }
+
+    localStorage.removeItem('userId');
     localStorage.removeItem('isLoggedIn');
     setUser(null);
     setAlertContent('Profile Successfully Deleted!');
@@ -316,6 +375,14 @@ function MyProfile({ user, setUser, logoutUser }) {
         //Navigate back to login page after successful deletion
         navigate('/');
       }, 2500);
+    }
+    catch (error) {
+    console.error('Error deleting account:', error);
+    // Show an error alert to the user
+    setAlertContentDanger('Failed to delete account, please try again later.');
+    setAlertDanger(true);
+    setTimeout(() => setAlertDanger(false), 3000);
+    }
   };
 
    // Handle pet profile picture upload
@@ -335,8 +402,20 @@ function MyProfile({ user, setUser, logoutUser }) {
     }
   };
 
+// Loading spinner displayed until the user data is loaded
+  if (isLoading || !user) {
+    return (
+      <div className="d-flex justify-content-center align-items-center" style={{ height: '100vh' }}>
+        <Spinner animation="border" role="status">
+          <span className="visually-hidden">Loading...</span>
+        </Spinner>
+      </div>
+    );
+  }
+
   return (
     <Container style={{ marginTop: '50px', marginBottom: '50px', fontFamily: 'Lato, sans-serif' }}>
+      {isSavingPet && <Spinner animation="border" role="status"><span className="visually-hidden">Saving...</span></Spinner>}
         {showAlert && alertContent &&(<Alert variant="success">{alertContent}</Alert>)}
       <div
         className="d-flex flex-column align-items-center p-5"
