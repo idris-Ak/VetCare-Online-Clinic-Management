@@ -32,6 +32,12 @@ public class UserController {
         if (user.isPresent() && user.get().getPassword().equals(loginRequest.getPassword())) {
             return ResponseEntity.ok(user.get());
         }
-        return ResponseEntity.status(401).build(); // Unauthorized
+        return ResponseEntity.status(401).build();
+    }
+
+    @GetMapping("/{userId}")
+    public ResponseEntity<User> getUserById(@PathVariable Long userId) {
+        Optional<User> user = userService.findById(userId);
+        return user.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 }
