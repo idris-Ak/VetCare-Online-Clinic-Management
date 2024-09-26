@@ -8,9 +8,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
 import java.io.IOException;
 import java.util.Base64;
-
 import java.util.List;
 import java.util.Optional;
 
@@ -33,7 +33,7 @@ public class PetController {
     @GetMapping("/user/{userId}")
     public ResponseEntity<List<Pet>> getPetsByUserId(@PathVariable Long userId) {
         if (userId == null) {
-            return ResponseEntity.badRequest().body("Invalid user ID");
+            return ResponseEntity.badRequest().build(); // Return bad request without a body
         }
         Optional<User> user = userService.findById(userId);
         if (user.isPresent()) {
@@ -43,6 +43,7 @@ public class PetController {
         return ResponseEntity.notFound().build();
     }
 
+    @PostMapping("/user/{userId}") // Added @PostMapping for the create/update method
     public ResponseEntity<Pet> createOrUpdatePet(
             @PathVariable Long userId,
             @RequestParam("name") String name,
@@ -51,6 +52,7 @@ public class PetController {
             @RequestParam("age") int age,
             @RequestParam(value = "profilePicture", required = false) MultipartFile profilePicture) 
         throws IOException {
+        
         Optional<User> user = userService.findById(userId);
         if (user.isPresent()) {
             Pet pet = new Pet();
@@ -68,7 +70,7 @@ public class PetController {
             Pet savedPet = petService.savePet(pet);
             return ResponseEntity.ok(savedPet);
         }
-        return ResponseEntity.status(404).build();
+        return ResponseEntity.status(404).build(); // Return 404 if user not found
     }
 
     @DeleteMapping("/{petId}")
