@@ -4,10 +4,12 @@ import au.edu.rmit.sept.webapp.model.Pet;
 import au.edu.rmit.sept.webapp.model.User;
 import au.edu.rmit.sept.webapp.service.PetService;
 import au.edu.rmit.sept.webapp.service.UserService;
+import au.edu.rmit.sept.webapp.service.ImageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.http.HttpStatus;
 
 import java.io.IOException;
 import java.util.Base64;
@@ -16,7 +18,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/pets")
-@CrossOrigin(origins = "http://localhost:3000") // Establish a connection with the frontend
+@CrossOrigin(origins = "http://localhost:3000", allowedHeaders = "*", allowCredentials = "true") // Establish a connection with the frontend
 public class PetController {
 
     @Autowired
@@ -24,6 +26,9 @@ public class PetController {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private ImageService imageService; // ImageService for processing images
 
     @GetMapping
     public List<Pet> getAllPets() {
@@ -62,9 +67,14 @@ public class PetController {
             pet.setAge(age);
             pet.setUser(user.get());
 
-            if (profilePicture != null && !profilePicture.isEmpty()) {
-                String base64Image = Base64.getEncoder().encodeToString(profilePicture.getBytes());
-                pet.setProfilePicture(base64Image);
+            try {
+                if (profilePicture != null && !profilePicture.isEmpty()) {
+                    // Process and resize the image if necessary
+                    String base64Image = imageService.processImage(profilePicture);
+                    pet.setProfilePicture(base64Image); // Store Base64 image string
+                }
+            } catch (IOException e) {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
             }
 
             Pet savedPet = petService.savePet(pet);
