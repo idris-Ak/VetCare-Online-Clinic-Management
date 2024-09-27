@@ -18,7 +18,6 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/pets")
-@CrossOrigin(origins = "http://localhost:3000", allowedHeaders = "*", allowCredentials = "true") // Establish a connection with the frontend
 public class PetController {
 
     @Autowired
@@ -35,6 +34,7 @@ public class PetController {
         return petService.getAllPets();
     }
 
+    //Fetch user pets
     @GetMapping("/user/{userId}")
     public ResponseEntity<List<Pet>> getPetsByUserId(@PathVariable Long userId) {
         if (userId == null) {
@@ -48,8 +48,9 @@ public class PetController {
         return ResponseEntity.notFound().build();
     }
 
-    @PostMapping("/user/{userId}") // Added @PostMapping for the create/update method
-    public ResponseEntity<Pet> createOrUpdatePet(
+    // Add pet
+    @PostMapping("/user/{userId}") 
+    public ResponseEntity<Pet> createPet(
             @PathVariable Long userId,
             @RequestParam("name") String name,
             @RequestParam("type") String type,
@@ -83,9 +84,87 @@ public class PetController {
         return ResponseEntity.status(404).build(); // Return 404 if user not found
     }
 
+    // Update pet
+    @PutMapping("/{petId}")
+    public ResponseEntity<Pet> updatePet(
+            @PathVariable Long petId,
+            @RequestParam("name") String name,
+            @RequestParam("type") String type,
+            @RequestParam("breed") String breed,
+            @RequestParam("age") Integer age,
+            @RequestParam(value = "profilePicture", required = false) MultipartFile profilePicture)
+            throws IOException {
+
+        Optional<Pet> existingPet = petService.findById(petId);
+        if (existingPet.isPresent()) {
+            Pet pet = existingPet.get();
+            if (name != null)
+                pet.setName(name);
+            if (type != null)
+                pet.setType(type);
+            if (breed != null)
+                pet.setBreed(breed);
+            if (age != null)
+                pet.setAge(age);
+
+            if (profilePicture != null && !profilePicture.isEmpty()) {
+                try {
+                    String base64Image = imageService.processImage(profilePicture);
+                    pet.setProfilePicture(base64Image);
+                } catch (IOException e) {
+                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+                }
+            }
+
+            Pet savedPet = petService.savePet(pet);
+            return ResponseEntity.ok(savedPet);
+        }
+        return ResponseEntity.status(404).build(); // Return 404 if pet not found
+    }
+
+    // Delete pet
     @DeleteMapping("/{petId}")
     public ResponseEntity<Void> deletePet(@PathVariable Long petId) {
         petService.deletePet(petId);
         return ResponseEntity.noContent().build();
     }
+    
+    // Update pet profile picture
+    @PutMapping("/{petId}/profilePicture")
+    public ResponseEntity<Pet> updatePetProfilePicture(
+            @PathVariable Long petId,
+            @RequestParam("profilePicture") MultipartFile profilePicture) {
+        Optional<Pet> existingPet = petService.findById(petId);
+        if (existingPet.isPresent()) {
+            Pet pet = existingPet.get();
+
+            if (profilePicture != null && !profilePicture.isEmpty()) {
+                try {
+                    String base64Image = imageService.processImage(profilePicture);
+                    pet.setProfilePicture(base64Image);
+                } catch (IOException e) {
+                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+                }
+            }
+
+            Pet savedPet = petService.savePet(pet);
+            return ResponseEntity.ok(savedPet);
+        }
+        return ResponseEntity.status(404).build();
+    }
+
+    // Delete pet profile picture
+    @DeleteMapping("/{petId}/profilePicture")
+    public ResponseEntity<Pet> removePetProfilePicture(@PathVariable Long petId) {
+        Optional<Pet> existingPet = petService.findById(petId);
+        if (existingPet.isPresent()) {
+            Pet pet = existingPet.get();
+            pet.setProfilePicture(null); // Remove the profile picture from the pet
+
+            Pet savedPet = petService.savePet(pet); // Save the updated pet
+            return ResponseEntity.ok(savedPet);
+        }
+        return ResponseEntity.status(404).build(); // Return 404 if pet not found
+    }
+
 }
