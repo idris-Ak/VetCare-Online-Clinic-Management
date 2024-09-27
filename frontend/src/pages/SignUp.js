@@ -96,10 +96,11 @@ try {
         emailError: 'An account with this email already exists.',
       }));
     } else if (response.ok) {
+      const fetchUser = await response.json();
       setShowSuccessAlert(true);
       setTimeout(() => {
         setShowSuccessAlert(false);
-        loginUser(user);
+        loginUser(fetchUser);
         navigate('/');
       }, 2000);
     }

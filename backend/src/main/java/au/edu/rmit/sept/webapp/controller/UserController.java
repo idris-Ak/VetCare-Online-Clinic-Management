@@ -5,12 +5,15 @@ import au.edu.rmit.sept.webapp.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Optional;
+import java.io.IOException;
+import java.util.Base64;
 
 @RestController
 @RequestMapping("/api/users")
-@CrossOrigin(origins = "http://localhost:3000") // Establish a connection with the frontend
+@CrossOrigin(origins = "http://localhost:3000", allowedHeaders = "*", allowCredentials = "true") // Establish a connection with the frontend
 public class UserController {
 
     @Autowired
@@ -43,17 +46,33 @@ public class UserController {
     
     // Update user profile
     @PutMapping("/{userId}")
-    public ResponseEntity<User> updateUser(@PathVariable Long userId, @RequestBody User updatedUser) {
+    public ResponseEntity<User> updateUser(
+            @PathVariable Long userId,
+            @RequestParam(value = "profilePicture", required = false) MultipartFile profilePicture)
+            throws IOException {
+
         Optional<User> existingUser = userService.findById(userId);
         if (existingUser.isPresent()) {
             User user = existingUser.get();
-            user.setName(updatedUser.getName());
-            user.setEmail(updatedUser.getEmail());
-            if (updatedUser.getPassword() != null && !updatedUser.getPassword().isEmpty()) {
-                user.setPassword(updatedUser.getPassword());
+
+            if (profilePicture != null && !profilePicture.isEmpty()) {
+                String base64Image = Base64.getEncoder().encodeToString(profilePicture.getBytes());
+                user.setProfilePicture(base64Image); // Update profile picture
             }
-            user.setProfilePicture(updatedUser.getProfilePicture());
+
             User savedUser = userService.signUp(user);
+            return ResponseEntity.ok(savedUser);
+        }
+        return ResponseEntity.notFound().build();
+    }
+
+    @DeleteMapping("/{userId}/profilePicture")
+    public ResponseEntity<User> removeProfilePicture(@PathVariable Long userId) {
+        Optional<User> existingUser = userService.findById(userId);
+        if (existingUser.isPresent()) {
+            User user = existingUser.get();
+            user.setProfilePicture(null); // Remove the profile picture from the user
+            User savedUser = userService.saveUser(user); // Save the updated user
             return ResponseEntity.ok(savedUser);
         }
         return ResponseEntity.notFound().build();

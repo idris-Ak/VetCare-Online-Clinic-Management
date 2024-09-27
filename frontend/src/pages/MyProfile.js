@@ -19,6 +19,9 @@ function MyProfile({ user, setUser, logoutUser }) {
   const[alertContent, setAlertContent] = useState('');
   const[alertContentDanger, setAlertContentDanger] = useState('');
   const[showAlertDanger, setAlertDanger] = useState(false);
+  const [showDeletePetModal, setShowDeletePetModal] = useState(false);
+  const [petToDelete, setPetToDelete] = useState(null);
+
   const [isSavingPet, setIsSavingPet] = useState(false);
 
   // State for edit profile modal
@@ -31,21 +34,13 @@ function MyProfile({ user, setUser, logoutUser }) {
     if (user) {
       fetchPets();
     }
-    setTimeout(() => setIsLoading(false), 2000);
+    setTimeout(() => setIsLoading(false), 1000);
   }, [user]);
-
-// Fetch request with timeout
-const fetchWithTimeout = (url, options = {}, timeout = 5000) => {
-  return Promise.race([
-    fetch(url, options),
-    new Promise((_, reject) => setTimeout(() => reject(new Error('Request timed out')), timeout)),
-  ]);
-};
 
   // Fetch pets from the backend for the current user
 const fetchPets = async () => {
   try {
-    const response = await fetchWithTimeout(`http://localhost:8080/api/pets/user/${user.id}`);
+    const response = await fetch(`http://localhost:8080/api/pets/user/${user.id}`);
     if (!response.ok) {
       throw new Error(`Error fetching pets: ${response.statusText}`);
     }
@@ -76,127 +71,55 @@ const fetchPets = async () => {
         formData.append('profilePicture', file);
 
         try {
-            const response = await fetch(`http://localhost:8080/api/users/${user.id}/profile-picture`, {
-                method: 'POST',
+            const response = await fetch(`http://localhost:8080/api/users/${user.id}`, {
+                method: 'PUT',
                 body: formData,
             });
 
-            if (!response.ok) {
-                throw new Error('Error uploading profile picture');
-            }
-
-            const updatedUser = await response.json();
-            setUser(updatedUser);
-            setProfilePicPreview(URL.createObjectURL(file)); // Preview the uploaded image
+             if (!response.ok) {
+          if (response.status === 413) {
+          // Handle "Payload Too Large" error
+          throw new Error('Image size exceeds the allowable limit. Please upload a smaller file.');
+          }
+          throw new Error(`Error uploading profile picture: ${response.statusText}`);
+          }
+          const updatedUser = await response.json();
+          setUser(updatedUser);
+          setProfilePicPreview(URL.createObjectURL(file)); // Preview the uploaded image
         } catch (error) {
             console.error('Error uploading profile picture:', error);
-            setAlertContentDanger('Failed to upload profile picture, please try again later.');
+            setAlertContentDanger(error.message || 'Failed to upload profile picture. Please try again later.');
             setAlertDanger(true);
             setTimeout(() => setAlertDanger(false), 3000);
         }
     }
 };
 
-  const handleRemoveProfilePic = () => {
-  const updatedUser = { ...user, profilePicture: null };
-    setUser(updatedUser);
-    setProfilePicPreview(profilepic);
-  };
+const handleRemoveProfilePic = async () => {
+  try {
+    const response = await fetch(`http://localhost:8080/api/users/${user.id}/profilePicture`, {
+      method: 'DELETE', // Use DELETE method for removing the profile picture
+    });
+
+    if (!response.ok) {
+      throw new Error(`Error removing profile picture: ${response.statusText}`);
+    }
+
+    // Update the user object to reflect that the profile picture is removed
+    const updatedUser = { ...user, profilePicture: null };
+    setUser(updatedUser); // Update React state with the new user object
+    setProfilePicPreview(profilepic); // Set the profile picture preview to default placeholder
+  } catch (error) {
+    console.error('Error removing profile picture:', error);
+    setAlertContentDanger('Failed to remove profile picture. Please try again later.');
+    setAlertDanger(true);
+    setTimeout(() => setAlertDanger(false), 3000);
+  }
+};
 
   // Handle profile picture click
   const handleProfilePicClick = () => {
     document.getElementById('profilePicInput').click();
-  };
-
-  // Handle add/edit pet
-  const handlePetSubmit = async(event) => {
-    event.preventDefault();
-    setIsSavingPet(true);  // Set saving state before the operation
-    const form = event.target;
-    const petData = new FormData();
-
-    petData.append('name', form.elements.petName.value);
-    petData.append('type', form.elements.petType.value);
-    petData.append('breed', form.elements.petBreed.value);
-    petData.append('age', form.elements.petAge.value);
-
-
-    // Handle pet profile picture
-    const petProfilePicFile = form.elements.petProfilePicture.files[0];
-    if (petProfilePicFile) {
-        petData.append('profilePicture', petProfilePicFile);
-    }
-
-    try {
-      const response = await fetch(`http://localhost:8080/api/pets/user/${user.id}`, {
-        method: 'POST',
-        body: petData,
-      });
-
-    if (!response.ok) {
-      throw new Error(`Error saving pet: ${response.statusText}`);
-    }
-
-    const updatedPet = await response.json();
-    setPets((prevPets) =>
-    currentPet ? prevPets.map((p) => (p.id === updatedPet.id ? updatedPet : p)) : [...prevPets, updatedPet]
-    );
-    setShowPetModal(false);
-    setCurrentPet(null);
-    } catch (error) {
-    console.error('Error saving pet:', error);
-    setAlertContentDanger('Failed to save pet, please try again later.');
-    setAlertDanger(true);
-    setTimeout(() => setAlertDanger(false), 3000);
-    }
-    finally {
-        setIsSavingPet(false);
-    }
-};
-
-   const handleRemovePetProfilePic = (petId) => {
-    const updatedPets = pets.map((pet) =>
-      pet.id === petId ? { ...pet, profilePicture: null } : pet
-    );
-    setPets(updatedPets);
-    updateUserPets(updatedPets);
-  };
-
-  const updateUserPets = (updatedPets) => {
-    const updatedUser = { ...user, pets: updatedPets };
-    setUser(updatedUser);
-  };
-
-  // Handle pet profile picture preview
-  const getPetProfilePicPreview = (pet) => {
-    if (pet.profilePicture) {
-      return pet.profilePicture;
-    } else {
-      // Set placeholder pet profile picture
-      return 'https://via.placeholder.com/286x180.png?text=Pet+Picture';
-    }
-  };
-
-  // Handle pet edit
-  const handlePetEdit = (pet) => {
-    setCurrentPet(pet);
-    setShowPetModal(true);
-  };
-
-  // Handle pet delete
- const handlePetDelete = async (petId) => {
-    try {
-      const response = await fetch(`http://localhost:8080/api/pets/${petId}`, {
-        method: 'DELETE',
-      });
-      if (response.ok) {
-        setPets(pets.filter((pet) => pet.id !== petId));
-      } else {
-        console.error('Error deleting pet');
-      }
-    } catch (error) {
-      console.error('Error deleting pet:', error);
-    }
   };
 
   // Handle profile update
@@ -324,30 +247,28 @@ const fetchPets = async () => {
         body: JSON.stringify(updatedUser),
       });
 
-    if (!response.ok) {
-      throw new Error(`Error updating profile: ${response.statusText}`);
-    }
-
-    if (response.status === 409) {
+     if (!response.ok) {
+      if (response.status === 409) {
         setAlertContentDanger("The email entered is already registered.");
         setAlertDanger(true);
-        setTimeout(() => {
-        setAlertDanger(false);
-        }, 2500);
-        return;
+      } else {
+        throw new Error(`Error updating profile: ${response.statusText}`);
       }
+    }
+    else {
         const savedUser = await response.json();
         setUser(savedUser);
         setShowEditProfileModal(false);
         setAlertContent('Profile Successfully Updated!');
         setAlert(true);
         setTimeout(() => setAlert(false), 2500);
+        }
       } catch (error) {
         console.error('Error updating profile:', error);
         // Show an error alert to the user
         setAlertContentDanger('Profile update failed, please try again later.');
         setAlertDanger(true);
-    setTimeout(() => setAlertDanger(false), 3000);
+        setTimeout(() => setAlertDanger(false), 3000);
   } 
 };
 
@@ -385,22 +306,152 @@ const fetchPets = async () => {
     }
   };
 
-   // Handle pet profile picture upload
-  const handlePetProfilePicChange = (event, petId) => {
-    const file = event.target.files[0];
-    if (file) {
-      // Convert image file to base64 string
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const updatedPets = pets.map((pet) =>
-          pet.id === petId ? { ...pet, profilePicture: reader.result } : pet
-        );
-        setPets(updatedPets);
-        updateUserPets(updatedPets);
-      };
-      reader.readAsDataURL(file);
+
+  // Handle add/edit pet
+  const handlePetSubmit = async(event) => {
+    event.preventDefault();
+    setIsSavingPet(true);  // Set saving state before the operation
+    const form = event.target;
+    const petData = new FormData();
+
+    petData.append('name', form.elements.petName.value);
+    petData.append('type', form.elements.petType.value);
+    petData.append('breed', form.elements.petBreed.value);
+    petData.append('age', form.elements.petAge.value);
+
+
+    // Handle pet profile picture
+    const petProfilePicFile = form.elements.petProfilePicture.files[0];
+    if (petProfilePicFile) {
+        petData.append('profilePicture', petProfilePicFile);
+    }
+
+    try {
+      let response;
+        if (currentPet) {
+            // If currentPet is defined, we are editing an existing pet
+            response = await fetch(`http://localhost:8080/api/pets/${currentPet.id}`, {
+                method: 'PUT',
+                body: petData,
+            });
+        } else {
+            // If currentPet is not defined, we are adding a new pet
+            response = await fetch(`http://localhost:8080/api/pets/user/${user.id}`, {
+                method: 'POST',
+                body: petData,
+            });
+        }
+
+    if (!response.ok) {
+      throw new Error(`Error saving pet: ${response.statusText}`);
+    }
+
+    const updatedPet = await response.json();
+    setPets((prevPets) =>
+    currentPet ? prevPets.map((p) => (p.id === updatedPet.id ? updatedPet : p)) : [...prevPets, updatedPet]
+    );
+    setShowPetModal(false);
+    setCurrentPet(null);
+    } catch (error) {
+    console.error('Error saving pet:', error);
+    setAlertContentDanger('Failed to save pet, please try again later.');
+    setAlertDanger(true);
+    setTimeout(() => setAlertDanger(false), 3000);
+    }
+    finally {
+        setIsSavingPet(false);
+    }
+};
+
+   const handleRemovePetProfilePic = (petId) => {
+    const updatedPets = pets.map((pet) =>
+      pet.id === petId ? { ...pet, profilePicture: null } : pet
+    );
+    setPets(updatedPets);
+    updateUserPets(updatedPets);
+  };
+
+  const updateUserPets = (updatedPets) => {
+    const updatedUser = { ...user, pets: updatedPets };
+    setUser(updatedUser);
+  };
+
+  // Handle pet profile picture preview
+  const getPetProfilePicPreview = (pet) => {
+    if (pet.profilePicture) {
+      return pet.profilePicture;
+    } else {
+      // Set placeholder pet profile picture
+      return 'https://via.placeholder.com/286x180.png?text=Pet+Picture';
     }
   };
+
+  // Handle pet edit
+  const handlePetEdit = (pet) => {
+    setCurrentPet(pet);
+    setShowPetModal(true);
+  };
+
+
+  const confirmPetDelete = (pet) => {
+    setPetToDelete(pet);
+    setShowDeletePetModal(true);  // Show delete confirmation modal
+  };
+
+
+  // Handle pet delete
+ const handlePetDelete = async (petId) => {
+    try {
+      const response = await fetch(`http://localhost:8080/api/pets/${petId}`, {
+        method: 'DELETE',
+      });
+      if (response.ok) {
+        setPets(pets.filter((pet) => pet.id !== petId));
+        setShowDeletePetModal(false); // Close modal on success
+      } else {
+        console.error('Error deleting pet');
+      }
+    } catch (error) {
+      console.error('Error deleting pet:', error);
+    }
+  };
+
+  
+   // Handle pet profile picture upload
+  // Handle pet profile picture upload
+const handlePetProfilePicChange = async (event, petId) => {
+  const file = event.target.files[0];
+  if (file) {
+    const formData = new FormData();
+    formData.append('profilePicture', file);
+
+    try {
+      const response = await fetch(`http://localhost:8080/api/pets/${petId}`, {
+        method: 'PUT',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        if (response.status === 413) {
+          // Handle "Payload Too Large" error for large files
+          throw new Error('Image size exceeds the allowable limit. Please upload a smaller file.');
+        }
+        throw new Error(`Error uploading pet profile picture: ${response.statusText}`);
+      }
+
+      const updatedPets = pets.map((pet) =>
+        pet.id === petId ? { ...pet, profilePicture: URL.createObjectURL(file) } : pet
+      );
+      setPets(updatedPets);
+      updateUserPets(updatedPets); // Update the pets in the user state as well
+    } catch (error) {
+      console.error('Error uploading pet profile picture:', error.message);
+      setAlertContentDanger(error.message || 'Failed to upload pet profile picture. Please try again later.');
+      setAlertDanger(true);
+      setTimeout(() => setAlertDanger(false), 3000);
+    }
+  }
+};
 
 // Loading spinner displayed until the user data is loaded
   if (isLoading || !user) {
@@ -579,7 +630,7 @@ const fetchPets = async () => {
                         </Button>
                         <Button
                           variant="outline-danger"
-                          onClick={() => handlePetDelete(pet.id)}
+                          onClick={() => confirmPetDelete(pet.id)}
                           style={{ flex: '1', marginLeft: '5px' }}
                         >
                           Delete
@@ -612,6 +663,24 @@ const fetchPets = async () => {
           </div>
         )}
       </div>
+      
+      {/* Pet Deletion Confirmation Modal */}
+      <Modal show={showDeletePetModal} onHide={() => setShowDeletePetModal(false)}>
+    <Modal.Header closeButton>
+        <Modal.Title>Delete Pet</Modal.Title>
+    </Modal.Header>
+    <Modal.Body>
+        Are you sure you want to delete this pet? This action cannot be undone.
+    </Modal.Body>
+    <Modal.Footer className="d-flex justify-content-between">
+        <Button variant="secondary" onClick={() => setShowDeletePetModal(false)}>
+            Cancel
+        </Button>
+        <Button variant="danger" onClick={handlePetDelete}>
+            Delete
+        </Button>
+    </Modal.Footer>
+    </Modal>
 
       {/* Pet Modal */}
       <Modal show={showPetModal} onHide={() => { setShowPetModal(false); setCurrentPet(null); }}>

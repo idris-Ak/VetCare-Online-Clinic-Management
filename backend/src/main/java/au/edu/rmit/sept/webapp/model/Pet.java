@@ -6,6 +6,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.JoinColumn;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 public class Pet {
@@ -20,6 +21,7 @@ public class Pet {
 
     @ManyToOne
     @JoinColumn(name = "user_id")
+    @JsonIgnore // Prevent circular reference
     private User user;
 
     // Getters and Setters
