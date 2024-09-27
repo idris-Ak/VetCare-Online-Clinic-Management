@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class PetService {
@@ -20,6 +21,10 @@ public class PetService {
 
     public List<Pet> getPetsByUser(User user) {
         return petRepository.findByUser(user);
+    }
+
+    public Optional<Pet> findById(Long id) {
+        return petRepository.findById(id); 
     }
 
     public Pet savePet(Pet pet) {

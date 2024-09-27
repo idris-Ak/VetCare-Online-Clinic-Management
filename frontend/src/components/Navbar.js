@@ -23,6 +23,16 @@ function Navbar({ logoutUser, isLoggedIn, user }) {
     }
   };
 
+  // function to get the profile picture URL
+  const getProfilePicUrl = () => {
+    // If user has a profile picture, check if it's Base64 and add prefix if needed
+    if (user && user.profilePicture) {
+      // If it's Base64, add the necessary prefix
+      return `data:image/jpeg;base64,${user.profilePicture}`;
+    }
+    return profilepic;
+  };
+
   return (
     <nav className="navbar">
       <ul className="navbar-list main-links">
@@ -60,9 +70,9 @@ function Navbar({ logoutUser, isLoggedIn, user }) {
             <Link to="/myprofile" className="navbar-link">
             {/* <a href="https://www.flaticon.com/free-icons/user" title="user icons">User icons created by Becris - Flaticon</a> */}
               <img 
-                src={user && user.profilePicture ? user.profilePicture : profilepic}
+                src={getProfilePicUrl()}
                 alt="Profile"
-                style={{ width: '28px', height: '28px', borderRadius: '50%' }}
+                style={{ width: '40px', height: '40px', objectFit: 'cover', borderRadius: '50%' }}
               />
             </Link>
             <button onClick={handleLogout} className="logout-button">Logout</button>

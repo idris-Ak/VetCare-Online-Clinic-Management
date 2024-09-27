@@ -1,10 +1,11 @@
-au/edu/rmit/sept/webapp/WebappApplication.class
 au/edu/rmit/sept/webapp/repository/UserRepository.class
 au/edu/rmit/sept/webapp/service/PetService.class
-au/edu/rmit/sept/webapp/repository/PetRepository.class
 au/edu/rmit/sept/webapp/service/UserService.class
-au/edu/rmit/sept/webapp/controller/PetController.class
 au/edu/rmit/sept/webapp/service/ImageService.class
+au/edu/rmit/sept/webapp/WebConfig.class
+au/edu/rmit/sept/webapp/WebappApplication.class
+au/edu/rmit/sept/webapp/repository/PetRepository.class
+au/edu/rmit/sept/webapp/controller/PetController.class
 au/edu/rmit/sept/webapp/model/User.class
 au/edu/rmit/sept/webapp/controller/UserController.class
 au/edu/rmit/sept/webapp/model/Pet.class

@@ -2,10 +2,12 @@ package au.edu.rmit.sept.webapp.controller;
 
 import au.edu.rmit.sept.webapp.model.User;
 import au.edu.rmit.sept.webapp.service.UserService;
+import au.edu.rmit.sept.webapp.service.ImageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.http.HttpStatus;
 
 import java.util.Optional;
 import java.io.IOException;
@@ -13,11 +15,13 @@ import java.util.Base64;
 
 @RestController
 @RequestMapping("/api/users")
-@CrossOrigin(origins = "http://localhost:3000", allowedHeaders = "*", allowCredentials = "true") // Establish a connection with the frontend
 public class UserController {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private ImageService imageService; // ImageService for processing images
 
     @PostMapping("/signup")
     public ResponseEntity<User> signUp(@RequestBody User user) {
@@ -56,16 +60,50 @@ public class UserController {
             User user = existingUser.get();
 
             if (profilePicture != null && !profilePicture.isEmpty()) {
-                String base64Image = Base64.getEncoder().encodeToString(profilePicture.getBytes());
-                user.setProfilePicture(base64Image); // Update profile picture
+                try {
+                    String base64Image = imageService.processImage(profilePicture);
+                    user.setProfilePicture(base64Image);
+                } catch (IOException e) {
+                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+                }
             }
 
-            User savedUser = userService.signUp(user);
+            User savedUser = userService.saveUser(user);
             return ResponseEntity.ok(savedUser);
         }
-        return ResponseEntity.notFound().build();
+        return ResponseEntity.status(404).build(); // Return 404 if user not found
     }
 
+    // Update user profile picture 
+    @PutMapping("/{userId}/profilePicture")
+    public ResponseEntity<User> updateUserProfilePicture(
+            @PathVariable Long userId,
+            @RequestParam("profilePicture") MultipartFile profilePicture) {
+
+        Optional<User> existingUser = userService.findById(userId);
+        if (existingUser.isPresent()) {
+            User user = existingUser.get();
+
+            if (profilePicture != null && !profilePicture.isEmpty()) {
+                try {
+                    // Process the image and save it
+                    String base64Image = imageService.processImage(profilePicture);
+                    user.setProfilePicture(base64Image); // Store Base64 image string in the database (optional)
+                    userService.saveUser(user); // Save updated user in the database
+
+                    return ResponseEntity.ok(user);
+
+                } catch (IOException e) {
+                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+                }
+            }
+
+            return ResponseEntity.badRequest().build();
+        }
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+    }
+
+    // Delete user profile picture 
     @DeleteMapping("/{userId}/profilePicture")
     public ResponseEntity<User> removeProfilePicture(@PathVariable Long userId) {
         Optional<User> existingUser = userService.findById(userId);
@@ -75,7 +113,7 @@ public class UserController {
             User savedUser = userService.saveUser(user); // Save the updated user
             return ResponseEntity.ok(savedUser);
         }
-        return ResponseEntity.notFound().build();
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
     }
 
     // Delete user profile

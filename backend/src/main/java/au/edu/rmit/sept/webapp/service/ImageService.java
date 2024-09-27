@@ -18,6 +18,11 @@ public class ImageService {
 
     // Method to validate and resize image
     public String processImage(MultipartFile file) throws IOException {
+        
+        String fileExtension = getFileExtension(file);
+        if (!isSupportedFileType(fileExtension)) {
+            throw new IOException("Unsupported file type: " + fileExtension);
+        }
         // Read the image file into a BufferedImage
         BufferedImage image = ImageIO.read(file.getInputStream());
 
@@ -29,6 +34,10 @@ public class ImageService {
 
         // Convert the BufferedImage to a Base64 encoded string
         return encodeToBase64(image, getFileExtension(file));
+    }
+
+    private boolean isSupportedFileType(String fileExtension) {
+        return "jpg".equalsIgnoreCase(fileExtension) || "png".equalsIgnoreCase(fileExtension);
     }
 
     // Method to resize the image

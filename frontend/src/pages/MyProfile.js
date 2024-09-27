@@ -37,7 +37,7 @@ function MyProfile({ user, setUser, logoutUser }) {
     setTimeout(() => setIsLoading(false), 1000);
   }, [user]);
 
-  // Fetch pets from the backend for the current user
+// Fetch pets from the backend for the current user
 const fetchPets = async () => {
   try {
     const response = await fetch(`http://localhost:8080/api/pets/user/${user.id}`);
@@ -55,31 +55,34 @@ const fetchPets = async () => {
   }
 };
 
-
   useEffect(() => {
     // Set profile picture preview if the user has a profile picture
     if (user && user.profilePicture) {
-      setProfilePicPreview(user.profilePicture);
+      setProfilePicPreview(`data:image/jpeg;base64,${user.profilePicture}`);
     }
   }, [user]);
 
   // Handle profile picture upload
   const handleProfilePicChange = async(event) => {
   const file = event.target.files[0];
-    if (file) {
+  // Check file type for allowed image formats
+  const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+    if (file && allowedTypes.includes(file.type)) {
         const formData = new FormData();
         formData.append('profilePicture', file);
 
         try {
-            const response = await fetch(`http://localhost:8080/api/users/${user.id}`, {
+            const response = await fetch(`http://localhost:8080/api/users/${user.id}/profilePicture`, {
                 method: 'PUT',
                 body: formData,
             });
 
-             if (!response.ok) {
+          if (!response.ok) {
           if (response.status === 413) {
           // Handle "Payload Too Large" error
-          throw new Error('Image size exceeds the allowable limit. Please upload a smaller file.');
+          setAlertContentDanger('Image size exceeds the allowable limit of 10MB. Please upload a smaller file.');
+          setAlertDanger(true);
+          setTimeout(() => setAlertDanger(false), 3000);
           }
           throw new Error(`Error uploading profile picture: ${response.statusText}`);
           }
@@ -93,6 +96,11 @@ const fetchPets = async () => {
             setTimeout(() => setAlertDanger(false), 3000);
         }
     }
+    else {
+    setAlertContentDanger('Please upload a valid image file (jpg or png).');
+    setAlertDanger(true);
+    setTimeout(() => setAlertDanger(false), 3000);
+  }
 };
 
 const handleRemoveProfilePic = async () => {
@@ -251,6 +259,7 @@ const handleRemoveProfilePic = async () => {
       if (response.status === 409) {
         setAlertContentDanger("The email entered is already registered.");
         setAlertDanger(true);
+        setTimeout(() => setAlert(false), 2500);
       } else {
         throw new Error(`Error updating profile: ${response.statusText}`);
       }
@@ -363,23 +372,89 @@ const handleRemoveProfilePic = async () => {
     }
 };
 
-   const handleRemovePetProfilePic = (petId) => {
+// Handle pet profile picture upload
+const handlePetProfilePicChange = async (event, petId) => {
+  const file = event.target.files[0];
+
+  // Check file type for allowed image formats
+  const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+
+    if (file && allowedTypes.includes(file.type)) {
+    const formData = new FormData();
+    formData.append('profilePicture', file);
+
+    try {
+        const response = await fetch(`http://localhost:8080/api/pets/${petId}/profilePicture`, {
+        method: 'PUT',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        if (response.status === 413) {
+          // Handle "Payload Too Large" error for large files
+          setAlertContentDanger('Image size exceeds the allowable limit of 10MB. Please upload a smaller file.');
+          setAlertDanger(true);
+          setTimeout(() => setAlertDanger(false), 3000);
+        }
+        throw new Error(`Error uploading pet profile picture: ${response.statusText}`);
+      }
+
+      const updatedPet = await response.json();
+
+      // Update the pets array in the state with the new profile picture
+      setPets((prevPets) =>
+        prevPets.map((pet) => 
+          pet.id === updatedPet.id ? { ...pet, profilePicture: updatedPet.profilePicture } : pet
+        )
+      );
+    } catch (error) {
+      console.error('Error uploading pet profile picture:', error.message);
+      setAlertContentDanger(error.message || 'Failed to upload pet profile picture. Please try again later.');
+      setAlertDanger(true);
+      setTimeout(() => setAlertDanger(false), 3000);
+    }
+  }
+  else {
+    setAlertContentDanger('Please upload a valid image file (jpg or png).');
+    setAlertDanger(true);
+    setTimeout(() => setAlertDanger(false), 3000);
+  }
+};
+
+const handleRemovePetProfilePic = async (petId) => {
+  try {
+    // Send a PUT request to the backend to update the pet and remove the profile picture
+    const response = await fetch(`http://localhost:8080/api/pets/${petId}/profilePicture`, {
+      method: 'DELETE',
+    });
+
+    if (!response.ok) {
+      throw new Error(`Error removing pet profile picture: ${response.statusText}`);
+    }
+
+    // Update the pet in the frontend state
     const updatedPets = pets.map((pet) =>
       pet.id === petId ? { ...pet, profilePicture: null } : pet
     );
     setPets(updatedPets);
-    updateUserPets(updatedPets);
-  };
+    updateUserPets(updatedPets); // Update the pets in the user state as well
+  } catch (error) {
+    console.error('Error removing pet profile picture:', error);
+    // Optionally, display an alert or error message to the user
+  }
+};
 
-  const updateUserPets = (updatedPets) => {
-    const updatedUser = { ...user, pets: updatedPets };
-    setUser(updatedUser);
-  };
+// Helper function to update the user state with the new pets array
+const updateUserPets = (updatedPets) => {
+  const updatedUser = { ...user, pets: updatedPets };
+  setUser(updatedUser);
+};
+
 
   // Handle pet profile picture preview
   const getPetProfilePicPreview = (pet) => {
     if (pet.profilePicture) {
-      return pet.profilePicture;
+      return `data:image/png;base64,${pet.profilePicture}`;
     } else {
       // Set placeholder pet profile picture
       return 'https://via.placeholder.com/286x180.png?text=Pet+Picture';
@@ -394,19 +469,23 @@ const handleRemoveProfilePic = async () => {
 
 
   const confirmPetDelete = (pet) => {
-    setPetToDelete(pet);
+    setPetToDelete(pet); 
     setShowDeletePetModal(true);  // Show delete confirmation modal
   };
 
 
   // Handle pet delete
  const handlePetDelete = async (petId) => {
+  if (!petId) {
+    console.error('Pet ID is undefined!');
+    return;
+  }
     try {
-      const response = await fetch(`http://localhost:8080/api/pets/${petId}`, {
+      const response = await fetch(`http://localhost:8080/api/pets/${petToDelete}`, {
         method: 'DELETE',
       });
       if (response.ok) {
-        setPets(pets.filter((pet) => pet.id !== petId));
+        setPets(pets.filter((pet) => pet.id !== petToDelete));
         setShowDeletePetModal(false); // Close modal on success
       } else {
         console.error('Error deleting pet');
@@ -415,43 +494,6 @@ const handleRemoveProfilePic = async () => {
       console.error('Error deleting pet:', error);
     }
   };
-
-  
-   // Handle pet profile picture upload
-  // Handle pet profile picture upload
-const handlePetProfilePicChange = async (event, petId) => {
-  const file = event.target.files[0];
-  if (file) {
-    const formData = new FormData();
-    formData.append('profilePicture', file);
-
-    try {
-      const response = await fetch(`http://localhost:8080/api/pets/${petId}`, {
-        method: 'PUT',
-        body: formData,
-      });
-
-      if (!response.ok) {
-        if (response.status === 413) {
-          // Handle "Payload Too Large" error for large files
-          throw new Error('Image size exceeds the allowable limit. Please upload a smaller file.');
-        }
-        throw new Error(`Error uploading pet profile picture: ${response.statusText}`);
-      }
-
-      const updatedPets = pets.map((pet) =>
-        pet.id === petId ? { ...pet, profilePicture: URL.createObjectURL(file) } : pet
-      );
-      setPets(updatedPets);
-      updateUserPets(updatedPets); // Update the pets in the user state as well
-    } catch (error) {
-      console.error('Error uploading pet profile picture:', error.message);
-      setAlertContentDanger(error.message || 'Failed to upload pet profile picture. Please try again later.');
-      setAlertDanger(true);
-      setTimeout(() => setAlertDanger(false), 3000);
-    }
-  }
-};
 
 // Loading spinner displayed until the user data is loaded
   if (isLoading || !user) {
