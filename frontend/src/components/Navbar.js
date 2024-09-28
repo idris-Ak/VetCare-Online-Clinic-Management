@@ -14,7 +14,6 @@ function Navbar({ logoutUser, isLoggedIn, user }) {
   };
 
   const handleNavigation= (link) => {
-    console.log('Navigating to:', link);
     if (!isLoggedIn) {
       //Navigate to the login page with the intended destination as state
       navigate('/login', { state: { from: link } });
@@ -41,38 +40,43 @@ function Navbar({ logoutUser, isLoggedIn, user }) {
         </li>
 
         <li className="navbar-item">
-          <Link to="/AppointmentPage/Appointments" className="navbar-link" onClick={()=> handleNavigation('/AppointmentPage/Appointments')}>
+          <NavLink to="/AppointmentPage/Appointments" className="navbar-link" onClick={()=> handleNavigation('/AppointmentPage/Appointments')}>
             Book Online
-          </Link>
+          </NavLink>
         </li>
 
         <li className="navbar-item">
-          <Link to="/MedicalRecords" className="navbar-link" onClick={() => handleNavigation('/MedicalRecords')}>
+          <NavLink to="/MedicalRecords" className="navbar-link" onClick={() => handleNavigation('/MedicalRecords')}>
             Medical Records
-          </Link>
+          </NavLink>
         </li>
 
         <li className="navbar-item">
-          <Link to="/prescription" className="navbar-link" onClick={() => handleNavigation('/prescription')}>
+          <NavLink to="/prescription" className="navbar-link" onClick={() => handleNavigation('/prescription')}>
             Prescription
-          </Link>
+          </NavLink>
         </li>
 
         <li className="navbar-item">
-          <Link to="/educational" className="navbar-link">Educational Resources</Link>
+          <NavLink to="/educational" className="navbar-link">Educational Resources</NavLink>
         </li>
       </ul>
 
       <ul className="navbar-list user-links">
         {isLoggedIn && user ? (
           <li className="navbar-item">
-            <span className="welcome-text">Welcome, {user.name}</span>
+          <span className="welcome-text">Welcome, {user.role === 'Vet' ? (
+          <span>
+          <span style={{ color: '#007bff', fontStyle: 'italic', marginLeft: '5px'}}>Dr. </span>{user.name}
+          </span>
+          ) : user.name} 
+          </span>
             <Link to="/myprofile" className="navbar-link">
             {/* <a href="https://www.flaticon.com/free-icons/user" title="user icons">User icons created by Becris - Flaticon</a> */}
               <img 
                 src={getProfilePicUrl()}
                 alt="Profile"
-                style={{ width: '40px', height: '40px', objectFit: 'cover', borderRadius: '50%' }}
+                style={{ width: '36px', height: '36px', objectFit: 'cover', borderRadius: '50%' }}
               />
             </Link>
             <button onClick={handleLogout} className="logout-button">Logout</button>

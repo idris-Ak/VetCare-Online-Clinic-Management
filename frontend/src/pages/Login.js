@@ -1,5 +1,5 @@
-import React, {useState} from 'react';
-import { Button, Form, Alert, Container, ToggleButtonGroup, ToggleButton } from 'react-bootstrap';
+import React, {useState, useEffect} from 'react';
+import { Button, Form, Alert, Container, ToggleButtonGroup, ToggleButton, Spinner } from 'react-bootstrap';
 import { useNavigate, Link, useLocation } from "react-router-dom";
 
 function Login({loginUser}) {
@@ -7,9 +7,15 @@ function Login({loginUser}) {
   const [errorMessage, setErrorMessage] = useState('');
   const [showErrorMessage, setShowErrorMessage] = useState(false);
   const [showSuccessAlert, setShowSuccessAlert] = useState(false);
+  const [isLoading, setIsLoading] = useState(true); // Loading state
   const navigate = useNavigate();
   const location = useLocation();
   
+
+  useEffect(() => {
+    setTimeout(() => setIsLoading(false), 500);
+  });
+
   const handleChange = (event) => {
     const { name, value } = event.target;
     setUserDetails((prevUserDetails) => ({
@@ -68,6 +74,16 @@ function Login({loginUser}) {
   }
 }
 
+  // Loading spinner displayed until the user data is loaded
+  if (isLoading) {
+    return (
+      <div className="d-flex justify-content-center align-items-center" style={{ height: '100vh' }}>
+        <Spinner animation="border" role="status">
+          <span className="visually-hidden">Loading...</span>
+        </Spinner>
+      </div>
+    );
+  }
 
   return (
   <Container className="d-flex justify-content-center align-items-center" style={{ marginTop: '25px', marginBottom: '25px', minHeight: '75vh', fontFamily: 'Lato, sans-serif'}}>
