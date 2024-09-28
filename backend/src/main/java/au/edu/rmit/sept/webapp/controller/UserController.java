@@ -52,13 +52,27 @@ public class UserController {
     @PutMapping("/{userId}")
     public ResponseEntity<User> updateUser(
             @PathVariable Long userId,
+            @RequestParam(value = "name", required = false) String name,
+            @RequestParam(value = "email", required = false) String email,
+            @RequestParam(value = "password", required = false) String password,
             @RequestParam(value = "profilePicture", required = false) MultipartFile profilePicture)
             throws IOException {
 
         Optional<User> existingUser = userService.findById(userId);
         if (existingUser.isPresent()) {
             User user = existingUser.get();
-
+            
+            // Update user fields if they are provided
+            if (name != null && !name.isEmpty()) {
+                user.setName(name);
+            }
+            if (email != null && !email.isEmpty()) {
+                user.setEmail(email);
+            }
+            if (password != null && !password.isEmpty()) {
+                user.setPassword(password);
+            }
+            
             if (profilePicture != null && !profilePicture.isEmpty()) {
                 try {
                     String base64Image = imageService.processImage(profilePicture);

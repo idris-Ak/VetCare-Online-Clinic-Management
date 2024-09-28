@@ -215,20 +215,6 @@ const handleRemoveProfilePic = async () => {
         }, 2500);
         return;
     }
-
-    // Check if the email is changed and already exists in the users array
-    if (newEmail !== user.email) {
-      const users = JSON.parse(localStorage.getItem('users')) || [];
-      const emailExists = users.some((u) => u.email === newEmail);
-      if (emailExists) {
-        setAlertContentDanger("The email entered is already registered.");
-        setAlertDanger(true);
-        setTimeout(() => {
-        setAlertDanger(false);
-        }, 2500);
-        return;
-      }
-    }
     
     //The following function was given by OpenAI (2024) ChatGPT [Large language model], accessed 3 September 2024. (*Link could not be generated successfully*)
     const isPasswordStrong = (newPassword) => {
@@ -495,7 +481,7 @@ const updateUserPets = (updatedPets) => {
     }
   };
 
-// Loading spinner displayed until the user data is loaded
+  // Loading spinner displayed until the user data is loaded
   if (isLoading || !user) {
     return (
       <div className="d-flex justify-content-center align-items-center" style={{ height: '100vh' }}>
@@ -574,7 +560,13 @@ const updateUserPets = (updatedPets) => {
         </div>
 
         {/* User Details */}
-        <h2 style={{ fontWeight: '700', color: '#333' }}>{user.name}</h2>
+        <h2 style={{ fontWeight: '700', color: '#333' }}>
+        {user.role === 'Vet' ? (
+        <span>
+          <span style={{ color: '#007bff', fontStyle: 'italic', marginTop: '15px', marginRight: '10px' }}>Dr. </span>{user.name}
+        </span>
+        ) : user.name}
+        </h2>
         <p style={{ color: '#555' }}>{user.email}</p>
         <div className="mt-3">
           <Button variant="outline-primary" className="me-2" onClick={() => setShowEditProfileModal(true)}>
@@ -584,6 +576,155 @@ const updateUserPets = (updatedPets) => {
             Delete Account
           </Button>
         </div>
+
+      {/* Edit Profile Modal */}
+      <Modal show={showEditProfileModal} onHide={() => setShowEditProfileModal(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>Edit Profile</Modal.Title>
+        </Modal.Header>
+        <Form onSubmit={handleProfileUpdate}>
+          <Modal.Body>
+            {showAlertDanger && alertContentDanger && <Alert variant="danger">{alertContentDanger}</Alert>}
+            <Form.Group controlId="userName" className="mb-3">
+              <Form.Label>Name</Form.Label>
+              <Form.Control
+                type="text"
+                name="name"
+                defaultValue={user.name}
+                required
+              />
+            </Form.Group>
+            <Form.Group controlId="userEmail" className="mb-3">
+              <Form.Label>Email</Form.Label>
+              <Form.Control
+                type="email"
+                name="email"
+                defaultValue={user.email}
+                required
+              />
+            </Form.Group>
+               <Form.Group controlId="currentPassword" className="mb-3">
+              <Form.Label>Current Password</Form.Label>
+              <Form.Control
+                type="password"
+                name="currentPassword"
+                placeholder="Enter current password"
+              />
+            </Form.Group>
+            <Form.Group controlId="userPassword" className="mb-3">
+              <Form.Label>New Password</Form.Label>
+              <Form.Control
+                type="password"
+                name="password"
+                placeholder="Enter new password"
+              />
+            </Form.Group>
+            <Form.Group controlId="userConfirmPassword" className="mb-3">
+              <Form.Label>Confirm New Password</Form.Label>
+              <Form.Control
+                type="password"
+                name="confirmPassword"
+                placeholder="Confirm new password"
+              />
+            </Form.Group>
+          </Modal.Body>
+          <Modal.Footer className="d-flex justify-content-between">
+            <Button variant="secondary" onClick={() => setShowEditProfileModal(false)}>
+              Cancel
+            </Button>
+            <Button variant="primary" type="submit">
+              Save Changes
+            </Button>
+          </Modal.Footer>
+        </Form>
+      </Modal>
+
+      {/* Delete Account Modal */}
+      <Modal show={showDeleteAccountModal} onHide={() => setShowDeleteAccountModal(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>Delete Account</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <p>Are you sure you want to delete your account? This action cannot be undone.</p>
+        </Modal.Body>
+        <Modal.Footer className="d-flex justify-content-between">
+          <Button variant="secondary" onClick={() => setShowDeleteAccountModal(false)}>
+            Cancel
+          </Button>
+          <Button variant="danger" onClick={handleAccountDeletion}>
+            Delete Account
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
+      {/* Pet Modal */}
+      <Modal show={showPetModal} onHide={() => { setShowPetModal(false); setCurrentPet(null); }}>
+        <Modal.Header closeButton>
+          <Modal.Title>{currentPet ? 'Edit Pet' : 'Add Pet'}</Modal.Title>
+        </Modal.Header>
+        <Form onSubmit={handlePetSubmit}>
+            <Modal.Body>
+            <Form.Group controlId="petName" className="mb-3">
+              <Form.Label>Pet Name</Form.Label>
+              <Form.Control
+                type="text"
+                name="petName"
+                defaultValue={currentPet ? currentPet.name : ''}
+                required
+                placeholder="Enter your pet's name"
+              />
+            </Form.Group>
+            <Form.Group controlId="petType" className="mb-3">
+              <Form.Label>Pet Type</Form.Label>
+              <Form.Control
+                type="text"
+                name="petType"
+                defaultValue={currentPet ? currentPet.type : ''}
+                required
+                placeholder="Enter your pet's type"
+                list="petTypeList"
+              />
+            <datalist id="petTypeList">
+            <option value="Dog" />
+            <option value="Cat" />
+            <option value="Bird" />
+            <option value="Fish" />
+            <option value="Reptile" />
+            </datalist>
+            </Form.Group>
+            <Form.Group controlId="petBreed" className="mb-3">
+              <Form.Label>Breed</Form.Label>
+              <Form.Control
+                type="text"
+                name="petBreed"
+                defaultValue={currentPet ? currentPet.breed : ''}
+                placeholder="Enter your pet's breed (optional)"
+              />
+            </Form.Group>
+            <Form.Group controlId="petAge" className="mb-3">
+              <Form.Label>Age</Form.Label>
+              <Form.Control
+                type="number"
+                name="petAge"
+                defaultValue={currentPet ? currentPet.age : ''}
+                placeholder="Enter your pet's age (optional)"
+              />
+            </Form.Group>
+            <Form.Group controlId="petProfilePicture" className="mb-3">
+              <Form.Label>Pet Profile Picture</Form.Label>
+              <Form.Control type="file" name="petProfilePicture" accept="image/*" />
+            </Form.Group>
+          </Modal.Body>
+          <Modal.Footer className="d-flex justify-content-between">
+            <Button variant="secondary" onClick={() => { setShowPetModal(false); setCurrentPet(null); }}>
+              Cancel
+            </Button>
+            <Button variant="primary" type="submit">
+              {currentPet ? 'Save Changes' : 'Add Pet'}
+            </Button>
+          </Modal.Footer>
+        </Form>
+      </Modal>
 
         {/* Pet Profiles */}
         {user.role === 'Pet Owner' && (
@@ -705,10 +846,10 @@ const updateUserPets = (updatedPets) => {
           </div>
         )}
       </div>
-      
-      {/* Pet Deletion Confirmation Modal */}
-      <Modal show={showDeletePetModal} onHide={() => setShowDeletePetModal(false)}>
-    <Modal.Header closeButton>
+
+        {/* Pet Deletion Confirmation Modal */}
+        <Modal show={showDeletePetModal} onHide={() => setShowDeletePetModal(false)}>
+      <Modal.Header closeButton>
         <Modal.Title>Delete Pet</Modal.Title>
     </Modal.Header>
     <Modal.Body>
@@ -721,157 +862,9 @@ const updateUserPets = (updatedPets) => {
         <Button variant="danger" onClick={handlePetDelete}>
             Delete
         </Button>
-    </Modal.Footer>
-    </Modal>
-
-      {/* Pet Modal */}
-      <Modal show={showPetModal} onHide={() => { setShowPetModal(false); setCurrentPet(null); }}>
-        <Modal.Header closeButton>
-          <Modal.Title>{currentPet ? 'Edit Pet' : 'Add Pet'}</Modal.Title>
-        </Modal.Header>
-        <Form onSubmit={handlePetSubmit}>
-            <Modal.Body>
-            <Form.Group controlId="petName" className="mb-3">
-              <Form.Label>Pet Name</Form.Label>
-              <Form.Control
-                type="text"
-                name="petName"
-                defaultValue={currentPet ? currentPet.name : ''}
-                required
-                placeholder="Enter your pet's name"
-              />
-            </Form.Group>
-            <Form.Group controlId="petType" className="mb-3">
-              <Form.Label>Pet Type</Form.Label>
-              <Form.Control
-                type="text"
-                name="petType"
-                defaultValue={currentPet ? currentPet.type : ''}
-                required
-                placeholder="Enter your pet's type"
-                list="petTypeList"
-              />
-            <datalist id="petTypeList">
-            <option value="Dog" />
-            <option value="Cat" />
-            <option value="Bird" />
-            <option value="Fish" />
-            <option value="Reptile" />
-            </datalist>
-            </Form.Group>
-            <Form.Group controlId="petBreed" className="mb-3">
-              <Form.Label>Breed</Form.Label>
-              <Form.Control
-                type="text"
-                name="petBreed"
-                defaultValue={currentPet ? currentPet.breed : ''}
-                placeholder="Enter your pet's breed (optional)"
-              />
-            </Form.Group>
-            <Form.Group controlId="petAge" className="mb-3">
-              <Form.Label>Age</Form.Label>
-              <Form.Control
-                type="number"
-                name="petAge"
-                defaultValue={currentPet ? currentPet.age : ''}
-                placeholder="Enter your pet's age (optional)"
-              />
-            </Form.Group>
-            <Form.Group controlId="petProfilePicture" className="mb-3">
-              <Form.Label>Pet Profile Picture</Form.Label>
-              <Form.Control type="file" name="petProfilePicture" accept="image/*" />
-            </Form.Group>
-          </Modal.Body>
-          <Modal.Footer className="d-flex justify-content-between">
-            <Button variant="secondary" onClick={() => { setShowPetModal(false); setCurrentPet(null); }}>
-              Cancel
-            </Button>
-            <Button variant="primary" type="submit">
-              {currentPet ? 'Save Changes' : 'Add Pet'}
-            </Button>
-          </Modal.Footer>
-        </Form>
+      </Modal.Footer>
       </Modal>
 
-      {/* Edit Profile Modal */}
-      <Modal show={showEditProfileModal} onHide={() => setShowEditProfileModal(false)}>
-        <Modal.Header closeButton>
-          <Modal.Title>Edit Profile</Modal.Title>
-        </Modal.Header>
-        <Form onSubmit={handleProfileUpdate}>
-          <Modal.Body>
-            {showAlertDanger && alertContentDanger && <Alert variant="danger">{alertContentDanger}</Alert>}
-            <Form.Group controlId="userName" className="mb-3">
-              <Form.Label>Name</Form.Label>
-              <Form.Control
-                type="text"
-                name="name"
-                defaultValue={user.name}
-                required
-              />
-            </Form.Group>
-            <Form.Group controlId="userEmail" className="mb-3">
-              <Form.Label>Email</Form.Label>
-              <Form.Control
-                type="email"
-                name="email"
-                defaultValue={user.email}
-                required
-              />
-            </Form.Group>
-               <Form.Group controlId="currentPassword" className="mb-3">
-              <Form.Label>Current Password</Form.Label>
-              <Form.Control
-                type="password"
-                name="currentPassword"
-                placeholder="Enter current password"
-              />
-            </Form.Group>
-            <Form.Group controlId="userPassword" className="mb-3">
-              <Form.Label>New Password</Form.Label>
-              <Form.Control
-                type="password"
-                name="password"
-                placeholder="Enter new password"
-              />
-            </Form.Group>
-            <Form.Group controlId="userConfirmPassword" className="mb-3">
-              <Form.Label>Confirm New Password</Form.Label>
-              <Form.Control
-                type="password"
-                name="confirmPassword"
-                placeholder="Confirm new password"
-              />
-            </Form.Group>
-          </Modal.Body>
-          <Modal.Footer className="d-flex justify-content-between">
-            <Button variant="secondary" onClick={() => setShowEditProfileModal(false)}>
-              Cancel
-            </Button>
-            <Button variant="primary" type="submit">
-              Save Changes
-            </Button>
-          </Modal.Footer>
-        </Form>
-      </Modal>
-
-      {/* Delete Account Modal */}
-      <Modal show={showDeleteAccountModal} onHide={() => setShowDeleteAccountModal(false)}>
-        <Modal.Header closeButton>
-          <Modal.Title>Delete Account</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <p>Are you sure you want to delete your account? This action cannot be undone.</p>
-        </Modal.Body>
-        <Modal.Footer className="d-flex justify-content-between">
-          <Button variant="secondary" onClick={() => setShowDeleteAccountModal(false)}>
-            Cancel
-          </Button>
-          <Button variant="danger" onClick={handleAccountDeletion}>
-            Delete Account
-          </Button>
-        </Modal.Footer>
-      </Modal>
     </Container>
   );
 }

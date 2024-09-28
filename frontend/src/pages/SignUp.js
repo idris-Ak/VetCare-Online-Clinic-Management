@@ -1,6 +1,6 @@
-import React, { useState} from 'react';
+import React, { useState, useEffect} from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Button, Form, Alert, Container, ToggleButtonGroup, ToggleButton, OverlayTrigger, Tooltip } from 'react-bootstrap';
+import { Button, Form, Alert, Container, ToggleButtonGroup, ToggleButton, OverlayTrigger, Tooltip, Spinner} from 'react-bootstrap';
 
 function SignUp({loginUser}) {
   const [user, setUser] = useState({
@@ -16,7 +16,12 @@ function SignUp({loginUser}) {
     confirmPasswordError: '',
   });
   const [showSuccessAlert, setShowSuccessAlert] = useState(false);
+  const [isLoading, setIsLoading] = useState(true); // Loading state
   const navigate = useNavigate();
+
+  useEffect(() => {
+    setTimeout(() => setIsLoading(false), 500);
+  });
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -123,6 +128,17 @@ try {
       Password must be at least 8 characters long and include uppercase, lowercase, numbers, and special characters.
     </Tooltip>
   );
+
+    // Loading spinner displayed until the user data is loaded
+  if (isLoading) {
+    return (
+      <div className="d-flex justify-content-center align-items-center" style={{ height: '100vh' }}>
+        <Spinner animation="border" role="status">
+          <span className="visually-hidden">Loading...</span>
+        </Spinner>
+      </div>
+    );
+  }
 
   return (
     <Container className="d-flex justify-content-center align-items-center" style={{ marginTop: '25px', marginBottom: '25px', minHeight: '100vh', fontFamily: 'Lato, sans-serif'}}>
