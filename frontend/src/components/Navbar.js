@@ -2,6 +2,7 @@ import React from 'react';
 import { NavLink, Link, useNavigate } from 'react-router-dom';
 import profilepic from '../components/assets/profilepic.png';
 import './Navbar.css'; // Import the CSS file for styling
+import logo from "../components/assets/veterinary.png";
 
 function Navbar({ logoutUser, isLoggedIn, user }) {
   const navigate = useNavigate();
@@ -34,6 +35,9 @@ function Navbar({ logoutUser, isLoggedIn, user }) {
 
   return (
     <nav className="navbar">
+      <Link to="/"> 
+      <img src={logo} alt='Veterinary Logo' className='navbar-logo' />
+      </Link>
       <ul className="navbar-list main-links">
         <li className="navbar-item">
         <NavLink to="/" className="navbar-link" activeClassName="active">Home</NavLink>
