@@ -75,7 +75,7 @@ function App() {
           <div className="navbar-spacer" style={{ height: '65px', backgroundColor: '#68ccd4' }}></div> {/* Spacer div */}
           <Navbar logoutUser={logoutUser} isLoggedIn={isLoggedIn} user={user} />
           <Routes>
-            <Route path="/" element={<HomePage />} />
+            <Route path="/" element={<HomePage isLoggedIn={isLoggedIn}/>} />
             <Route path="/all-vets" element={<AllVetMembers vets={vets} />} />
             {vets.map(vet => (
               <Route key={vet.id} path={vet.detailPath} element={<VetProfilePage vet={vet} />} />
