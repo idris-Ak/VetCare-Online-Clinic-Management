@@ -2,6 +2,9 @@ import React from 'react';
 import './Footer.css';
 import { Link } from 'react-router-dom';
 import logo from "../components/assets/veterinary.png";
+import Facebook from "../components/assets/facebook-circular-logo.png";
+import Instagram from "../components/assets/instagram.png"; 
+import Twitter from "../components/assets/twitter.png"; 
 
 function Footer() {
   return (
@@ -24,10 +27,27 @@ function Footer() {
         <p>Sunday: CLOSED</p>
       </div>
       <div className="footer-section social">
-        <h3>Follow Us</h3>
-        <a href="http://facebook.com" target="_blank" rel="noopener noreferrer">Facebook</a>
-        <a href="http://instagram.com" target="_blank" rel="noopener noreferrer">Instagram</a>
-        <a href="http://twitter.com" target="_blank" rel="noopener noreferrer">Twitter</a>
+        <h5>Follow Us</h5>
+            <ul className="list-unstyled">
+              {/*<a href="https://www.flaticon.com/free-icons/facebook" title="facebook icons">Facebook icons created by Freepik - Flaticon</a>*/}
+              <li>  
+              <a href="https://www.facebook.com" target="_blank" rel="noopener noreferrer">
+              <img src={Facebook} url="/https://www.facebook.com" alt="Search" style={{ width: '30px', height: '30px' }} />
+              </a> 
+              </li>
+              {/*<a href="https://www.flaticon.com/free-icons/brands-and-logotypes" title="brands and logotypes icons">Brands and logotypes icons created by Freepik - Flaticon</a>*/}
+              <li>  
+              <a href="https://www.twitter.com" target="_blank" rel="noopener noreferrer">
+              <img src={Twitter} url="/https://www.twitter.com" alt="Search" style={{ width: '30px', height: '30px', marginTop: '5px' }} />
+              </a> 
+              </li>
+              {/*<a href="https://www.flaticon.com/free-icons/instagram-logo" title="instagram logo icons">Instagram logo icons created by Freepik - Flaticon</a>*/}
+              <li>
+              <a href="https://www.instagram.com" target="_blank" rel="noopener noreferrer">
+              <img src={Instagram} url="/https://www.instagram.com" alt="Search" style={{ width: '30px', height: '30px', marginTop: '5px'}} />
+              </a> 
+              </li>
+        </ul>
       </div>
     </footer>
   );
