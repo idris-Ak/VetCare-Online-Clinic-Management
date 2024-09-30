@@ -93,7 +93,7 @@ function App() {
               path="/AppointmentPage/Appointments" 
               element={
                 <PrivateRoute isLoggedIn={isLoggedIn}>
-                  <Appointments />
+                  <Appointments user={user} />
                 </PrivateRoute>
               } 
             />
