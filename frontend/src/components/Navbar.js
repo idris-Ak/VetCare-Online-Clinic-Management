@@ -1,17 +1,22 @@
-import React from 'react';
+import { useState } from 'react';
 import { NavLink, Link, useNavigate } from 'react-router-dom';
 import profilepic from '../components/assets/profilepic.png';
 import './Navbar.css'; // Import the CSS file for styling
 import logo from "../components/assets/veterinary.png";
+import { Modal, Button } from 'react-bootstrap';
 
 function Navbar({ logoutUser, isLoggedIn, user }) {
   const navigate = useNavigate();
+  const [showLogoutMessage, setShowLogoutMessage] = useState(false);
+
+    // Handle showing the modal
+  const handleShowLogoutModal = () => setShowLogoutMessage(true);
+  const handleCloseLogoutModal = () => setShowLogoutMessage(false);
 
   const handleLogout = () => {
-    if (window.confirm("Are you sure you want to log out?")) {
+    setShowLogoutMessage(false);
     logoutUser();
     navigate('/login');
-    }
   };
 
   const handleNavigation= (link) => {
@@ -83,7 +88,7 @@ function Navbar({ logoutUser, isLoggedIn, user }) {
                 style={{ width: '36px', height: '36px', objectFit: 'cover', borderRadius: '50%' }}
               />
             </Link>
-            <button onClick={handleLogout} className="logout-button">Logout</button>
+            <button onClick={handleShowLogoutModal} className="logout-button">Logout</button>
           </li>
         ) : (
           <li className="navbar-item">
@@ -91,6 +96,23 @@ function Navbar({ logoutUser, isLoggedIn, user }) {
           </li>
         )}
       </ul>
+
+
+      {/* Logout Confirmation Modal */}
+      <Modal show={showLogoutMessage} onHide={handleCloseLogoutModal}>
+        <Modal.Header closeButton>
+          <Modal.Title>Confirm Logout</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>Are you sure you want to log out?</Modal.Body>
+        <Modal.Footer className="d-flex justify-content-between">
+          <Button variant="secondary" onClick={handleCloseLogoutModal}>
+            Cancel
+          </Button>
+          <Button variant="danger" onClick={handleLogout}>
+            Logout
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </nav>
   );
 }
