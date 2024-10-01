@@ -9,7 +9,8 @@ import Twitter from "../components/assets/twitter.png";
 function Footer() {
   return (
     <footer className="footer">
-      <div className="footer-section logo">
+      <div className="footer-content">
+        <div className="footer-section logo">
         <Link to="/"> 
           <img src={logo} alt='Veterinary Clinic Logo' className='footer-logo' />
         </Link>
@@ -48,6 +49,11 @@ function Footer() {
               </a> 
               </li>
         </ul>
+      </div>
+      </div>
+
+      <div className="footer-copyright">
+        <p className="text-center">Copyright &copy; {new Date().getFullYear()} VetCare. All rights reserved.</p>
       </div>
     </footer>
   );
