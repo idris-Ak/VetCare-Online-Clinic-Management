@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
 import { Button, Form, Container, Modal, Card, Row, Col, Alert, Spinner } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import profilepic from '../../components/assets/profilepic.png';
@@ -30,15 +30,9 @@ function MyProfile({ user, setUser, logoutUser }) {
   // State for delete account modal
   const [showDeleteAccountModal, setShowDeleteAccountModal] = useState(false);
 
-   useEffect(() => {
-    if (user) {
-      fetchPets();
-    }
-    setTimeout(() => setIsLoading(false), 1000);
-  }, [user]);
 
 // Fetch pets from the backend for the current user
-const fetchPets = async () => {
+const fetchPets = useCallback(async () => {
   try {
     const response = await fetch(`http://localhost:8080/api/pets/user/${user.id}`);
     if (!response.ok) {
@@ -53,7 +47,14 @@ const fetchPets = async () => {
     setAlertDanger(true);
     setTimeout(() => setAlertDanger(false), 3000);
   }
-};
+}, [user]);
+
+  useEffect(() => {
+    if (user) {
+      fetchPets();
+    }
+    setTimeout(() => setIsLoading(false), 1000);
+  }, [user, fetchPets]);
 
   useEffect(() => {
     // Set profile picture preview if the user has a profile picture

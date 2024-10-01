@@ -30,7 +30,7 @@
 
 @media (max-width: 768px) {
   .navbar-item {
-    margin-right: 20px; /* Less margin for smaller screens */
+    margin-bottom: 10px; /* Less margin for smaller screens */
   }
 }
 
