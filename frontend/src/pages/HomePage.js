@@ -8,6 +8,9 @@ import 'swiper/css/scrollbar';
 import 'swiper/css/autoplay';
 import { Navigation, Autoplay } from 'swiper/modules';
 
+import { useState, useEffect } from 'react';
+
+
 import blog1 from '../components/assets/blog1.jpg';
 import blog2 from '../components/assets/blog2.jpg';
 import blog3 from '../components/assets/blog3.jpg';
@@ -19,7 +22,23 @@ import about2 from "../components/assets/about2.jpg";
 import CustomerReviews from "../components/CustomerReviews";
 import "./HomePage.css";
 
-function HomePage({isLoggedIn}) {
+
+function HomePage() {
+  const [vets, setVets] = useState([]); // This holds the vet data
+
+  useEffect(() => {
+    fetch('http://localhost:5001/api/vets') // Adjust the URL as per your actual backend URL
+      .then(response => response.json())
+      .then(data => {
+        if (data.message === 'success') {
+          setVets(data.data); // Set the vet data in state
+        } else {
+          console.error('Failed to fetch vets');
+        }
+      })
+      .catch(error => console.error('Error fetching data:', error));
+  }, []); // Empty dependency array means this effect runs once after the initial render
+
   return (
     <div>
      

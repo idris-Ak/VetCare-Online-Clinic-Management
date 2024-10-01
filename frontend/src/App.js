@@ -4,7 +4,6 @@ import { Navigate, Route, BrowserRouter as Router, Routes } from 'react-router-d
 import './App.css';
 import Footer from './components/Footer';
 import Navbar from './components/Navbar';
-import vets from './components/data/vets';
 import AllVetMembers from './pages/AllVetMembers';
 import Appointments from './pages/AppointmentPage/Appointments';
 import EducationalResource from './pages/EducationalResource';
@@ -75,11 +74,14 @@ function App() {
           <div className="navbar-spacer" style={{ height: '65px', backgroundColor: '#68ccd4' }}></div> {/* Spacer div */}
           <Navbar logoutUser={logoutUser} isLoggedIn={isLoggedIn} user={user} />
           <Routes>
-            <Route path="/" element={<HomePage isLoggedIn={isLoggedIn}/>} />
-            <Route path="/all-vets" element={<AllVetMembers vets={vets} />} />
-            {vets.map(vet => (
-              <Route key={vet.id} path={vet.detailPath} element={<VetProfilePage vet={vet} />} />
-            ))}
+
+            <Route path="/" element={<HomePage />} />
+            <Route path="/all-vets" element={<AllVetMembers />} /> {/* Pass the vets data directly from the backend, if necessary */}
+            
+            {/* Dynamic route for vet profile pages */}
+            <Route path="/vets/:id" element={<VetProfilePage />} /> {/* :id captures the vet ID from the URL */}
+            
+
             <Route path="/login" element={<Login loginUser={loginUser} />} />
             <Route path="/signup" element={<SignUp loginUser={loginUser} />} />
             <Route path="/educational" element={<EducationalResource />} />
