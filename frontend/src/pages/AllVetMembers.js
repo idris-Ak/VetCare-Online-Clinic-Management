@@ -1,3 +1,5 @@
+/* eslint-disable react/jsx-no-comment-textnodes */
+/* eslint-disable jsx-a11y/alt-text */
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import './AllVetMembers.css'; // Ensure the CSS file is correctly set up
@@ -45,7 +47,7 @@ const AllVetMembers = () => {
       <div className="vets-list">
         {vets.map(vet => (
           <div key={vet.id} className="vet-card">
-            <img src={vet.image_path} alt={`${vet.name}`} className="vet-image" />
+            <img src={vet.image_path} className="vet-image" />
             <h3>{vet.name}</h3>
             <p>{vet.short_description}</p>
             <Link to={vet.detail_path} className="learn-more-link">Learn More</Link>

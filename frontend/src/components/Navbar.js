@@ -1,41 +1,27 @@
-import { useState } from 'react';
+import React from 'react';
 import { NavLink, Link, useNavigate } from 'react-router-dom';
 import profilepic from '../components/assets/profilepic.png';
 import './Navbar.css'; // Import the CSS file for styling
 import logo from "../components/assets/veterinary.png";
-import { Modal, Button } from 'react-bootstrap';
 
 function Navbar({ logoutUser, isLoggedIn, user }) {
   const navigate = useNavigate();
-  const [showLogoutMessage, setShowLogoutMessage] = useState(false);
-
-    // Handle showing the modal
-  const handleShowLogoutModal = () => setShowLogoutMessage(true);
-  const handleCloseLogoutModal = () => setShowLogoutMessage(false);
 
   const handleLogout = () => {
-    setShowLogoutMessage(false);
+    if (window.confirm("Are you sure you want to log out?")) {
     logoutUser();
     navigate('/login');
+    }
   };
 
   const handleNavigation= (link) => {
+    console.log('Navigating to:', link);
     if (!isLoggedIn) {
       //Navigate to the login page with the intended destination as state
       navigate('/login', { state: { from: link } });
     } else {
       navigate(link);
     }
-  };
-
-  // function to get the profile picture URL
-  const getProfilePicUrl = () => {
-    // If user has a profile picture, check if it's Base64 and add prefix if needed
-    if (user && user.profilePicture) {
-      // If it's Base64, add the necessary prefix
-      return `data:image/jpeg;base64,${user.profilePicture}`;
-    }
-    return profilepic;
   };
 
   return (
@@ -49,46 +35,41 @@ function Navbar({ logoutUser, isLoggedIn, user }) {
         </li>
 
         <li className="navbar-item">
-          <NavLink to="/AppointmentPage/Appointments" className="navbar-link" onClick={()=> handleNavigation('/AppointmentPage/Appointments')}>
+          <Link to="/AppointmentPage/Appointments" className="navbar-link" onClick={()=> handleNavigation('/AppointmentPage/Appointments')}>
             Book Online
-          </NavLink>
+          </Link>
         </li>
 
         <li className="navbar-item">
-          <NavLink to="/MedicalRecords" className="navbar-link" onClick={() => handleNavigation('/MedicalRecords')}>
+          <Link to="/MedicalRecords" className="navbar-link" onClick={() => handleNavigation('/MedicalRecords')}>
             Medical Records
-          </NavLink>
+          </Link>
         </li>
 
         <li className="navbar-item">
-          <NavLink to="/prescription" className="navbar-link" onClick={() => handleNavigation('/prescription')}>
+          <Link to="/prescription" className="navbar-link" onClick={() => handleNavigation('/prescription')}>
             Prescription
-          </NavLink>
+          </Link>
         </li>
 
         <li className="navbar-item">
-          <NavLink to="/educational" className="navbar-link">Educational Resources</NavLink>
+          <Link to="/educational" className="navbar-link">Educational Resources</Link>
         </li>
       </ul>
 
       <ul className="navbar-list user-links">
-        {isLoggedIn && user ? (
+        {isLoggedIn ? (
           <li className="navbar-item">
-          <span className="welcome-text">Welcome, {user.role === 'Vet' ? (
-          <span>
-          <span style={{ color: '#007bff', fontStyle: 'italic', marginLeft: '5px'}}>Dr. </span>{user.name}
-          </span>
-          ) : user.name} 
-          </span>
+            <span className="welcome-text">Welcome, {user?.name}</span>
             <Link to="/myprofile" className="navbar-link">
             {/* <a href="https://www.flaticon.com/free-icons/user" title="user icons">User icons created by Becris - Flaticon</a> */}
               <img 
-                src={getProfilePicUrl()}
+                src={user && user.profilePicture ? user.profilePicture : profilepic}
                 alt="Profile"
-                style={{ width: '36px', height: '36px', objectFit: 'cover', borderRadius: '50%' }}
+                style={{ width: '28px', height: '28px', borderRadius: '50%' }}
               />
             </Link>
-            <button onClick={handleShowLogoutModal} className="logout-button">Logout</button>
+            <button onClick={handleLogout} className="logout-button">Logout</button>
           </li>
         ) : (
           <li className="navbar-item">
@@ -96,23 +77,6 @@ function Navbar({ logoutUser, isLoggedIn, user }) {
           </li>
         )}
       </ul>
-
-
-      {/* Logout Confirmation Modal */}
-      <Modal show={showLogoutMessage} onHide={handleCloseLogoutModal}>
-        <Modal.Header closeButton>
-          <Modal.Title>Confirm Logout</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>Are you sure you want to log out?</Modal.Body>
-        <Modal.Footer className="d-flex justify-content-between">
-          <Button variant="secondary" onClick={handleCloseLogoutModal}>
-            Cancel
-          </Button>
-          <Button variant="danger" onClick={handleLogout}>
-            Logout
-          </Button>
-        </Modal.Footer>
-      </Modal>
     </nav>
   );
 }

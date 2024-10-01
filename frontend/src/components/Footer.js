@@ -2,7 +2,7 @@ import React from 'react';
 import './Footer.css';
 import { Link } from 'react-router-dom';
 import logo from "../components/assets/veterinary.png";
-import Facebook from "../components/assets/facebook-circular-logo.png";
+import Facebook from "../components/assets/facebook-logo.png";
 import Instagram from "../components/assets/instagram.png"; 
 import Twitter from "../components/assets/twitter.png"; 
 
@@ -27,7 +27,7 @@ function Footer() {
         <p>Sunday: CLOSED</p>
       </div>
       <div className="footer-section social">
-        <h5>Follow Us</h5>
+      <h5>Follow Us</h5>
             <ul className="list-unstyled">
               {/*<a href="https://www.flaticon.com/free-icons/facebook" title="facebook icons">Facebook icons created by Freepik - Flaticon</a>*/}
               <li>  

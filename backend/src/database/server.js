@@ -5,8 +5,43 @@ const sqlite3 = require('sqlite3').verbose();
 const app = express();
 const PORT = 5001;
 
+
 const path = require('path');
+const fs = require('fs');
 console.log('Using database file at:', path.resolve('../vetclinic.db'));
+
+
+function initializeDatabase() {
+  db.get("SELECT COUNT(id) AS count FROM vets", (err, row) => {
+      if (err) {
+          console.error('Error checking vets data:', err.message);
+          return;
+      }
+      if (row.count === 0) {
+          console.log('No entries found in vets table, inserting data...');
+          insertData();
+      } else {
+          console.log('Entries already exist in vets table, skipping insertion.');
+      }
+  });
+}
+
+function insertData() {
+  const sqlPath = path.resolve(__dirname, 'SeedData.sql');
+  fs.readFile(sqlPath, 'utf8', (err, data) => {
+      if (err) {
+          console.error('Error reading SQL file', err);
+          return;
+      }
+      db.exec(data, (execErr) => {
+          if (execErr) {
+              console.error('Error executing SQL', execErr);
+          } else {
+              console.log('Seed data inserted successfully');
+          }
+      });
+  });
+}
 
 
 // Middleware
@@ -19,72 +54,13 @@ const db = new sqlite3.Database('../vetclinic.db', sqlite3.OPEN_READWRITE, (err)
     console.error(err.message);
   }
   console.log('Connected to the vetclinic database.');
+  initializeDatabase();  // Call the initialization function
 });
 
-const seedDatabase = () => {
-  const vets = [
-    {
-      name: "Dr. Sophie",
-      title: "Veterinarian",
-      short_description: "Specializing in dermatology, Dr. Sophie brings a wealth of experience to the VetCare team...",
-      long_description: "Dr. Sophie is a dedicated veterinarian who graduated from the University of Melbourne's Veterinary School in 2019...",
-      image_path: "../assets/vet1.jpg",
-      detail_path: "/dr-sophie"
-    },
-    {
-      name: "Dr. Liam",
-      title: "Emergency Care Veterinarian",
-      short_description: "Dr. Liam specializes in emergency and critical care at VetCare...",
-      long_description: "Dr. Liam has carved a niche in emergency and critical care since his graduation from the Royal Veterinary College...",
-      image_path: "../assets/vet2.jpg",
-      detail_path: "/dr-liam"
-    }
-  ];
-
-  vets.forEach(vet => {
-    const sql = `INSERT INTO vets (name, title, short_description, long_description, image_path, detail_path)
-                 VALUES (?, ?, ?, ?, ?, ?)`;
-    db.run(sql, [vet.name, vet.title, vet.short_description, vet.long_description, vet.image_path, vet.detail_path], 
-      (err) => {
-        if (err) {
-          return console.error("Error inserting vet:", vet.name, err.message); // Log insertion errors
-        }
-        console.log(`Inserted vet: ${vet.name}`);
-      });
-  });
-};
 
 
-// Create vets table if it doesn't exist, then seed the database if needed
-db.serialize(() => {
-  // Create the vets table if it doesn't exist
-  db.run(`
-    CREATE TABLE IF NOT EXISTS vets (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      name TEXT NOT NULL,
-      title TEXT NOT NULL,
-      short_description TEXT,
-      long_description TEXT,
-      image_path TEXT,
-      detail_path TEXT
-    )
-  `, (err) => {
-    if (err) {
-      return console.error(err.message);
-    }
 
-// Check if the table is empty and seed the database if needed
-db.get("SELECT COUNT(*) AS count FROM vets", (err, row) => {
-  if (err) {
-    console.error(err.message);
-  } else {
-    console.log("Forcing database seeding...");
-    seedDatabase();  // Remove the condition to force re-seeding
-  }
-});
 
-  });
-});
 
 // API to get pets
 app.get('/api/pets', (req, res) => {
