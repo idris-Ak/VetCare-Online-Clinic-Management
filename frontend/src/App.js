@@ -9,11 +9,11 @@ import AllVetMembers from './pages/AllVetMembers';
 import Appointments from './pages/AppointmentPage/Appointments';
 import EducationalResource from './pages/EducationalResource';
 import HomePage from './pages/HomePage';
-import Login from './pages/Login';
+import Login from './pages/User and Pet Management/Login';
 import MedicalRecords from './pages/MedicalRec/MedicalRecords';
-import MyProfile from './pages/MyProfile'; // Assuming MyProfile is located in the 'pages' directory
+import MyProfile from './pages/User and Pet Management/MyProfile'; // Assuming MyProfile is located in the 'pages' directory
 import Prescription from './pages/Prescriptionrefill/prescription';
-import SignUp from './pages/SignUp';
+import SignUp from './pages/User and Pet Management/SignUp';
 import VetProfilePage from './pages/VetProfilePage'; // Adjusted relative path
 
 // PrivateRoute component to protect certain routes
