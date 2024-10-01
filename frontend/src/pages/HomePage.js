@@ -8,18 +8,36 @@ import 'swiper/css/scrollbar';
 import 'swiper/css/autoplay';
 import { Navigation, Autoplay } from 'swiper/modules';
 
+import { useState, useEffect } from 'react';
+
+
 import blog1 from '../components/assets/blog1.jpg';
 import blog2 from '../components/assets/blog2.jpg';
 import blog3 from '../components/assets/blog3.jpg';
 import VetCard from '../components/VetCard';
-import vets from '../components/data/vets';
 import about1 from "../components/assets/about1.jpg";
 import about2 from "../components/assets/about2.jpg";
 
 import CustomerReviews from "../components/CustomerReviews";
 import "./HomePage.css";
 
-function HomePage({isLoggedIn}) {
+
+function HomePage() {
+  const [vets, setVets] = useState([]); // This holds the vet data
+
+  useEffect(() => {
+    fetch('http://localhost:5001/api/vets') // Adjust the URL as per your actual backend URL
+      .then(response => response.json())
+      .then(data => {
+        if (data.message === 'success') {
+          setVets(data.data); // Set the vet data in state
+        } else {
+          console.error('Failed to fetch vets');
+        }
+      })
+      .catch(error => console.error('Error fetching data:', error));
+  }, []); // Empty dependency array means this effect runs once after the initial render
+
   return (
     <div>
      
@@ -67,15 +85,9 @@ function HomePage({isLoggedIn}) {
                 <h2>Don't have an account yet?</h2>
                 <h1>Sign Up Today</h1>
                 <h3>For Free</h3>
-                {isLoggedIn ? (
-                <Link to="/MyProfile">
-                  <button className="explore-btn">Sign Up</button>
+                <Link to="/SignUp">
+                  <button className="explore-btn">Sign up</button>
                 </Link>
-                ) : (
-                  <Link to="/SignUp">
-                    <button className="explore-btn">Sign Up</button>
-                  </Link>
-                )}
               </div>
             </SwiperSlide>
 

@@ -26,17 +26,14 @@
 .footer-section p {
     margin: 2px 0;
 }
-
 .footer-section a {
     color: #fff;
     text-decoration: none;
     margin: 5px 0;
 }
-
 .footer-section a:hover {
     text-decoration: underline;
 }
-
 @media (max-width: 768px) {
     .footer {
         flex-direction: column;
