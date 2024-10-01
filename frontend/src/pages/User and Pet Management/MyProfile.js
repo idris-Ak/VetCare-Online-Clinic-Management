@@ -140,12 +140,12 @@ const handleRemoveProfilePic = async () => {
     const currentPassword = form.elements.currentPassword.value;
     const newPassword = form.elements.password.value;
     const confirmPassword = form.elements.confirmPassword.value;
-    const updatedUser = {
-        ...user,
-        name: newName,
-        email: newEmail,
-        password: newPassword ? newPassword : user.password, // Only update password if it's provided
-    };
+
+    // Create a FormData object to handle both text and file data
+    const formData = new FormData();
+    formData.append('name', newName);
+    formData.append('email', newEmail);
+    if (newPassword) formData.append('password', newPassword);
 
      // Validate current password
     if (currentPassword && currentPassword !== user.password) {
@@ -233,13 +233,19 @@ const handleRemoveProfilePic = async () => {
      return;
     }
 
+    if(user.role === 'Pet Owner' && newEmail.endsWith('@vetcare.com')){
+     setAlertContentDanger('Your email cannot end with @vetcare.com.');
+     setAlertDanger(true);
+        setTimeout(() => {
+        setAlertDanger(false);
+     }, 2500);
+     return;
+    }
+
     try {
       const response = await fetch(`http://localhost:8080/api/users/${user.id}`, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(updatedUser),
+        body: formData,  // Use FormData to send the request
       });
 
      if (!response.ok) {
@@ -591,7 +597,11 @@ const updateUserPets = (updatedPets) => {
               <Form.Control
                 type="text"
                 name="name"
+                maxLength={50}
                 defaultValue={user.name}
+                onInput={(e) => {
+                  e.target.value = e.target.value.replace(/[^a-zA-Z\s]/g, ''); // Only allow letters and spaces
+                }}
                 required
               />
             </Form.Group>
@@ -600,6 +610,7 @@ const updateUserPets = (updatedPets) => {
               <Form.Control
                 type="email"
                 name="email"
+                maxLength={100}
                 defaultValue={user.email}
                 required
               />
@@ -670,9 +681,13 @@ const updateUserPets = (updatedPets) => {
               <Form.Control
                 type="text"
                 name="petName"
+                maxLength={50}
                 defaultValue={currentPet ? currentPet.name : ''}
                 required
                 placeholder="Enter your pet's name"
+                onInput={(e) => {
+                  e.target.value = e.target.value.replace(/[^a-zA-Z\s]/g, ''); // Only allow letters and spaces
+                }}
               />
             </Form.Group>
             <Form.Group controlId="petType" className="mb-3">
@@ -680,10 +695,14 @@ const updateUserPets = (updatedPets) => {
               <Form.Control
                 type="text"
                 name="petType"
+                maxLength={30} 
                 defaultValue={currentPet ? currentPet.type : ''}
                 required
                 placeholder="Enter your pet's type"
                 list="petTypeList"
+                onInput={(e) => {
+                  e.target.value = e.target.value.replace(/[^a-zA-Z\s]/g, ''); // Only allow letters and spaces
+                }}
               />
             <datalist id="petTypeList">
             <option value="Dog" />
@@ -698,8 +717,12 @@ const updateUserPets = (updatedPets) => {
               <Form.Control
                 type="text"
                 name="petBreed"
+                maxLength={40}
                 defaultValue={currentPet ? currentPet.breed : ''}
                 placeholder="Enter your pet's breed (optional)"
+                onInput={(e) => {
+                  e.target.value = e.target.value.replace(/[^a-zA-Z\s]/g, ''); // Only allow letters and spaces
+                }}
               />
             </Form.Group>
             <Form.Group controlId="petAge" className="mb-3">
@@ -708,6 +731,8 @@ const updateUserPets = (updatedPets) => {
                 type="number"
                 name="petAge"
                 defaultValue={currentPet ? currentPet.age : ''}
+                max='40'
+                min='0'
                 placeholder="Enter your pet's age (optional)"
               />
             </Form.Group>
@@ -735,12 +760,13 @@ const updateUserPets = (updatedPets) => {
             {/* Pet Cards */}
             {pets.map((pet) => (
               <Col md={4} sm={6} xs={12} key={pet.id} className="d-flex">
-                  <Card className="m-2 flex-fill" style={{ width: '100%' }}>
+                  <Card className="m-2 flex-fill" style={{  width: '100%', borderRadius: '15px', boxShadow: '0 8px 16px rgba(0,0,0,0.15)', backgroundColor: '#f8f9fa', overflow: 'hidden', 
+                  transition: 'transform 0.3s' }} onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.025)'} onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}>
                     <div style={{ position: 'relative' }}>
                       <Card.Img
                         variant="top"
                         src={getPetProfilePicPreview(pet)}
-                        style={{ height: '180px', objectFit: 'cover' }}
+                        style={{ height: '220px', objectFit: 'cover', borderBottom: '5px solid #007bff'  }}
                       />
                       <div
                         onClick={() => document.getElementById(`petPicInput-${pet.id}`).click()}
@@ -756,6 +782,7 @@ const updateUserPets = (updatedPets) => {
                           alignItems: 'center',
                           justifyContent: 'center',
                           cursor: 'pointer',
+                          boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)'
                         }}
                       >
                         <i className="bi bi-pencil-fill" style={{ color: '#fff', fontSize: '16px' }}></i>
@@ -775,6 +802,7 @@ const updateUserPets = (updatedPets) => {
                             alignItems: 'center',
                             justifyContent: 'center',
                             cursor: 'pointer',
+                            boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)'
                           }}
                         >
                           <i className="bi bi-x" style={{ color: '#fff', fontSize: '16px' }}></i>
@@ -788,34 +816,34 @@ const updateUserPets = (updatedPets) => {
                         onChange={(e) => handlePetProfilePicChange(e, pet.id)}
                       />
                     </div>
-                    <Card.Body>
-                      <Card.Title style={{ fontWeight: '700', marginBottom: '5px', fontSize: '16px', lineHeight: '1.6' }}>{pet.name}</Card.Title>
-                      <Card.Text style={{ marginBottom: '15px' }}>
-                        <div style={{ marginBottom: '5px' }}>
-                         <strong style={{ marginRight: '10px', fontWeight: 'bold' }}>Type:</strong> 
+                    <Card.Body style={{ padding: '20px', textAlign: 'center' }}>
+                      <Card.Title style={{ fontWeight: '700', marginBottom: '10px', fontSize: '22px', lineHeight: '1.6', color: '#333' }}>{pet.name}</Card.Title>
+                      <Card.Text style={{ color: '#555', marginBottom: '15px', textAlign: 'center' }}>
+                        <div style={{ marginBottom: '10px' }}>
+                         <strong style={{ marginRight: '10px', fontWeight: 'bold', color: '#007bff', display: 'center' }}>Type:</strong> 
                          <span>{pet.type}</span>
                         </div>
-                         <div style={{ marginBottom: '5px' }}>
-                         <strong style={{ marginRight: '10px', fontWeight: 'bold' }}>Breed:</strong> 
+                         <div style={{ marginBottom: '10px' }}>
+                         <strong style={{ marginRight: '10px', fontWeight: 'bold', color: '#007bff', display: 'center'}}>Breed:</strong> 
                          <span>{pet.breed || 'N/A'}</span>
                         </div>
                         <div style={{ marginBottom: '10px' }}>
-                         <strong style={{ marginRight: '10px', fontWeight: 'bold' }}>Age:</strong> 
+                         <strong style={{ marginRight: '10px', fontWeight: 'bold', color: '#007bff', display: 'center' }}>Age:</strong> 
                          <span>{pet.age || 'N/A'}</span>
                         </div>        
                        </Card.Text>
-                      <div className="d-flex justify-content-between">
+                      <div className="d-flex justify-content-center" style={{ gap: '10px' }}>
                         <Button
                           variant="outline-primary"
                           onClick={() => handlePetEdit(pet)}
-                          style={{ flex: '1', marginRight: '5px' }}
+                          style={{ flex: '1', padding: '10px 15px', borderRadius: '10px', fontWeight: 'bold' }}
                         >
                           Edit
                         </Button>
                         <Button
                           variant="outline-danger"
                           onClick={() => confirmPetDelete(pet.id)}
-                          style={{ flex: '1', marginLeft: '5px' }}
+                          style={{ flex: '1', padding: '10px 15px', borderRadius: '10px', fontWeight: 'bold' }}
                         >
                           Delete
                         </Button>

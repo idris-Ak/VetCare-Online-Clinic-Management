@@ -178,7 +178,11 @@ try {
           </div>
         <Form.Group className="mb-3" controlId="userName">
           <Form.Label style={{fontFamily: 'Lato, sans-serif', fontSize:'20px'}}>Name</Form.Label>
-          <Form.Control type="text" name="name" value={user.name} onChange={handleChange} required style={{ borderRadius: '15px'}}/>
+          <Form.Control type="text" name="name" maxLength={50} value={user.name} onChange={handleChange} 
+            onInput={(e) => {
+              e.target.value = e.target.value.replace(/[^a-zA-Z\s]/g, ''); // Only allow letters and spaces
+            }}
+            required style={{ borderRadius: '15px'}}/>
         </Form.Group>
         
         <Form.Group className="mb-3" controlId="userEmailSignUp">
@@ -188,7 +192,7 @@ try {
                 <i className="bi bi-info-circle"></i>
               </OverlayTrigger>
             </Form.Label>
-            <Form.Control type="email" name="email" value={user.email} onChange={handleChange} required style={{ borderRadius: '15px'}}/>
+            <Form.Control type="email" name="email" maxLength={100} value={user.email} onChange={handleChange} required style={{ borderRadius: '15px'}}/>
             {errors.emailError && <div style={{ color: 'red', fontSize: '0.85rem', marginTop: '0.25rem' }}>{errors.emailError}</div>}
         </Form.Group>
 
