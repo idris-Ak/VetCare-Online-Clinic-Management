@@ -90,46 +90,6 @@ app.post('/api/medical-history', (req, res) => {
     });
   });
 
-  // API call to get appointments
-  app.get('/api/appointments', (req, res) => {
-    const sql = 'SELECT * FROM appointments';
-    db.all(sql, [], (err, rows) => {
-        if (err) {
-            return res.status(400).json({ error: err.message });
-        }
-        res.json({
-            message: 'success',
-            data: rows
-        });
-    });
-});
-
-// API to add an appointment
-app.post('/api/appointments', (req, res) => {
-    const { petId, clinicId, time, day, month, year } = req.body;
-    const sql = `INSERT INTO appointments (petId, clinicId, time, day, month, year)
-                 VALUES (?, ?, ?, ?, ?, ?)`;
-    
-    db.run(sql, [petId, clinicId, time, day, month, year], function (err) {
-        if (err) {
-            return res.status(400).json({ error: err.message });
-        }
-        res.json({ message: 'Appointment booked', id: this.lastID });
-    });
-});
-
-// API to delete an appointment
-app.delete('/api/appointments/:id', (req, res) => {
-  const { id } = req.params;
-  const sql = 'DELETE FROM appointments WHERE id = ?';
-  
-  db.run(sql, [id], function (err) {
-      if (err) {
-          return res.status(400).json({ error: err.message });
-      }
-      res.json({ message: 'Appointment cancelled' });
-  });
-});
 
 // Close connection to the database to prevent memory leaks 
 process.on('SIGINT', () => {
