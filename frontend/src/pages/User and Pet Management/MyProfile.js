@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Button, Form, Container, Modal, Card, Row, Col, Alert, Spinner } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
-import profilepic from '../components/assets/profilepic.png';
+import profilepic from '../../components/assets/profilepic.png';
 
 function MyProfile({ user, setUser, logoutUser }) {
   const [profilePicPreview, setProfilePicPreview] = useState(null);
