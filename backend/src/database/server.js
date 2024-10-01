@@ -3,19 +3,64 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 const sqlite3 = require('sqlite3').verbose();
 const app = express();
-const PORT = 5000;
+const PORT = 5001;
+
+
+const path = require('path');
+const fs = require('fs');
+console.log('Using database file at:', path.resolve('../vetclinic.db'));
+
+
+function initializeDatabase() {
+  db.get("SELECT COUNT(id) AS count FROM vets", (err, row) => {
+      if (err) {
+          console.error('Error checking vets data:', err.message);
+          return;
+      }
+      if (row.count === 0) {
+          console.log('No entries found in vets table, inserting data...');
+          insertData();
+      } else {
+          console.log('Entries already exist in vets table, skipping insertion.');
+      }
+  });
+}
+
+function insertData() {
+  const sqlPath = path.resolve(__dirname, 'SeedData.sql');
+  fs.readFile(sqlPath, 'utf8', (err, data) => {
+      if (err) {
+          console.error('Error reading SQL file', err);
+          return;
+      }
+      db.exec(data, (execErr) => {
+          if (execErr) {
+              console.error('Error executing SQL', execErr);
+          } else {
+              console.log('Seed data inserted successfully');
+          }
+      });
+  });
+}
+
 
 // Middleware
 app.use(cors());
 app.use(bodyParser.json());
 
 // Connect to SQLite database
-const db = new sqlite3.Database('./vetclinic.db', sqlite3.OPEN_READWRITE, (err) => {
+const db = new sqlite3.Database('../vetclinic.db', sqlite3.OPEN_READWRITE, (err) => {
   if (err) {
     console.error(err.message);
   }
   console.log('Connected to the vetclinic database.');
+  initializeDatabase();  // Call the initialization function
 });
+
+
+
+
+
 
 // API to get pets
 app.get('/api/pets', (req, res) => {
@@ -62,6 +107,40 @@ app.get('/api/clinics', (req, res) => {
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
+
+// API to get all vets
+app.get('/api/vets', (req, res) => {
+  const sql = 'SELECT * FROM vets';
+  db.all(sql, [], (err, rows) => {
+    if (err) {
+      return res.status(400).json({ error: err.message });
+    }
+    res.json({
+      message: 'success',
+      data: rows
+    });
+  });
+});
+
+// API to get a vet by ID
+app.get('/api/vets/:id', (req, res) => {
+  const { id } = req.params;
+  const sql = 'SELECT * FROM vets WHERE id = ?';
+  db.get(sql, [id], (err, row) => {
+    if (err) {
+      return res.status(400).json({ error: err.message });
+    }
+    if (!row) {
+      return res.status(404).json({ message: 'Vet not found' });
+    }
+    res.json({
+      message: 'success',
+      data: row
+    });
+  });
+});
+
+
 
 // Add Prescription to Medical History
 app.post('/api/medical-history', (req, res) => {

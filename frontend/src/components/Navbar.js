@@ -1,17 +1,22 @@
-import React from 'react';
+import { useState } from 'react';
 import { NavLink, Link, useNavigate } from 'react-router-dom';
 import profilepic from '../components/assets/profilepic.png';
 import './Navbar.css'; // Import the CSS file for styling
 import logo from "../components/assets/veterinary.png";
+import { Modal, Button } from 'react-bootstrap';
 
 function Navbar({ logoutUser, isLoggedIn, user }) {
   const navigate = useNavigate();
+  const [showLogoutMessage, setShowLogoutMessage] = useState(false);
+
+    // Handle showing the modal
+  const handleShowLogoutModal = () => setShowLogoutMessage(true);
+  const handleCloseLogoutModal = () => setShowLogoutMessage(false);
 
   const handleLogout = () => {
-    if (window.confirm("Are you sure you want to log out?")) {
+    setShowLogoutMessage(false);
     logoutUser();
     navigate('/login');
-    }
   };
 
   const handleNavigation= (link) => {
@@ -34,10 +39,16 @@ function Navbar({ logoutUser, isLoggedIn, user }) {
   };
 
   return (
-    <nav className="navbar">
+    <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
       <Link to="/"> 
-      <img src={logo} alt='Veterinary Logo' className='navbar-logo' />
+        <img src={logo} alt='Veterinary Logo' className='navbar-logo' />
       </Link>
+      {/*Implement navbar toggler if user has smaller screen*/}
+          <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
+          aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation" style={{ borderColor: 'rgba(255,255,255,.5)' }}>
+        <span className="navbar-toggler-icon" style={{ color: '#fff' }}></span>
+        </button>
+    <div className="collapse navbar-collapse" style={{fontWeight: 'bold'}} id="navbarSupportedContent">
       <ul className="navbar-list main-links">
         <li className="navbar-item">
         <NavLink to="/" className="navbar-link" activeClassName="active">Home</NavLink>
@@ -66,7 +77,7 @@ function Navbar({ logoutUser, isLoggedIn, user }) {
         </li>
       </ul>
 
-      <ul className="navbar-list user-links">
+      <ul className="navbar-list user-links ms-auto">
         {isLoggedIn && user ? (
           <li className="navbar-item">
           <span className="welcome-text">Welcome, {user.role === 'Vet' ? (
@@ -83,7 +94,7 @@ function Navbar({ logoutUser, isLoggedIn, user }) {
                 style={{ width: '36px', height: '36px', objectFit: 'cover', borderRadius: '50%' }}
               />
             </Link>
-            <button onClick={handleLogout} className="logout-button">Logout</button>
+            <button onClick={handleShowLogoutModal} className="logout-button" style={{fontWeight: 'bold'}}>Logout</button>
           </li>
         ) : (
           <li className="navbar-item">
@@ -91,6 +102,23 @@ function Navbar({ logoutUser, isLoggedIn, user }) {
           </li>
         )}
       </ul>
+
+      {/* Logout Confirmation Modal */}
+      <Modal show={showLogoutMessage} onHide={handleCloseLogoutModal}>
+        <Modal.Header closeButton>
+          <Modal.Title>Confirm Logout</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>Are you sure you want to log out?</Modal.Body>
+        <Modal.Footer className="d-flex justify-content-between">
+          <Button variant="secondary" onClick={handleCloseLogoutModal}>
+            Cancel
+          </Button>
+          <Button variant="danger" onClick={handleLogout}>
+            Logout
+          </Button>
+        </Modal.Footer>
+      </Modal>
+        </div>
     </nav>
   );
 }

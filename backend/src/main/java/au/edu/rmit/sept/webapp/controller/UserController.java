@@ -63,16 +63,16 @@ public class UserController {
             User user = existingUser.get();
             
             // Update user fields if they are provided
-            if (name != null && !name.isEmpty()) {
-                user.setName(name);
+            if (name != null) {
+                user.setName(name.trim()); // Update the name, even if it's an empty string
             }
-            if (email != null && !email.isEmpty()) {
-                user.setEmail(email);
+            if (email != null) {
+                user.setEmail(email.trim()); // Update the email, even if it's an empty string
             }
-            if (password != null && !password.isEmpty()) {
-                user.setPassword(password);
+            if (password != null) {
+                user.setPassword(password); // Update the password if provided
             }
-            
+
             if (profilePicture != null && !profilePicture.isEmpty()) {
                 try {
                     String base64Image = imageService.processImage(profilePicture);
@@ -82,7 +82,7 @@ public class UserController {
                 }
             }
 
-            User savedUser = userService.saveUser(user);
+            User savedUser = userService.saveUser(user); // Save the updated user in the database
             return ResponseEntity.ok(savedUser);
         }
         return ResponseEntity.status(404).build(); // Return 404 if user not found
