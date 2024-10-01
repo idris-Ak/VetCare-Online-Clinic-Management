@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { Button, Form, Container, Modal, Card, Row, Col, Alert } from 'react-bootstrap';
+import { Button, Form, Container, Modal, Card, Row, Col, Alert, Spinner } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import profilepic from '../components/assets/profilepic.png';
 
 function MyProfile({ user, setUser, logoutUser }) {
   const [profilePicPreview, setProfilePicPreview] = useState(null);
+  const [isLoading, setIsLoading] = useState(true); // Loading state
   const navigate = useNavigate();
 
   // Pet profiles state
-  const [pets, setPets] = useState(user.pets || []);
+  const [pets, setPets] = useState(user?.pets || []);
 
   // State for pet details modal
   const [showPetModal, setShowPetModal] = useState(false);
@@ -18,6 +19,10 @@ function MyProfile({ user, setUser, logoutUser }) {
   const[alertContent, setAlertContent] = useState('');
   const[alertContentDanger, setAlertContentDanger] = useState('');
   const[showAlertDanger, setAlertDanger] = useState(false);
+  const [showDeletePetModal, setShowDeletePetModal] = useState(false);
+  const [petToDelete, setPetToDelete] = useState(null);
+
+  const [isSavingPet, setIsSavingPet] = useState(false);
 
   // State for edit profile modal
   const [showEditProfileModal, setShowEditProfileModal] = useState(false);
@@ -25,161 +30,121 @@ function MyProfile({ user, setUser, logoutUser }) {
   // State for delete account modal
   const [showDeleteAccountModal, setShowDeleteAccountModal] = useState(false);
 
+   useEffect(() => {
+    if (user) {
+      fetchPets();
+    }
+    setTimeout(() => setIsLoading(false), 1000);
+  }, [user]);
+
+// Fetch pets from the backend for the current user
+const fetchPets = async () => {
+  try {
+    const response = await fetch(`http://localhost:8080/api/pets/user/${user.id}`);
+    if (!response.ok) {
+      throw new Error(`Error fetching pets: ${response.statusText}`);
+    }
+    const data = await response.json();
+    setPets(data);
+  } catch (error) {
+    console.error('Error fetching pets:', error);
+    // Display an error alert to the user
+    setAlertContentDanger('Failed to fetch pets, please try again later.');
+    setAlertDanger(true);
+    setTimeout(() => setAlertDanger(false), 3000);
+  }
+};
+
   useEffect(() => {
     // Set profile picture preview if the user has a profile picture
     if (user && user.profilePicture) {
-      setProfilePicPreview(user.profilePicture);
+      setProfilePicPreview(`data:image/jpeg;base64,${user.profilePicture}`);
     }
   }, [user]);
 
   // Handle profile picture upload
-  const handleProfilePicChange = (event) => {
-    const file = event.target.files[0];
-    if (file) {
-      // Convert image file to base64 string
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const base64String = reader.result;
-        const updatedUser = { ...user, profilePicture: base64String };
-        setUser(updatedUser);
-        setProfilePicPreview(base64String);
-        // Update user in localStorage
-        updateUserInLocalStorage(updatedUser);
-      };
-      reader.readAsDataURL(file);
+  const handleProfilePicChange = async(event) => {
+  const file = event.target.files[0];
+  // Check file type for allowed image formats
+  const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+    if (file && allowedTypes.includes(file.type)) {
+        const formData = new FormData();
+        formData.append('profilePicture', file);
+
+        try {
+            const response = await fetch(`http://localhost:8080/api/users/${user.id}/profilePicture`, {
+                method: 'PUT',
+                body: formData,
+            });
+
+          if (!response.ok) {
+          if (response.status === 413) {
+          // Handle "Payload Too Large" error
+          setAlertContentDanger('Image size exceeds the allowable limit of 10MB. Please upload a smaller file.');
+          setAlertDanger(true);
+          setTimeout(() => setAlertDanger(false), 3000);
+          }
+          throw new Error(`Error uploading profile picture: ${response.statusText}`);
+          }
+          const updatedUser = await response.json();
+          setUser(updatedUser);
+          setProfilePicPreview(URL.createObjectURL(file)); // Preview the uploaded image
+        } catch (error) {
+            console.error('Error uploading profile picture:', error);
+            setAlertContentDanger(error.message || 'Failed to upload profile picture. Please try again later.');
+            setAlertDanger(true);
+            setTimeout(() => setAlertDanger(false), 3000);
+        }
     }
-  };
+    else {
+    setAlertContentDanger('Please upload a valid image file (jpg or png).');
+    setAlertDanger(true);
+    setTimeout(() => setAlertDanger(false), 3000);
+  }
+};
 
+const handleRemoveProfilePic = async () => {
+  try {
+    const response = await fetch(`http://localhost:8080/api/users/${user.id}/profilePicture`, {
+      method: 'DELETE', // Use DELETE method for removing the profile picture
+    });
 
-  const handleRemoveProfilePic = () => {
-  const updatedUser = { ...user, profilePicture: null };
-    setUser(updatedUser);
-    setProfilePicPreview(profilepic);
-    updateUserInLocalStorage(updatedUser);
-  };
-
-  // Update user in localStorage
-  const updateUserInLocalStorage = (updatedUser) => {
-    localStorage.setItem('user', JSON.stringify(updatedUser));
-    // Also update the user in the 'users' array in localStorage
-    const users = JSON.parse(localStorage.getItem('users')) || [];
-    const userIndex = users.findIndex((u) => u.email === updatedUser.email);
-    if (userIndex !== -1) {
-      users[userIndex] = updatedUser;
-      localStorage.setItem('users', JSON.stringify(users));
+    if (!response.ok) {
+      throw new Error(`Error removing profile picture: ${response.statusText}`);
     }
-  };
+
+    // Update the user object to reflect that the profile picture is removed
+    const updatedUser = { ...user, profilePicture: null };
+    setUser(updatedUser); // Update React state with the new user object
+    setProfilePicPreview(profilepic); // Set the profile picture preview to default placeholder
+  } catch (error) {
+    console.error('Error removing profile picture:', error);
+    setAlertContentDanger('Failed to remove profile picture. Please try again later.');
+    setAlertDanger(true);
+    setTimeout(() => setAlertDanger(false), 3000);
+  }
+};
 
   // Handle profile picture click
   const handleProfilePicClick = () => {
     document.getElementById('profilePicInput').click();
   };
 
-  // Handle add/edit pet
-  const handlePetSubmit = (event) => {
-    event.preventDefault();
-    const form = event.target;
-    const pet = {
-      id: currentPet ? currentPet.id : Date.now(),
-      name: form.elements.petName.value,
-      type: form.elements.petType.value,
-      breed: form.elements.petBreed.value,
-      age: form.elements.petAge.value,
-      profilePicture: null,
-    };
-
-    // Handle pet profile picture
-    const petProfilePicFile = form.elements.petProfilePicture.files[0];
-    if (petProfilePicFile) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        pet.profilePicture = reader.result;
-
-        if (currentPet) {
-          // Edit existing pet
-          const updatedPets = pets.map((p) => (p.id === pet.id ? pet : p));
-          setPets(updatedPets);
-          updateUserPets(updatedPets);
-        } else {
-          // Add new pet
-          const updatedPets = [...pets, pet];
-          setPets(updatedPets);
-          updateUserPets(updatedPets);
-        }
-        setShowPetModal(false);
-        setCurrentPet(null);
-      };
-      reader.readAsDataURL(petProfilePicFile);
-    } else {
-      // No new profile picture
-      if (currentPet && currentPet.profilePicture) {
-        pet.profilePicture = currentPet.profilePicture;
-      }
-
-      if (currentPet) {
-        // Edit existing pet
-        const updatedPets = pets.map((p) => (p.id === pet.id ? pet : p));
-        setPets(updatedPets);
-        updateUserPets(updatedPets);
-      } else {
-        // Add new pet
-        const updatedPets = [...pets, pet];
-        setPets(updatedPets);
-        updateUserPets(updatedPets);
-      }
-      setShowPetModal(false);
-      setCurrentPet(null);
-    }
-  };
-
-   const handleRemovePetProfilePic = (petId) => {
-    const updatedPets = pets.map((pet) =>
-      pet.id === petId ? { ...pet, profilePicture: null } : pet
-    );
-    setPets(updatedPets);
-    updateUserPets(updatedPets);
-  };
-
-  const updateUserPets = (updatedPets) => {
-    const updatedUser = { ...user, pets: updatedPets };
-    setUser(updatedUser);
-    // Update user in localStorage
-    updateUserInLocalStorage(updatedUser);
-  };
-
-  // Handle pet profile picture preview
-  const getPetProfilePicPreview = (pet) => {
-    if (pet.profilePicture) {
-      return pet.profilePicture;
-    } else {
-      // Set placeholder pet profile picture
-      return 'https://via.placeholder.com/286x180.png?text=Pet+Picture';
-    }
-  };
-
-  // Handle pet edit
-  const handlePetEdit = (pet) => {
-    setCurrentPet(pet);
-    setShowPetModal(true);
-  };
-
-  // Handle pet delete
-  const handlePetDelete = (petId) => {
-    const updatedPets = pets.filter((pet) => pet.id !== petId);
-    setPets(updatedPets);
-    updateUserPets(updatedPets);
-  };
-
   // Handle profile update
-  const handleProfileUpdate = (event) => {
+  const handleProfileUpdate = async(event) => {
     event.preventDefault();
     const form = event.target;
-    const updatedUser = { ...user };
     const newName = form.elements.name.value.trim();
     const newEmail = form.elements.email.value.trim();
     const currentPassword = form.elements.currentPassword.value;
     const newPassword = form.elements.password.value;
     const confirmPassword = form.elements.confirmPassword.value;
+    const updatedUser = {
+        ...user,
+        name: newName,
+        email: newEmail,
+        password: newPassword ? newPassword : user.password, // Only update password if it's provided
+    };
 
      // Validate current password
     if (currentPassword && currentPassword !== user.password) {
@@ -250,20 +215,6 @@ function MyProfile({ user, setUser, logoutUser }) {
         }, 2500);
         return;
     }
-
-    // Check if the email is changed and already exists in the users array
-    if (newEmail !== user.email) {
-      const users = JSON.parse(localStorage.getItem('users')) || [];
-      const emailExists = users.some((u) => u.email === newEmail);
-      if (emailExists) {
-        setAlertContentDanger("The email entered is already registered.");
-        setAlertDanger(true);
-        setTimeout(() => {
-        setAlertDanger(false);
-        }, 2500);
-        return;
-      }
-    }
     
     //The following function was given by OpenAI (2024) ChatGPT [Large language model], accessed 3 September 2024. (*Link could not be generated successfully*)
     const isPasswordStrong = (newPassword) => {
@@ -272,7 +223,7 @@ function MyProfile({ user, setUser, logoutUser }) {
     };
 
      //If password is not strong, output the error message
-    if (!isPasswordStrong(newPassword)) {
+    if (currentPassword && newPassword && confirmPassword && !isPasswordStrong(newPassword)) {
      setAlertContentDanger('Your password must be at least 8 characters long and include uppercase letters, lowercase letters, numbers, and special characters.');
      setAlertDanger(true);
         setTimeout(() => {
@@ -281,29 +232,53 @@ function MyProfile({ user, setUser, logoutUser }) {
      return;
     }
 
-    updatedUser.name = newName;
-    updatedUser.email = newEmail;
-    if (newPassword) {
-      updatedUser.password = newPassword;
-    }
+    try {
+      const response = await fetch(`http://localhost:8080/api/users/${user.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updatedUser),
+      });
 
-    setUser(updatedUser);
-    updateUserInLocalStorage(updatedUser);
-    setAlertContent('Profile Successfully Updated!');
-      setAlert(true);
-      setTimeout(() => {
-        setAlert(false);
-      }, 2500);
-    setShowEditProfileModal(false);
-  };
+     if (!response.ok) {
+      if (response.status === 409) {
+        setAlertContentDanger("The email entered is already registered.");
+        setAlertDanger(true);
+        setTimeout(() => setAlert(false), 2500);
+      } else {
+        throw new Error(`Error updating profile: ${response.statusText}`);
+      }
+    }
+    else {
+        const savedUser = await response.json();
+        setUser(savedUser);
+        setShowEditProfileModal(false);
+        setAlertContent('Profile Successfully Updated!');
+        setAlert(true);
+        setTimeout(() => setAlert(false), 2500);
+        }
+      } catch (error) {
+        console.error('Error updating profile:', error);
+        // Show an error alert to the user
+        setAlertContentDanger('Profile update failed, please try again later.');
+        setAlertDanger(true);
+        setTimeout(() => setAlertDanger(false), 3000);
+  } 
+};
 
   // Handle account deletion
-  const handleAccountDeletion = () => {
-    // Remove user from localStorage
-    const users = JSON.parse(localStorage.getItem('users')) || [];
-    const updatedUsers = users.filter((u) => u.email !== user.email);
-    localStorage.setItem('users', JSON.stringify(updatedUsers));
-    localStorage.removeItem('user');
+  const handleAccountDeletion = async() => {
+   try {
+      const response = await fetch(`http://localhost:8080/api/users/${user.id}`, {
+        method: 'DELETE',
+      });
+
+    if (!response.ok) {
+      throw new Error(`Error deleting account: ${response.statusText}`);
+    }
+
+    localStorage.removeItem('userId');
     localStorage.removeItem('isLoggedIn');
     setUser(null);
     setAlertContent('Profile Successfully Deleted!');
@@ -316,27 +291,210 @@ function MyProfile({ user, setUser, logoutUser }) {
         //Navigate back to login page after successful deletion
         navigate('/');
       }, 2500);
-  };
-
-   // Handle pet profile picture upload
-  const handlePetProfilePicChange = (event, petId) => {
-    const file = event.target.files[0];
-    if (file) {
-      // Convert image file to base64 string
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        const updatedPets = pets.map((pet) =>
-          pet.id === petId ? { ...pet, profilePicture: reader.result } : pet
-        );
-        setPets(updatedPets);
-        updateUserPets(updatedPets);
-      };
-      reader.readAsDataURL(file);
+    }
+    catch (error) {
+    console.error('Error deleting account:', error);
+    // Show an error alert to the user
+    setAlertContentDanger('Failed to delete account, please try again later.');
+    setAlertDanger(true);
+    setTimeout(() => setAlertDanger(false), 3000);
     }
   };
 
+
+  // Handle add/edit pet
+  const handlePetSubmit = async(event) => {
+    event.preventDefault();
+    setIsSavingPet(true);  // Set saving state before the operation
+    const form = event.target;
+    const petData = new FormData();
+
+    petData.append('name', form.elements.petName.value);
+    petData.append('type', form.elements.petType.value);
+    petData.append('breed', form.elements.petBreed.value);
+    petData.append('age', form.elements.petAge.value);
+
+
+    // Handle pet profile picture
+    const petProfilePicFile = form.elements.petProfilePicture.files[0];
+    if (petProfilePicFile) {
+        petData.append('profilePicture', petProfilePicFile);
+    }
+
+    try {
+      let response;
+        if (currentPet) {
+            // If currentPet is defined, we are editing an existing pet
+            response = await fetch(`http://localhost:8080/api/pets/${currentPet.id}`, {
+                method: 'PUT',
+                body: petData,
+            });
+        } else {
+            // If currentPet is not defined, we are adding a new pet
+            response = await fetch(`http://localhost:8080/api/pets/user/${user.id}`, {
+                method: 'POST',
+                body: petData,
+            });
+        }
+
+    if (!response.ok) {
+      throw new Error(`Error saving pet: ${response.statusText}`);
+    }
+
+    const updatedPet = await response.json();
+    setPets((prevPets) =>
+    currentPet ? prevPets.map((p) => (p.id === updatedPet.id ? updatedPet : p)) : [...prevPets, updatedPet]
+    );
+    setShowPetModal(false);
+    setCurrentPet(null);
+    } catch (error) {
+    console.error('Error saving pet:', error);
+    setAlertContentDanger('Failed to save pet, please try again later.');
+    setAlertDanger(true);
+    setTimeout(() => setAlertDanger(false), 3000);
+    }
+    finally {
+        setIsSavingPet(false);
+    }
+};
+
+// Handle pet profile picture upload
+const handlePetProfilePicChange = async (event, petId) => {
+  const file = event.target.files[0];
+
+  // Check file type for allowed image formats
+  const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+
+    if (file && allowedTypes.includes(file.type)) {
+    const formData = new FormData();
+    formData.append('profilePicture', file);
+
+    try {
+        const response = await fetch(`http://localhost:8080/api/pets/${petId}/profilePicture`, {
+        method: 'PUT',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        if (response.status === 413) {
+          // Handle "Payload Too Large" error for large files
+          setAlertContentDanger('Image size exceeds the allowable limit of 10MB. Please upload a smaller file.');
+          setAlertDanger(true);
+          setTimeout(() => setAlertDanger(false), 3000);
+        }
+        throw new Error(`Error uploading pet profile picture: ${response.statusText}`);
+      }
+
+      const updatedPet = await response.json();
+
+      // Update the pets array in the state with the new profile picture
+      setPets((prevPets) =>
+        prevPets.map((pet) => 
+          pet.id === updatedPet.id ? { ...pet, profilePicture: updatedPet.profilePicture } : pet
+        )
+      );
+    } catch (error) {
+      console.error('Error uploading pet profile picture:', error.message);
+      setAlertContentDanger(error.message || 'Failed to upload pet profile picture. Please try again later.');
+      setAlertDanger(true);
+      setTimeout(() => setAlertDanger(false), 3000);
+    }
+  }
+  else {
+    setAlertContentDanger('Please upload a valid image file (jpg or png).');
+    setAlertDanger(true);
+    setTimeout(() => setAlertDanger(false), 3000);
+  }
+};
+
+const handleRemovePetProfilePic = async (petId) => {
+  try {
+    // Send a PUT request to the backend to update the pet and remove the profile picture
+    const response = await fetch(`http://localhost:8080/api/pets/${petId}/profilePicture`, {
+      method: 'DELETE',
+    });
+
+    if (!response.ok) {
+      throw new Error(`Error removing pet profile picture: ${response.statusText}`);
+    }
+
+    // Update the pet in the frontend state
+    const updatedPets = pets.map((pet) =>
+      pet.id === petId ? { ...pet, profilePicture: null } : pet
+    );
+    setPets(updatedPets);
+    updateUserPets(updatedPets); // Update the pets in the user state as well
+  } catch (error) {
+    console.error('Error removing pet profile picture:', error);
+    // Optionally, display an alert or error message to the user
+  }
+};
+
+// Helper function to update the user state with the new pets array
+const updateUserPets = (updatedPets) => {
+  const updatedUser = { ...user, pets: updatedPets };
+  setUser(updatedUser);
+};
+
+
+  // Handle pet profile picture preview
+  const getPetProfilePicPreview = (pet) => {
+    if (pet.profilePicture) {
+      return `data:image/png;base64,${pet.profilePicture}`;
+    } else {
+      // Set placeholder pet profile picture
+      return 'https://via.placeholder.com/286x180.png?text=Pet+Picture';
+    }
+  };
+
+  // Handle pet edit
+  const handlePetEdit = (pet) => {
+    setCurrentPet(pet);
+    setShowPetModal(true);
+  };
+
+
+  const confirmPetDelete = (pet) => {
+    setPetToDelete(pet); 
+    setShowDeletePetModal(true);  // Show delete confirmation modal
+  };
+
+
+  // Handle pet delete
+ const handlePetDelete = async (petId) => {
+  if (!petId) {
+    console.error('Pet ID is undefined!');
+    return;
+  }
+    try {
+      const response = await fetch(`http://localhost:8080/api/pets/${petToDelete}`, {
+        method: 'DELETE',
+      });
+      if (response.ok) {
+        setPets(pets.filter((pet) => pet.id !== petToDelete));
+        setShowDeletePetModal(false); // Close modal on success
+      } else {
+        console.error('Error deleting pet');
+      }
+    } catch (error) {
+      console.error('Error deleting pet:', error);
+    }
+  };
+
+  // Loading spinner displayed until the user data is loaded
+  if (isLoading || !user) {
+    return (
+      <div className="d-flex justify-content-center align-items-center" style={{ height: '100vh' }}>
+        <Spinner animation="border" role="status">
+          <span className="visually-hidden">Loading...</span>
+        </Spinner>
+      </div>
+    );
+  }
+
   return (
     <Container style={{ marginTop: '50px', marginBottom: '50px', fontFamily: 'Lato, sans-serif' }}>
+      {isSavingPet && <Spinner animation="border" role="status"><span className="visually-hidden">Saving...</span></Spinner>}
         {showAlert && alertContent &&(<Alert variant="success">{alertContent}</Alert>)}
       <div
         className="d-flex flex-column align-items-center p-5"
@@ -402,7 +560,13 @@ function MyProfile({ user, setUser, logoutUser }) {
         </div>
 
         {/* User Details */}
-        <h2 style={{ fontWeight: '700', color: '#333' }}>{user.name}</h2>
+        <h2 style={{ fontWeight: '700', color: '#333' }}>
+        {user.role === 'Vet' ? (
+        <span>
+          <span style={{ color: '#007bff', fontStyle: 'italic', marginTop: '15px', marginRight: '10px' }}>Dr. </span>{user.name}
+        </span>
+        ) : user.name}
+        </h2>
         <p style={{ color: '#555' }}>{user.email}</p>
         <div className="mt-3">
           <Button variant="outline-primary" className="me-2" onClick={() => setShowEditProfileModal(true)}>
@@ -412,6 +576,155 @@ function MyProfile({ user, setUser, logoutUser }) {
             Delete Account
           </Button>
         </div>
+
+      {/* Edit Profile Modal */}
+      <Modal show={showEditProfileModal} onHide={() => setShowEditProfileModal(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>Edit Profile</Modal.Title>
+        </Modal.Header>
+        <Form onSubmit={handleProfileUpdate}>
+          <Modal.Body>
+            {showAlertDanger && alertContentDanger && <Alert variant="danger">{alertContentDanger}</Alert>}
+            <Form.Group controlId="userName" className="mb-3">
+              <Form.Label>Name</Form.Label>
+              <Form.Control
+                type="text"
+                name="name"
+                defaultValue={user.name}
+                required
+              />
+            </Form.Group>
+            <Form.Group controlId="userEmail" className="mb-3">
+              <Form.Label>Email</Form.Label>
+              <Form.Control
+                type="email"
+                name="email"
+                defaultValue={user.email}
+                required
+              />
+            </Form.Group>
+               <Form.Group controlId="currentPassword" className="mb-3">
+              <Form.Label>Current Password</Form.Label>
+              <Form.Control
+                type="password"
+                name="currentPassword"
+                placeholder="Enter current password"
+              />
+            </Form.Group>
+            <Form.Group controlId="userPassword" className="mb-3">
+              <Form.Label>New Password</Form.Label>
+              <Form.Control
+                type="password"
+                name="password"
+                placeholder="Enter new password"
+              />
+            </Form.Group>
+            <Form.Group controlId="userConfirmPassword" className="mb-3">
+              <Form.Label>Confirm New Password</Form.Label>
+              <Form.Control
+                type="password"
+                name="confirmPassword"
+                placeholder="Confirm new password"
+              />
+            </Form.Group>
+          </Modal.Body>
+          <Modal.Footer className="d-flex justify-content-between">
+            <Button variant="secondary" onClick={() => setShowEditProfileModal(false)}>
+              Cancel
+            </Button>
+            <Button variant="primary" type="submit">
+              Save Changes
+            </Button>
+          </Modal.Footer>
+        </Form>
+      </Modal>
+
+      {/* Delete Account Modal */}
+      <Modal show={showDeleteAccountModal} onHide={() => setShowDeleteAccountModal(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>Delete Account</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <p>Are you sure you want to delete your account? This action cannot be undone.</p>
+        </Modal.Body>
+        <Modal.Footer className="d-flex justify-content-between">
+          <Button variant="secondary" onClick={() => setShowDeleteAccountModal(false)}>
+            Cancel
+          </Button>
+          <Button variant="danger" onClick={handleAccountDeletion}>
+            Delete Account
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
+      {/* Pet Modal */}
+      <Modal show={showPetModal} onHide={() => { setShowPetModal(false); setCurrentPet(null); }}>
+        <Modal.Header closeButton>
+          <Modal.Title>{currentPet ? 'Edit Pet' : 'Add Pet'}</Modal.Title>
+        </Modal.Header>
+        <Form onSubmit={handlePetSubmit}>
+            <Modal.Body>
+            <Form.Group controlId="petName" className="mb-3">
+              <Form.Label>Pet Name</Form.Label>
+              <Form.Control
+                type="text"
+                name="petName"
+                defaultValue={currentPet ? currentPet.name : ''}
+                required
+                placeholder="Enter your pet's name"
+              />
+            </Form.Group>
+            <Form.Group controlId="petType" className="mb-3">
+              <Form.Label>Pet Type</Form.Label>
+              <Form.Control
+                type="text"
+                name="petType"
+                defaultValue={currentPet ? currentPet.type : ''}
+                required
+                placeholder="Enter your pet's type"
+                list="petTypeList"
+              />
+            <datalist id="petTypeList">
+            <option value="Dog" />
+            <option value="Cat" />
+            <option value="Bird" />
+            <option value="Fish" />
+            <option value="Reptile" />
+            </datalist>
+            </Form.Group>
+            <Form.Group controlId="petBreed" className="mb-3">
+              <Form.Label>Breed</Form.Label>
+              <Form.Control
+                type="text"
+                name="petBreed"
+                defaultValue={currentPet ? currentPet.breed : ''}
+                placeholder="Enter your pet's breed (optional)"
+              />
+            </Form.Group>
+            <Form.Group controlId="petAge" className="mb-3">
+              <Form.Label>Age</Form.Label>
+              <Form.Control
+                type="number"
+                name="petAge"
+                defaultValue={currentPet ? currentPet.age : ''}
+                placeholder="Enter your pet's age (optional)"
+              />
+            </Form.Group>
+            <Form.Group controlId="petProfilePicture" className="mb-3">
+              <Form.Label>Pet Profile Picture</Form.Label>
+              <Form.Control type="file" name="petProfilePicture" accept="image/*" />
+            </Form.Group>
+          </Modal.Body>
+          <Modal.Footer className="d-flex justify-content-between">
+            <Button variant="secondary" onClick={() => { setShowPetModal(false); setCurrentPet(null); }}>
+              Cancel
+            </Button>
+            <Button variant="primary" type="submit">
+              {currentPet ? 'Save Changes' : 'Add Pet'}
+            </Button>
+          </Modal.Footer>
+        </Form>
+      </Modal>
 
         {/* Pet Profiles */}
         {user.role === 'Pet Owner' && (
@@ -500,7 +813,7 @@ function MyProfile({ user, setUser, logoutUser }) {
                         </Button>
                         <Button
                           variant="outline-danger"
-                          onClick={() => handlePetDelete(pet.id)}
+                          onClick={() => confirmPetDelete(pet.id)}
                           style={{ flex: '1', marginLeft: '5px' }}
                         >
                           Delete
@@ -534,154 +847,24 @@ function MyProfile({ user, setUser, logoutUser }) {
         )}
       </div>
 
-      {/* Pet Modal */}
-      <Modal show={showPetModal} onHide={() => { setShowPetModal(false); setCurrentPet(null); }}>
-        <Modal.Header closeButton>
-          <Modal.Title>{currentPet ? 'Edit Pet' : 'Add Pet'}</Modal.Title>
-        </Modal.Header>
-        <Form onSubmit={handlePetSubmit}>
-            <Modal.Body>
-            <Form.Group controlId="petName" className="mb-3">
-              <Form.Label>Pet Name</Form.Label>
-              <Form.Control
-                type="text"
-                name="petName"
-                defaultValue={currentPet ? currentPet.name : ''}
-                required
-                placeholder="Enter your pet's name"
-              />
-            </Form.Group>
-            <Form.Group controlId="petType" className="mb-3">
-              <Form.Label>Pet Type</Form.Label>
-              <Form.Control
-                type="text"
-                name="petType"
-                defaultValue={currentPet ? currentPet.type : ''}
-                required
-                placeholder="Enter your pet's type"
-                list="petTypeList"
-              />
-            <datalist id="petTypeList">
-            <option value="Dog" />
-            <option value="Cat" />
-            <option value="Bird" />
-            <option value="Fish" />
-            <option value="Reptile" />
-            </datalist>
-            </Form.Group>
-            <Form.Group controlId="petBreed" className="mb-3">
-              <Form.Label>Breed</Form.Label>
-              <Form.Control
-                type="text"
-                name="petBreed"
-                defaultValue={currentPet ? currentPet.breed : ''}
-                placeholder="Enter your pet's breed (optional)"
-              />
-            </Form.Group>
-            <Form.Group controlId="petAge" className="mb-3">
-              <Form.Label>Age</Form.Label>
-              <Form.Control
-                type="number"
-                name="petAge"
-                defaultValue={currentPet ? currentPet.age : ''}
-                placeholder="Enter your pet's age (optional)"
-              />
-            </Form.Group>
-            <Form.Group controlId="petProfilePicture" className="mb-3">
-              <Form.Label>Pet Profile Picture</Form.Label>
-              <Form.Control type="file" name="petProfilePicture" accept="image/*" />
-            </Form.Group>
-          </Modal.Body>
-          <Modal.Footer className="d-flex justify-content-between">
-            <Button variant="secondary" onClick={() => { setShowPetModal(false); setCurrentPet(null); }}>
-              Cancel
-            </Button>
-            <Button variant="primary" type="submit">
-              {currentPet ? 'Save Changes' : 'Add Pet'}
-            </Button>
-          </Modal.Footer>
-        </Form>
-      </Modal>
-
-      {/* Edit Profile Modal */}
-      <Modal show={showEditProfileModal} onHide={() => setShowEditProfileModal(false)}>
-        <Modal.Header closeButton>
-          <Modal.Title>Edit Profile</Modal.Title>
-        </Modal.Header>
-        <Form onSubmit={handleProfileUpdate}>
-          <Modal.Body>
-            {showAlertDanger && alertContentDanger && <Alert variant="danger">{alertContentDanger}</Alert>}
-            <Form.Group controlId="userName" className="mb-3">
-              <Form.Label>Name</Form.Label>
-              <Form.Control
-                type="text"
-                name="name"
-                defaultValue={user.name}
-                required
-              />
-            </Form.Group>
-            <Form.Group controlId="userEmail" className="mb-3">
-              <Form.Label>Email</Form.Label>
-              <Form.Control
-                type="email"
-                name="email"
-                defaultValue={user.email}
-                required
-              />
-            </Form.Group>
-               <Form.Group controlId="currentPassword" className="mb-3">
-              <Form.Label>Current Password</Form.Label>
-              <Form.Control
-                type="password"
-                name="currentPassword"
-                placeholder="Enter current password"
-              />
-            </Form.Group>
-            <Form.Group controlId="userPassword" className="mb-3">
-              <Form.Label>New Password</Form.Label>
-              <Form.Control
-                type="password"
-                name="password"
-                placeholder="Enter new password"
-              />
-            </Form.Group>
-            <Form.Group controlId="userConfirmPassword" className="mb-3">
-              <Form.Label>Confirm New Password</Form.Label>
-              <Form.Control
-                type="password"
-                name="confirmPassword"
-                placeholder="Confirm new password"
-              />
-            </Form.Group>
-          </Modal.Body>
-          <Modal.Footer className="d-flex justify-content-between">
-            <Button variant="secondary" onClick={() => setShowEditProfileModal(false)}>
-              Cancel
-            </Button>
-            <Button variant="primary" type="submit">
-              Save Changes
-            </Button>
-          </Modal.Footer>
-        </Form>
-      </Modal>
-
-      {/* Delete Account Modal */}
-      <Modal show={showDeleteAccountModal} onHide={() => setShowDeleteAccountModal(false)}>
-        <Modal.Header closeButton>
-          <Modal.Title>Delete Account</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <p>Are you sure you want to delete your account? This action cannot be undone.</p>
-        </Modal.Body>
-        <Modal.Footer className="d-flex justify-content-between">
-          <Button variant="secondary" onClick={() => setShowDeleteAccountModal(false)}>
+        {/* Pet Deletion Confirmation Modal */}
+        <Modal show={showDeletePetModal} onHide={() => setShowDeletePetModal(false)}>
+      <Modal.Header closeButton>
+        <Modal.Title>Delete Pet</Modal.Title>
+    </Modal.Header>
+    <Modal.Body>
+        Are you sure you want to delete this pet? This action cannot be undone.
+    </Modal.Body>
+    <Modal.Footer className="d-flex justify-content-between">
+        <Button variant="secondary" onClick={() => setShowDeletePetModal(false)}>
             Cancel
-          </Button>
-          <Button variant="danger" onClick={handleAccountDeletion}>
-            Delete Account
-          </Button>
-        </Modal.Footer>
+        </Button>
+        <Button variant="danger" onClick={handlePetDelete}>
+            Delete
+        </Button>
+      </Modal.Footer>
       </Modal>
+
     </Container>
   );
 }

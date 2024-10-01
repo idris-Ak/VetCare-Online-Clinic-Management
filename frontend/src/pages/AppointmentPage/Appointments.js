@@ -3,7 +3,7 @@ import './Appointments.css';
 import { PayPalScriptProvider, PayPalButtons } from '@paypal/react-paypal-js';
 import successfulPaymentCheck from 'frontend/src/components/assets/check.png'; 
 
-function Appointments() {
+function Appointments({user}) {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [daysInMonth, setDaysInMonth] = useState([]);
   const [showSelector, setShowSelector] = useState(false);
@@ -117,23 +117,37 @@ function Appointments() {
     }));
   };
 
+
+  // LOAD PET DATA FROM DATABASE
   useEffect(() => {
-    // Load user information from local storage and store pet information in variable 
-    const storedUser = localStorage.getItem("user");
-    if (storedUser) {
-      const user = JSON.parse(storedUser);
-      const userPets = user.pets || [];
-      setPetData(userPets);
-    } else {
-      setPetData([]);
+    if (user) {
+      async function getUserPets() {
+        const storedUserPets = await getPetInfo();
+        if (storedUserPets) {
+          setPetData(storedUserPets);
+        } else {
+          setPetData([]);
+        }
+      }
+      getUserPets();
     }
+  }, [user]);
 
-    // Load appointments from local storage
-    const storedAppointments = JSON.parse(localStorage.getItem("appointments")) || {};
-    setAppointments(storedAppointments);
-  }, []);
+  const getPetInfo = async () => {
+    try {
+      const response = await fetch(`http://localhost:8080/api/pets/user/${user.id}`);
+      if (response.ok) {
+        const petData = await response.json();
+        return petData;
+      }
+      return null;
+    } catch (error) {
+      console.error('Error fetching pets:', error);
+      return null;
+    }
+  };
 
-    // Set clinics into a varrible when component is deployed. 
+    // SET CLINICS INTO A VARAIBLE WHEN COMPONENT IS DEPLOYED. 
   useEffect(() => {
     const defaultClinics = Array.from({ length: 5 }, (_, i) => ({
       id: i + 1,
@@ -185,8 +199,7 @@ function Appointments() {
     return selectedDate >= today;
   };
 
-
-  // Function that handles the modal state when clicking the calander.
+  // FUNCTION THAT HANDLES MODAL STATE FOR CALANDER
   const openDayModal = (day) => {
     if (selectedPet && isDateInFuture(currentDate.getFullYear(), currentDate.getMonth(), day)) {
       setSelectedDay(day);
@@ -232,7 +245,7 @@ function Appointments() {
       return updatedAppointments;
     });
   
-    // set Day to highlighted to highlight it on the calander
+    // HIHGLIGHT DAY ON CALANDER 
     setHighlightedDays((prev) => ({
       ...prev,
       [selectedDay]: true
@@ -275,13 +288,13 @@ const handleCloseConfirmationModal = () => {
       delete updatedAppointments[keyToRemove]; 
       localStorage.setItem("appointments", JSON.stringify(updatedAppointments)); 
   
-      // Check if there are any remaining appointments on the selected day
+      // CHECK FOR APPOINTMENT AVAILABLITY ON SELECTED DAY
       const hasAppointmentsLeft = Object.values(updatedAppointments).some(
         (app) =>
           app.day === selectedDay && app.petId === selectedPet.id && app.clinicId === selectedClinic.id
       );
   
-      // Update highlightedDays state based on remaining appointments
+      // UPDATE HIGHLIGHTEDDAYS BASED ON REMAINING APPOINTMENTS
       setHighlightedDays((prev) => {
         const updatedHighlightedDays = { ...prev };
         if (!hasAppointmentsLeft) {
@@ -316,7 +329,7 @@ const handleCloseConfirmationModal = () => {
           {petData.length > 0 ? 
             (petData.map((pet) => (
               <div key={pet.id} className="pet">
-                <img src={pet.profilePicture} alt={pet.name} />
+                <img src={`data:image/jpeg;base64,${pet.profilePicture}`} alt={pet.name} />
                 <p className="pet-name">{pet.name}</p>
                 <button
                   className={selectedPet === pet ? 'selected' : 'select'}

@@ -1,5 +1,5 @@
-import React, {useState} from 'react';
-import { Button, Form, Alert, Container, ToggleButtonGroup, ToggleButton } from 'react-bootstrap';
+import React, {useState, useEffect} from 'react';
+import { Button, Form, Alert, Container, ToggleButtonGroup, ToggleButton, Spinner } from 'react-bootstrap';
 import { useNavigate, Link, useLocation } from "react-router-dom";
 
 function Login({loginUser}) {
@@ -7,9 +7,15 @@ function Login({loginUser}) {
   const [errorMessage, setErrorMessage] = useState('');
   const [showErrorMessage, setShowErrorMessage] = useState(false);
   const [showSuccessAlert, setShowSuccessAlert] = useState(false);
+  const [isLoading, setIsLoading] = useState(true); // Loading state
   const navigate = useNavigate();
   const location = useLocation();
   
+
+  useEffect(() => {
+    setTimeout(() => setIsLoading(false), 500);
+  });
+
   const handleChange = (event) => {
     const { name, value } = event.target;
     setUserDetails((prevUserDetails) => ({
@@ -23,49 +29,61 @@ function Login({loginUser}) {
     }));
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async(event) => {
     event.preventDefault();
     setShowErrorMessage(false);
 
     //Check if the Vet's email ends with @vetcare.com
-    if (userDetails.role === 'Vet' && !userDetails.email.endsWith('@vetcare.com').trim()) {
+    if (userDetails.role === 'Vet' && !userDetails.email.endsWith('@vetcare.com')) {
       setErrorMessage("Vets must use an email that ends with '@vetcare.com'.");
       setShowErrorMessage(true);
       setTimeout(() => setShowErrorMessage(false), 3000);
       return;
     }
 
-    //Retrieve the users array from localStorage
-    const users = JSON.parse(localStorage.getItem('users')) || [];
+    try {
+    const response = await fetch('http://localhost:8080/api/users/login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        email: userDetails.email.trim(),
+        password: userDetails.password,
+        role: userDetails.role,
+      }),
+    });
 
-    //Store the user details in local storage temporarily 
-    const storedUser = users.find(user => user.email.trim() === userDetails.email && user.role === userDetails.role);
-    
-    if (storedUser && storedUser.password.trim() === userDetails.password && storedUser.role === userDetails.role) {
-      setShowSuccessAlert(true);
-      setTimeout(() => {
-        setShowSuccessAlert(false);
-        loginUser(storedUser);
-
-        // if(storedUser.role === 'Vet'){
-        //   navigate('/AdminDashboard');
-        // }
-        // else {
-        //   navigate('/');
-        // }
-
-        // Check if the user was redirected here with a "from" state
-        const redirectTo = location.state?.from || '/';
-        navigate(redirectTo);
-      }, 3000);
-    } else {
-      //Show an error message if the user enters any invalid details
+    if (response.status === 401) {
       setErrorMessage('Invalid email, password, or role selection.');
       setShowErrorMessage(true);
       setTimeout(() => setShowErrorMessage(false), 3000);
       setUserDetails(prevDetails => ({ ...prevDetails, password: '' }));
+    } else if (response.ok) {
+      const user = await response.json();
+      setShowSuccessAlert(true);
+      setTimeout(() => {
+        setShowSuccessAlert(false);
+        loginUser(user);
+        const redirectTo = location.state?.from || '/';
+        navigate(redirectTo);
+      }, 3000);
     }
-  };
+  } catch (error) {
+    console.error('Error during login:', error);
+  }
+}
+
+  // Loading spinner displayed until the user data is loaded
+  if (isLoading) {
+    return (
+      <div className="d-flex justify-content-center align-items-center" style={{ height: '100vh' }}>
+        <Spinner animation="border" role="status">
+          <span className="visually-hidden">Loading...</span>
+        </Spinner>
+      </div>
+    );
+  }
 
   return (
   <Container className="d-flex justify-content-center align-items-center" style={{ marginTop: '25px', marginBottom: '25px', minHeight: '75vh', fontFamily: 'Lato, sans-serif'}}>

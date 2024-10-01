@@ -1,6 +1,6 @@
-import React, { useState} from 'react';
+import React, { useState, useEffect} from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Button, Form, Alert, Container, ToggleButtonGroup, ToggleButton, OverlayTrigger, Tooltip } from 'react-bootstrap';
+import { Button, Form, Alert, Container, ToggleButtonGroup, ToggleButton, OverlayTrigger, Tooltip, Spinner} from 'react-bootstrap';
 
 function SignUp({loginUser}) {
   const [user, setUser] = useState({
@@ -16,7 +16,12 @@ function SignUp({loginUser}) {
     confirmPasswordError: '',
   });
   const [showSuccessAlert, setShowSuccessAlert] = useState(false);
+  const [isLoading, setIsLoading] = useState(true); // Loading state
   const navigate = useNavigate();
+
+  useEffect(() => {
+    setTimeout(() => setIsLoading(false), 500);
+  });
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -58,7 +63,7 @@ function SignUp({loginUser}) {
       newErrors.confirmPasswordError = 'Passwords do not match.';
       isValid = false; 
     }
-    
+
     //If password is not strong, output the error message
     if (!isPasswordStrong(user.password)) {
       newErrors.passwordError = 'Your password must be at least 8 characters long and include uppercase letters, lowercase letters, numbers, and special characters.';
@@ -76,40 +81,40 @@ function SignUp({loginUser}) {
     return;
   }
 
-//Save the user to localStorage
-const users = JSON.parse(localStorage.getItem('users')) || [];
-const emailExists = users.some(existingUser => existingUser.email === user.email);
+try {
+    const response = await fetch('http://localhost:8080/api/users/signup', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        name: user.name.trim(),
+        email: user.email.trim(),
+        password: user.password,
+        role: user.role,
+      }),
+    });
 
- if (emailExists) {
-    setErrors((prevErrors) => ({ ...prevErrors, emailError: 'An account with this email already exists.' }));
-    setTimeout(() => {
-      setErrors((prevErrors) => ({ ...prevErrors, emailError: '' }));
-    }, 4000); //Clear the error after 4 seconds
-    return;
-  }
-
-    //Save the new user in localStorage
-    const newUser = {
-      name: user.name.trim(),
-      email: user.email.trim(),
-      password: user.password,
-      role: user.role,
-    };
-
-    if (user.role === 'Vet') {
-      newUser.medRecSent = []; // Array to hold multiple medical records
+    if (response.status === 409) {
+      setErrors((prevErrors) => ({
+        ...prevErrors,
+        emailError: 'An account with this email already exists.',
+      }));
+    } else if (response.ok) {
+      const fetchUser = await response.json();
+      setShowSuccessAlert(true);
+      setTimeout(() => {
+        setShowSuccessAlert(false);
+        loginUser(fetchUser);
+        navigate('/');
+      }, 2000);
     }
-
-    //Add the new user to the users array and store it in localStorage
-    users.push(newUser);
-    localStorage.setItem('users', JSON.stringify(users));
-
-    setShowSuccessAlert(true);
-    setTimeout(() => {
-      setShowSuccessAlert(false);
-      loginUser(user);
-      navigate('/'); 
-    }, 2000);
+  } catch (error) {
+    console.error('Error during sign-up:', error);
+  }
+    if (user.role === 'Vet') {
+      user.medRecSent = []; // Array to hold multiple medical records
+    }
   };
 
    const renderTooltipEmail = (props) => (
@@ -123,6 +128,17 @@ const emailExists = users.some(existingUser => existingUser.email === user.email
       Password must be at least 8 characters long and include uppercase, lowercase, numbers, and special characters.
     </Tooltip>
   );
+
+    // Loading spinner displayed until the user data is loaded
+  if (isLoading) {
+    return (
+      <div className="d-flex justify-content-center align-items-center" style={{ height: '100vh' }}>
+        <Spinner animation="border" role="status">
+          <span className="visually-hidden">Loading...</span>
+        </Spinner>
+      </div>
+    );
+  }
 
   return (
     <Container className="d-flex justify-content-center align-items-center" style={{ marginTop: '25px', marginBottom: '25px', minHeight: '100vh', fontFamily: 'Lato, sans-serif'}}>

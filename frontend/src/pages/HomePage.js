@@ -86,9 +86,15 @@ function HomePage() {
                 <h2>Don't have an account yet?</h2>
                 <h1>Sign Up Today</h1>
                 <h3>For Free</h3>
-                <Link to="/SignUp">
-                  <button className="explore-btn">Sign up</button>
+                {isLoggedIn ? (
+                <Link to="/MyProfile">
+                  <button className="explore-btn">Sign Up</button>
                 </Link>
+                ) : (
+                  <Link to="/SignUp">
+                    <button className="explore-btn">Sign Up</button>
+                  </Link>
+                )}
               </div>
             </SwiperSlide>
 

@@ -40,6 +40,10 @@
   font-size: 20px;
 }
 
+.VetTeam h1 {
+  color: azure;
+}
+
 
 
 
@@ -181,7 +185,11 @@
 
 .VetTeam h1 {
   padding-bottom: 60px;
+  color: azure;
+  font-size: 40px;
 }
+
+
 
 .vet-team-container {
   display: flex;

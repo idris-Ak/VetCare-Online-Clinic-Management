@@ -1,14 +1,14 @@
-import React, { useState, useEffect } from 'react';
-import { Button, Table, Container, Modal, Form, DropdownButton, Dropdown } from 'react-bootstrap';
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import dayjs from 'dayjs';
 import { jsPDF } from 'jspdf';
+import React, { useEffect, useState } from 'react';
+import { Button, Container, Dropdown, DropdownButton, Form, Modal, Table } from 'react-bootstrap';
 
-import pet1Image from 'frontend/src/components/assets/blog3.jpg';
-import pet2Image from 'frontend/src/components/assets/about2.jpg';
 import pet3Image from 'frontend/src/components/assets/about1.jpg';
+import pet2Image from 'frontend/src/components/assets/about2.jpg';
+import pet1Image from 'frontend/src/components/assets/blog3.jpg';
 import './MedicalRecords.css';
 
 function MedicalRecords() {
@@ -207,12 +207,11 @@ function MedicalRecords() {
   };
 
   const filteredRecords = allRecords
-    .filter(record => 
-      (category === 'All' || record.service === category || 
-      (category === 'Other' && record.service !== 'Vaccination' && record.service !== 'Treatment Plan')) &&
-      (selectedPet === null || record.petId === selectedPet) &&
-      (record.vet.toLowerCase().includes(searchTerm.toLowerCase()) || record.date.includes(searchTerm))
-    );
+  .filter(record =>
+    (!selectedPet || record.petId === selectedPet) &&
+    ((record.service && record.service.toLowerCase().includes(searchTerm.toLowerCase())) || 
+    (record.date && record.date.includes(searchTerm)))
+  );
 
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
