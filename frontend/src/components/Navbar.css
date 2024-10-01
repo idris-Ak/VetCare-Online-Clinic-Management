@@ -14,7 +14,6 @@
   font-size: 17px;
 }
 
-
 .main-links {
   flex-grow: 1;
   justify-content: center; /* Centers main navigation links */
@@ -44,7 +43,6 @@
   text-decoration: none;
   display: block; 
   padding: 10px; 
-  box-sizing: border-box; /* Ensures padding and border are included in the element's dimensions */
 }
 
 .navbar-link img {
@@ -93,4 +91,3 @@
   margin-right: 20px; 
   margin-left: 20px;
 }
-
