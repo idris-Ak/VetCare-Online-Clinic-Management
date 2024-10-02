@@ -877,7 +877,7 @@ const updateUserPets = (updatedPets) => {
                     border: '2px dashed #ccc',
                     borderRadius: '10px',
                     cursor: 'pointer',
-                    minHeight: '286px',
+                    minHeight: '400px',
                   }}
                   onClick={() => {
                     setCurrentPet(null); // Reset currentPet
