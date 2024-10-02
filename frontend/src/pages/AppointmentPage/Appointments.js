@@ -8,26 +8,42 @@ function Appointments({ user }) {
   const [selectedYear, setSelectedYear] = useState(currentDate.getFullYear());
   const [selectedMonth, setSelectedMonth] = useState(currentDate.getMonth());
   const [selectedDay, setSelectedDay] = useState(null);
-  const [selectedTime, setSelectedTime] = useState("");
+  const [selectedTimeSlot, setSelectedTimeSlot] = useState("");
   const [appointments, setAppointments] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [petData, setPetData] = useState([]);
   const [selectedPet, setSelectedPet] = useState(null);
   const [clinics, setClinics] = useState([]);
   const [selectedClinic, setSelectedClinic] = useState(null);
-  const [selectedTimeSlot, setSelectedTimeSlot] = useState("");
   const [highlightedDays, setHighlightedDays] = useState({});
+  const [buttonLabel, setButtonLabel] = useState("Book Appointment");
+  const [selectedAppointment, setSelectedAppointment] = useState(null);
+
+  const timeSlotKeys = {
+    1: "09:00",
+    2: "09:30",
+    3: "10:00",
+    4: "10:30",
+    5: "11:00",
+    6: "11:30",
+    7: "12:00",
+    8: "12:30",
+    9: "13:00",
+    10: "13:30",
+    11: "14:00",
+    12: "14:30",
+    13: "15:00",
+    14: "15:30",
+    15: "16:00",
+    16: "16:30"
+  };  
 
   // LOAD PET DATA FROM DATABASE
   useEffect(() => {
     if (user) {
       async function getUserPets() {
         const storedUserPets = await getPetInfo();
-        if (storedUserPets) {
-          setPetData(storedUserPets);
-        } else {
-          setPetData([]);
-        }
+        setPetData(storedUserPets || []);
       }
       getUserPets();
     }
@@ -36,11 +52,7 @@ function Appointments({ user }) {
   const getPetInfo = async () => {
     try {
       const response = await fetch(`http://localhost:8080/api/pets/user/${user.id}`);
-      if (response.ok) {
-        const petData = await response.json();
-        return petData;
-      }
-      return null;
+      return response.ok ? response.json() : null;
     } catch (error) {
       console.error('Error fetching pets:', error);
       return null;
@@ -73,12 +85,10 @@ function Appointments({ user }) {
   const getAppointments = async () => {
     try {
       const response = await fetch(`http://localhost:8080/api/appointments`);
-      if (response.ok) {
-        const appointmentData = await response.json();
-        return appointmentData;
-      }
+      return response.ok ? response.json() : null;
     } catch (error) {
       console.error('Error fetching appointments:', error);
+      return null;
     }
   };
 
@@ -119,23 +129,41 @@ function Appointments({ user }) {
 
   const handleGoToToday = () => setCurrentDate(new Date());
 
-  // FUNCTION CHECKS TO SEE IF THE SELECTED DATE IS IN THE FUTURE
-  const isDateInFuture = (year, month, day) => {
-    const today = new Date();
-    const selectedDate = new Date(year, month, day);
-    const cutoffTime = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 17, 0, 0);
+ // FUNCTION CHECKS TO SEE IF THE SELECTED DATE IS IN THE FUTURE
+ const isDateInFuture = (year, month, day) => {
+  const today = new Date();
+  const selectedDate = new Date(year, month, day);
+  return selectedDate > today;
+};
 
-    if (selectedDate.toDateString() === today.toDateString()) {
-      return selectedDate > cutoffTime;
-    }
-
-    return selectedDate > today;
-  };
-
-  // FUNCTION THAT HANDLES MODAL STATE FOR CALENDAR
+  // OPEN DAY MODAL AND LOAD APPOINTMENT INFO IF HIGHLIGHTED
   const openDayModal = (day) => {
     if (selectedPet && isDateInFuture(currentDate.getFullYear(), currentDate.getMonth(), day)) {
       setSelectedDay(day);
+
+      // Check if there's an appointment for the selected day
+      const existingAppointment = appointments.find(appt => {
+        const appointmentDate = new Date(appt.appointmentDate);
+        return (
+          appointmentDate.getFullYear() === currentDate.getFullYear() &&
+          appointmentDate.getMonth() === currentDate.getMonth() &&
+          appointmentDate.getDate() === day &&
+          appt.petId === selectedPet.id
+        );
+      });
+
+      if (existingAppointment) {
+        // Pre-load the clinic and time slot
+        setSelectedClinic(clinics.find(clinic => clinic.id === existingAppointment.clinicId));
+        setSelectedTimeSlot(existingAppointment.appointmentTime);
+        setButtonLabel("Reschedule Appointment");
+        setSelectedAppointment(existingAppointment);
+      } else {
+        setButtonLabel("Book Appointment");
+        setSelectedAppointment(null);
+        setSelectedTimeSlot("");
+      }
+
       setShowModal(true);
     } else {
       alert("Please select your pet.");
@@ -146,19 +174,24 @@ function Appointments({ user }) {
   useEffect(() => {
     if (selectedPet) {
       const petAppointments = appointments.filter(appt => appt.petId === selectedPet.id);
-
       const highlighted = petAppointments.reduce((acc, appt) => {
         const appointmentDate = new Date(appt.appointmentDate);
-        const day = appointmentDate.getDate();
-        acc[day] = true;
+        acc[appointmentDate.getDate()] = true;
         return acc;
       }, {});
-
       setHighlightedDays(highlighted);
     } else {
       setHighlightedDays({});
     }
   }, [selectedPet, appointments]);
+
+  const handleAppointmentAction = () => {
+    if (buttonLabel === "Reschedule Appointment") {
+      rescheduleAppointment();
+    } else {
+      bookAppointment();
+    }
+  };
 
   const bookAppointment = async () => {
     if (!selectedPet || !selectedClinic || !selectedTimeSlot || !selectedDay) {
@@ -173,7 +206,7 @@ function Appointments({ user }) {
       appointmentDate: `${currentDate.getFullYear()}-${(currentDate.getMonth() + 1)
         .toString()
         .padStart(2, '0')}-${selectedDay.toString().padStart(2, '0')}`,
-      appointmentTime: selectedTimeSlot
+      appointmentTimeId: selectedTimeSlot
     };
 
     try {
@@ -194,7 +227,7 @@ function Appointments({ user }) {
           [selectedDay]: true,
         }));
         setShowModal(false);
-        await getPetAppointments(); // Refresh appointments to reflect the new booking
+        await getPetAppointments();
       } else {
         alert(result.message || "Failed to book appointment.");
       }
@@ -204,6 +237,7 @@ function Appointments({ user }) {
     }
   };
 
+  // FUNCTION THAT HANDLES APPOINTMENT CANCELING 
   const cancelAppointment = async (appointmentId) => {
     try {
       const response = await fetch(`http://localhost:8080/api/appointments/${appointmentId}`, {
@@ -225,11 +259,62 @@ function Appointments({ user }) {
     }
   };
 
-  const timeSlots = Array.from({ length: 16 }, (_, i) => `${9 + Math.floor(i / 2)}:${i % 2 === 0 ? "00" : "30"}`);
+  // FUNCTION THAT HANDLES APPOINTMENT RESCHEDUALING
+  const rescheduleAppointment = async () => {
+    if (!selectedAppointment || !selectedTimeSlot || !selectedDay) {
+      alert("Please complete all fields to reschedule the appointment.");
+      return;
+    }
 
-  const isTimeSlotBooked = (time) => {
-    return Object.values(appointments).some(appointment => appointment.day === selectedDay && appointment.time === time && appointment.clinicId === selectedClinic?.id);
+    const updatedAppointmentData = {
+      ...selectedAppointment,
+      appointmentDate: `${currentDate.getFullYear()}-${(currentDate.getMonth() + 1)
+        .toString()
+        .padStart(2, '0')}-${selectedDay.toString().padStart(2, '0')}`,
+      appointmentTimeId: selectedTimeSlot
+    };
+
+    try {
+      const response = await fetch(`http://localhost:8080/api/appointments/${selectedAppointment.id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(updatedAppointmentData),
+      });
+
+      if (response.ok) {
+        alert("Appointment rescheduled successfully!");
+        setHighlightedDays((prev) => ({
+          ...prev,
+          [selectedDay]: true,
+        }));
+        setShowModal(false);
+        await getPetAppointments();
+      } else {
+        alert("Failed to reschedule appointment.");
+      }
+    } catch (error) {
+      console.error("Error rescheduling appointment:", error);
+      alert("An error occurred while rescheduling the appointment.");
+    }
   };
+
+  const isTimeSlotBooked = (timeSlotKey) => {
+    for (let appointment of appointments) {
+      const appointmentDate = new Date(appointment.appointmentDate);
+      if (
+        timeSlotKey == appointment.appointmentTimeId &&
+        appointmentDate.getFullYear() === currentDate.getFullYear() &&
+        appointmentDate.getMonth() === currentDate.getMonth() &&
+        appointmentDate.getDate() === selectedDay 
+      ) {
+        return appointment;
+      }
+    }
+    return false;
+  };
+
 
   return (
     <>
@@ -253,7 +338,7 @@ function Appointments({ user }) {
                   <h4>Appointments:</h4>
                   {appointments.filter(appt => appt.petId === pet.id).map(appt => (
                     <div key={appt.id} className="appointment-details">
-                      <p>{appt.appointmentDate} at {appt.appointmentTime} (Clinic {appt.clinicId})</p>
+                      <p>{appt.appointmentDate} at {timeSlotKeys[appt.appointmentTimeId]} (Clinic {appt.clinicId})</p>
                       <button onClick={() => cancelAppointment(appt.id)}>Cancel</button>
                     </div>
                   ))}
@@ -352,33 +437,29 @@ function Appointments({ user }) {
 
             <h3>Available Times:</h3>
             <div className="appointment-time-slots">
-            {timeSlots.map((time, index) => {
-              const isBooked = isTimeSlotBooked(time);
-              const isSelected = selectedTimeSlot === time;
+              {Object.entries(timeSlotKeys).map(([key, time]) => {
+                const appointment = isTimeSlotBooked(key);
+                const isBooked = !!appointment; 
+                const buttonClass = isBooked ? "booked" : (selectedTimeSlot === key ? "selected" : "");
 
-              return (
-                <button
-                  key={index}
-                  className={isBooked ? "booked" : (isSelected ? "selected" : "")}
-                  onClick={() => {
-                    if (!isBooked) {
-                      setSelectedTimeSlot(prev => (prev === time ? "" : time));
-                      setSelectedTime(prev => (prev === time ? "" : time));
-                    }
-                  }}
-                  disabled={isBooked}
-                >
-                  {time}
-                </button>
-              );
-            })}
+                return (
+                  <button
+                    key={key}
+                    className={buttonClass}
+                    onClick={() => !isBooked && setSelectedTimeSlot(key === selectedTimeSlot ? "" : key)}
+                    disabled={isBooked}
+                  >
+                    {time}
+                  </button>
+                );
+              })}
             </div>
 
             <div className="appointment-modal-actions">
               
-                <button className="appointment-book" onClick={bookAppointment}>
-                  Book Appointment
-                </button>
+            <button className={buttonLabel == "Reschedule Appointment" ? "reschedule" : "book"} onClick={handleAppointmentAction}>
+              {buttonLabel}
+            </button>
       
               <button className="appointment-close" onClick={() => setShowModal(false)}>
                 Close

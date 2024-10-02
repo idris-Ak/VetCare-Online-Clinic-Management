@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Optional;
 import java.time.LocalDate;
-import java.time.LocalTime;
 
 @RestController
 @RequestMapping("/api/appointments")
@@ -41,7 +40,7 @@ public class AppointmentController {
             appointmentRequest.getPetId(),
             appointmentRequest.getClinicId(),
             LocalDate.parse(appointmentRequest.getAppointmentDate()),
-            LocalTime.parse(appointmentRequest.getAppointmentTime())
+            appointmentRequest.getAppointmentTimeId()
         );
 
         Appointment savedAppointment = appointmentService.saveAppointment(appointment);
@@ -57,7 +56,7 @@ public class AppointmentController {
         if (existingAppointment.isPresent()) {
             Appointment appointment = existingAppointment.get();
             appointment.setAppointmentDate(LocalDate.parse(appointmentRequest.getAppointmentDate()));
-            appointment.setAppointmentTime(LocalTime.parse(appointmentRequest.getAppointmentTime()));
+            appointment.setAppointmentTimeId(appointmentRequest.getAppointmentTimeId()); 
 
             Appointment updatedAppointment = appointmentService.saveAppointment(appointment);
             return ResponseEntity.ok(updatedAppointment);
@@ -76,8 +75,8 @@ public class AppointmentController {
         private int userId;
         private int petId;
         private int clinicId;
+        private int appointmentTimeId;
         private String appointmentDate;
-        private String appointmentTime;
 
         // Getters and setters
         public int getUserId() {
@@ -112,12 +111,12 @@ public class AppointmentController {
             this.appointmentDate = appointmentDate;
         }
 
-        public String getAppointmentTime() {
-            return appointmentTime;
+        public int getAppointmentTimeId() {
+            return appointmentTimeId;
         }
 
-        public void setAppointmentTime(String appointmentTime) {
-            this.appointmentTime = appointmentTime;
+        public void setAppointmentTimeId(int appointmentTimeId) { 
+            this.appointmentTimeId = appointmentTimeId;
         }
     }
 }

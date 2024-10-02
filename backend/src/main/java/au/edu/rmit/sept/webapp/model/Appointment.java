@@ -7,10 +7,9 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.Column;
 import java.time.LocalDate;
-import java.time.LocalTime;
 
 @Entity
-@Table(name = "appointments")  // You can omit this if the table name is the same as the class name
+@Table(name = "appointments")
 public class Appointment {
 
     @Id
@@ -30,18 +29,18 @@ public class Appointment {
     private LocalDate appointmentDate;
 
     @Column(nullable = false)
-    private LocalTime appointmentTime;
+    private int appointmentTimeId; // Ensure this is an int to match the key system
 
     // Default constructor
     public Appointment() {}
 
     // Constructor
-    public Appointment(int userId, int petId, int clinicId, LocalDate appointmentDate, LocalTime appointmentTime) {
+    public Appointment(int userId, int petId, int clinicId, LocalDate appointmentDate, int appointmentTimeId) {
         this.userId = userId;
         this.petId = petId;
         this.clinicId = clinicId;
         this.appointmentDate = appointmentDate;
-        this.appointmentTime = appointmentTime;
+        this.appointmentTimeId = appointmentTimeId; // Key for the time slot
     }
 
     // Getters and Setters
@@ -85,12 +84,12 @@ public class Appointment {
         this.appointmentDate = appointmentDate;
     }
 
-    public LocalTime getAppointmentTime() {
-        return appointmentTime;
+    public int getAppointmentTimeId() {
+        return appointmentTimeId;
     }
 
-    public void setAppointmentTime(LocalTime appointmentTime) {
-        this.appointmentTime = appointmentTime;
+    public void setAppointmentTimeId(int appointmentTimeId) {
+        this.appointmentTimeId = appointmentTimeId; // Key for the time slot
     }
 
     @Override
@@ -101,7 +100,7 @@ public class Appointment {
                 ", petId=" + petId +
                 ", clinicId=" + clinicId +
                 ", appointmentDate=" + appointmentDate +
-                ", appointmentTime=" + appointmentTime +
+                ", appointmentTimeId=" + appointmentTimeId + // Key representation
                 '}';
     }
 }

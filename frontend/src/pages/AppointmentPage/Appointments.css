@@ -204,25 +204,19 @@ button:hover {
   Margin: 5px;
 }
 
-.appointment-modal-actions .appointment-book{
+.appointment-modal-actions .book{
   background-color: rgb(91, 213, 91);
   color: white;
   font-weight: bold;
 }
 
-.appointment-modal-actions .appointment-book:hover{
-  background-color: white;
-  color: black;
-  font-weight: bold;
-}
-
-.appointment-modal-actions .appointment-cancel{
-  background-color:red;
+.appointment-modal-actions .reschedule{
+  background-color: orange;
   color: white;
   font-weight: bold;
 }
 
-.appointment-modal-actions .appointment-cancel:hover{
+.appointment-modal-actions button:hover{
   background-color: white;
   color: black;
   font-weight: bold;
@@ -234,6 +228,7 @@ button:hover {
   border: Solid 4px black;
   padding: 5px;
   Margin: 5px;
+  width: 10%;
 }
 
 .appointment-time-slots button:hover {
@@ -241,12 +236,16 @@ background-color: aqua;
 color: White;
 }
 
-.appointment-time-slots button.selected{
+.appointment-time-slots button.selected,
+.appointment-time-slots button.booked {
   background-color: aqua;
   color: white;
-  width: 20%;
-  font-weight: bold;
+  border: solid 4px black;
+  padding: 5px;
+  margin: 5px;
+  width: 10%;
 }
+
 
 .close-modal {
   background-color: red;
