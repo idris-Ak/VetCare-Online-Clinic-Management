@@ -37,6 +37,12 @@ public class PaymentController {
     @PostMapping("/paypal")
     public ResponseEntity<Map<String, String>> handlePayPalPayment(@RequestBody Map<String, Object> paymentData, 
             @RequestParam Long userId, @RequestParam Long petId, @RequestParam String serviceType) {
+
+        // Validate serviceType
+        if (!serviceType.equals("prescription") && !serviceType.equals("appointment")) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Invalid service type"));
+        }
+
         String orderId = (String) paymentData.get("orderId");
         // Handle the amount conversion from Integer or Double
         double amount;
@@ -79,10 +85,13 @@ public class PaymentController {
     @PostMapping("/credit-card")
     public ResponseEntity<Map<String, String>> handleCreditCardPayment(@RequestBody Map<String, Object> paymentDetails,
             @RequestParam Long userId, @RequestParam Long petId, @RequestParam String serviceType) {
-        String cardNumber = (String) paymentDetails.get("cardNumber");
-        String expiryDate = (String) paymentDetails.get("expiryDate");
-        String cvv = (String) paymentDetails.get("cvv");
-        // Handle the amount conversion from Integer or Double
+        
+        // Validate serviceType
+        if (!serviceType.equals("prescription") && !serviceType.equals("appointment")) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Invalid service type"));
+        }
+
+        // Validate the amount
         double amount;
         if (paymentDetails.get("amount") instanceof Integer) {
             amount = ((Integer) paymentDetails.get("amount")).doubleValue();
@@ -91,11 +100,13 @@ public class PaymentController {
         } else {
             return ResponseEntity.badRequest().body(Map.of("error", "Invalid amount format"));
         }
-
-        // Simulate validation
-        if (cardNumber.length() == 19 && expiryDate.matches("\\d{2}/\\d{2}") && cvv.length() == 3) {
+        
+        if (amount <= 0) {
+            return ResponseEntity.badRequest().body(Map.of("error", "Amount must be greater than 0"));
+        }
+        
             // Simulate successful payment
-            Payment transaction = paymentService.recordPayment("CreditCard", "mock-transaction-id", amount);
+            Payment transaction = paymentService.recordPayment("Credit/Debit Card", "mock-transaction-id", amount);
             // Fetch the user and pet information
             User currentUser = userService.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
             Pet pet = petService.findById(petId).orElseThrow(() -> new RuntimeException("Pet not found"));
@@ -115,10 +126,5 @@ public class PaymentController {
             response.put("message", "Credit/Debit card payment successful");
             response.put("transactionId", transaction.getTransactionId());
             return ResponseEntity.ok(response);
-        } else {
-            // Return error as JSON
-            Map<String, String> errorResponse = new HashMap<>();
-            errorResponse.put("error", "Invalid payment details");
-            return ResponseEntity.badRequest().body(errorResponse);        }
-    }
+        }
 }
