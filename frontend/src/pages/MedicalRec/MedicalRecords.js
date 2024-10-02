@@ -24,7 +24,6 @@ function MedicalRecords() {
   const [allRecords, setAllRecords] = useState([]);
   const [category, setCategory] = useState('All');
 
-  
   const initialRecords = [
     { petId: 1, date: '01/01/2023', service: 'Annual Check-up', vet: 'Dr. Doofenshmirtz', id: 1, weight: '25kg', healthStatus: 'Healthy', diet: 'Grass only' },
     { petId: 1, date: '01/06/2023', service: 'Vaccination', vet: 'Dr. Perry', id: 2, vaccine: 'Rabies', dose: '10mg', nextDose: '06/06/2023', vetComments: 'All went well' },
@@ -40,8 +39,10 @@ function MedicalRecords() {
   const [selectedRecord, setSelectedRecord] = useState(null);
   const [showRecordModal, setShowRecordModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
-  const [showAddModal, setShowAddModal] = useState(false);  // New for "Add Record" modal
-  const [newRecord, setNewRecord] = useState({ date: null, service: "", vet: "" });
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [newRecord, setNewRecord] = useState({ 
+    date: null, service: "", vet: "", weight: "", healthStatus: "", diet: "", allergies: "", medications: "" 
+  });
   const [editRecord, setEditRecord] = useState({
     date: null,
     service: "",
@@ -49,8 +50,6 @@ function MedicalRecords() {
   });  
   const [errors, setErrors] = useState({ date: "", service: "", vet: "" });
 
-
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     const storedVets = JSON.parse(localStorage.getItem('users'))?.filter(user => user.role === 'Vet') || [];
     setVets(storedVets);
@@ -64,8 +63,6 @@ function MedicalRecords() {
     }
   }, []);
 
-  
-
   const handleDownload = (record) => {
     const doc = new jsPDF();
     doc.setFontSize(16);
@@ -74,15 +71,31 @@ function MedicalRecords() {
     doc.text(`Date: ${record.date}`, 10, 20);
     doc.text(`Service: ${record.service}`, 10, 30);
     doc.text(`Veterinarian: ${record.vet}`, 10, 40);
+    if (record.weight) {
+      doc.text(`Weight: ${record.weight}`, 10, 50);
+      doc.text(`Health Status: ${record.healthStatus}`, 10, 60);
+      doc.text(`Diet: ${record.diet}`, 10, 70);
+    }
     if (record.vaccine) {
-      doc.text(`Vaccine: ${record.vaccine}`, 10, 50);
-      doc.text(`Dose: ${record.dose}`, 10, 60);
-      doc.text(`Next Dose: ${record.nextDose}`, 10, 70);
+      doc.text(`Vaccine: ${record.vaccine}`, 10, 80);
+      doc.text(`Dose: ${record.dose}`, 10, 90);
+      doc.text(`Next Dose: ${record.nextDose}`, 10, 100);
+      doc.text(`Vet Comments: ${record.vetComments}`, 10, 110);
     }
     if (record.treatment) {
-      doc.text(`Treatment: ${record.treatment}`, 10, 50);
-      doc.text(`Medications: ${record.medications}`, 10, 60);
-      doc.text(`Duration: ${record.duration}`, 10, 70);
+      doc.text(`Treatment: ${record.treatment}`, 10, 120);
+      doc.text(`Medications: ${record.medications}`, 10, 130);
+      doc.text(`Dosage: ${record.dosage}`, 10, 140);
+      doc.text(`Duration: ${record.duration}`, 10, 150);
+      doc.text(`Symptoms: ${record.symptoms}`, 10, 160);
+      doc.text(`Diagnosis: ${record.diagnosis}`, 10, 170);
+      doc.text(`Follow-up Date: ${record.followUpDate}`, 10, 180);
+    }
+    if (record.procedure) {
+      doc.text(`Procedure: ${record.procedure}`, 10, 190);
+      doc.text(`Pre-op Diagnosis: ${record.preOpDiagnosis}`, 10, 200);
+      doc.text(`Post-op Medications: ${record.postOpMedications}`, 10, 210);
+      doc.text(`Follow-up Plan: ${record.followUpPlan}`, 10, 220);
     }
     doc.save(`medical-record-${record.id}.pdf`);
   };
@@ -119,9 +132,8 @@ function MedicalRecords() {
   };
 
   const handleAddRecord = () => {
-    setShowAddModal(true);  // Show "Add Record" modal
+    setShowAddModal(true);
   };
-
 
   const handleSaveNewRecord = () => {
     let valid = true;
@@ -138,23 +150,21 @@ function MedicalRecords() {
     }
     
     if (!newRecord.vet.startsWith("Dr.")) {
-      newErrors.vet = "Veterinarian must start with 'Dr.'.";
+      newErrors.vet = "Veterinarian must start with 'Dr.'";
       valid = false;
     }
 
     setErrors(newErrors);
 
     if (valid) {
-      const updatedRecords = [...allRecords, { id: allRecords.length + 1, ...newRecord, petId: selectedPet }];
+      const updatedRecords = [...allRecords, { id: allRecords.length + 1, ...newRecord, petId: selectedPet, date: dayjs(newRecord.date).format('MM/DD/YYYY') }];
       setAllRecords(updatedRecords);
       localStorage.setItem('medicalRecords', JSON.stringify(updatedRecords));
       setShowAddModal(false);
       setNewRecord({ date: null, service: "", vet: "" });
-      setNewRecord({ ...newRecord, date: dayjs(newRecord.date) }); 
+      setErrors({ date: "", service: "", vet: "" });
     }
   };
-
-  
 
   const handleSaveEdit = () => {
     let valid = true;
@@ -180,21 +190,23 @@ function MedicalRecords() {
     if (valid) {
       const updatedRecords = allRecords.map((record) =>
         record.id === editRecord.id
-          ? { ...record, ...editRecord, date: dayjs(editRecord.date).format('YYYY-MM-DD') }
+          ? { ...record, ...editRecord, date: dayjs(editRecord.date).format('MM/DD/YYYY') }
           : record
       );
   
       setAllRecords(updatedRecords);
       localStorage.setItem('medicalRecords', JSON.stringify(updatedRecords));
       setShowEditModal(false);
+      setErrors({ date: "", service: "", vet: "" });
     }
   };
-  
+
   const handleClose = () => {
     setShowEditModal(false); 
-    setShowAddModal(false);   
+    setShowAddModal(false);  
+    setErrors({ date: "", service: "", vet: "" }); 
   };
-  
+
   const handleDeleteRecord = (id) => {
     const updatedRecords = allRecords.filter(record => record.id !== id);
     setAllRecords(updatedRecords);
@@ -202,16 +214,16 @@ function MedicalRecords() {
   };
 
   const handleShowEditModal = (record) => {
-    setEditRecord(record);  
+    setEditRecord({ ...record, date: dayjs(record.date, 'MM/DD/YYYY') });  
     setShowEditModal(true); 
   };
 
   const filteredRecords = allRecords
-  .filter(record =>
-    (!selectedPet || record.petId === selectedPet) &&
-    ((record.service && record.service.toLowerCase().includes(searchTerm.toLowerCase())) || 
-    (record.date && record.date.includes(searchTerm)))
-  );
+    .filter(record =>
+      (!selectedPet || record.petId === selectedPet) &&
+      ((record.service && record.service.toLowerCase().includes(searchTerm.toLowerCase())) || 
+      (record.date && record.date.includes(searchTerm)))
+    );
 
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -220,7 +232,6 @@ function MedicalRecords() {
           <h2>Pets</h2>
           <div className="pet-selection">
             <div className="pet-list">
-              {/* Pet List */}
               {pets.map((pet) => (
                 <div
                   key={pet.id}
@@ -236,7 +247,6 @@ function MedicalRecords() {
                   </Button>
                 </div>
               ))}
-
             </div>
           </div>
         </div>
@@ -244,29 +254,28 @@ function MedicalRecords() {
         <div>
           <h2>{selectedPet ? `${pets.find(pet => pet.id === selectedPet).name}'s Medical Records` : 'All Pets Medical Records'}</h2>
           
-          {/* Record Category Dropdown */}
-          <DropdownButton
-            id="dropdown-basic-button"
-            title={`Category: ${category}`}
-            onSelect={(eventKey) => setCategory(eventKey)}
-            className="category-dropdown"  // Added padding to dropdown
-          >
-            <Dropdown.Item eventKey="All">All</Dropdown.Item>
-            <Dropdown.Item eventKey="Vaccination">Vaccination</Dropdown.Item>
-            <Dropdown.Item eventKey="Treatment Plan">Treatment Plan</Dropdown.Item>
-            <Dropdown.Item eventKey="Other">Other</Dropdown.Item>
-          </DropdownButton>
+          <div className="d-flex justify-content-between align-items-center mb-3">
+            <DropdownButton
+              id="dropdown-basic-button"
+              title={`Category: ${category}`}
+              onSelect={(eventKey) => setCategory(eventKey)}
+              className="category-dropdown"
+            >
+              <Dropdown.Item eventKey="All">All</Dropdown.Item>
+              <Dropdown.Item eventKey="Vaccination">Vaccination</Dropdown.Item>
+              <Dropdown.Item eventKey="Treatment Plan">Treatment Plan</Dropdown.Item>
+              <Dropdown.Item eventKey="Other">Other</Dropdown.Item>
+            </DropdownButton>
 
-          {/* Add Record Button */}
-          <Button onClick={handleAddRecord} disabled={!selectedPet} className="add-record-btn">
-            Add Record
-          </Button>
-          
-          {/* Search Bar */}
-          <div className="search-bar">
+            <Button onClick={handleAddRecord} disabled={!selectedPet} className="add-record-btn">
+              Add Record
+            </Button>
+          </div>
+
+          <div className="search-bar mb-3">
             <Form.Control
               type="text"
-              placeholder="Search records by date or VET..."
+              placeholder="Search records by date or service..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -288,12 +297,12 @@ function MedicalRecords() {
                   <td>{record.service}</td>
                   <td>{record.vet}</td>
                   <td>
-                    <Button onClick={() => handleShowEditModal(record)}>Edit</Button>
-                    <Button onClick={() => handleDeleteRecord(record.id)}>Delete</Button>
-                    <Button onClick={() => {
+                    <Button variant="info" size="sm" onClick={() => {
                       setSelectedRecord(record);
                       setShowRecordModal(true);
-                    }}>View</Button>
+                    }}>View</Button>{' '}
+                    <Button variant="warning" size="sm" onClick={() => handleShowEditModal(record)}>Edit</Button>{' '}
+                    <Button variant="danger" size="sm" onClick={() => handleDeleteRecord(record.id)}>Delete</Button>
                   </td>
                 </tr>
               ))}
@@ -301,9 +310,8 @@ function MedicalRecords() {
           </Table>
         </div>
 
-
         {/* Add Record Modal */}
-        <Modal show={showAddModal} onHide={() => setShowAddModal(false)}>
+        <Modal show={showAddModal} onHide={handleClose}>
           <Modal.Header closeButton>
             <Modal.Title>Add Medical Record</Modal.Title>
           </Modal.Header>
@@ -311,21 +319,20 @@ function MedicalRecords() {
             <Form>
               <Form.Group controlId="formDate">
                 <Form.Label>Date</Form.Label>
-                <LocalizationProvider dateAdapter={AdapterDayjs}>
-                  <DatePicker
-                    label="Select date"
-                    value={newRecord.date ? dayjs(newRecord.date) : null}
-                    onChange={(date) => setNewRecord({ ...newRecord, date })}
-                    renderInput={(params) => (
-                      <Form.Control
-                        {...params}
-                        className={`${errors.date ? 'is-invalid' : ''}`}
-                      />
-                    )}
-                  />
-                </LocalizationProvider>
-
-                {errors.date && <span className="text-danger">{errors.date}</span>}
+                <DatePicker
+                  label="Select date"
+                  value={newRecord.date}
+                  onChange={(date) => setNewRecord({ ...newRecord, date })}
+                  renderInput={(params) => (
+                    <Form.Control
+                      {...params.inputProps}
+                      isInvalid={!!errors.date}
+                    />
+                  )}
+                />
+                <Form.Control.Feedback type="invalid">
+                  {errors.date}
+                </Form.Control.Feedback>
               </Form.Group>
               <Form.Group controlId="formService">
                 <Form.Label>Service</Form.Label>
@@ -333,9 +340,11 @@ function MedicalRecords() {
                   type="text"
                   value={newRecord.service}
                   onChange={(e) => setNewRecord({ ...newRecord, service: e.target.value })}
-                  className={`${errors.service ? 'is-invalid' : ''}`}
+                  isInvalid={!!errors.service}
                 />
-                {errors.service && <span className="text-danger">{errors.service}</span>}
+                <Form.Control.Feedback type="invalid">
+                  {errors.service}
+                </Form.Control.Feedback>
               </Form.Group>
               <Form.Group controlId="formVet">
                 <Form.Label>Veterinarian</Form.Label>
@@ -343,24 +352,27 @@ function MedicalRecords() {
                   type="text"
                   value={newRecord.vet}
                   onChange={(e) => setNewRecord({ ...newRecord, vet: e.target.value })}
-                  className={`${errors.vet ? 'is-invalid' : ''}`}
+                  isInvalid={!!errors.vet}
                 />
-                {errors.vet && <span className="text-danger">{errors.vet}</span>}
+                <Form.Control.Feedback type="invalid">
+                  {errors.vet}
+                </Form.Control.Feedback>
               </Form.Group>
             </Form>
           </Modal.Body>
           <Modal.Footer>
-            <Button variant="secondary" onClick={() => setShowAddModal(false)}>Close</Button>
+            <Button variant="secondary" onClick={handleClose}>Close</Button>
             <Button variant="primary" onClick={handleSaveNewRecord}>Save Record</Button>
           </Modal.Footer>
         </Modal>
-        
+
+        {/* View Record Modal */}
         <Modal show={showRecordModal} onHide={() => setShowRecordModal(false)}>
           <Modal.Header closeButton>
             <Modal.Title>Medical Record Details</Modal.Title>
           </Modal.Header>
           <Modal.Body>
-            {selectedRecord && formatRecordDetails(selectedRecord)}
+            {selectedRecord && <pre>{formatRecordDetails(selectedRecord)}</pre>}
           </Modal.Body>
           <Modal.Footer>
             <Button variant="secondary" onClick={() => setShowRecordModal(false)}>Close</Button>
@@ -369,6 +381,7 @@ function MedicalRecords() {
           </Modal.Footer>
         </Modal>
 
+        {/* Share with Vet Modal */}
         <Modal show={showVetModal} onHide={() => setShowVetModal(false)}>
           <Modal.Header closeButton>
             <Modal.Title>Share with Vet</Modal.Title>
@@ -390,6 +403,7 @@ function MedicalRecords() {
           </Modal.Footer>
         </Modal>
 
+        {/* Edit Record Modal */}
         <Modal show={showEditModal} onHide={handleClose}>
           <Modal.Header closeButton>
             <Modal.Title>Edit Medical Record</Modal.Title>
@@ -399,28 +413,43 @@ function MedicalRecords() {
               <Form.Group controlId="formDate">
                 <Form.Label>Date</Form.Label>
                 <DatePicker
-                  selected={dayjs(editRecord.date).toDate()} 
-                  onChange={(date) => setEditRecord({ ...editRecord, date: date })}
-                  dateFormat="dd/MM/yyyy"
+                  label="Select date"
+                  value={editRecord.date}
+                  onChange={(date) => setEditRecord({ ...editRecord, date })}
+                  renderInput={(params) => (
+                    <Form.Control
+                      {...params.inputProps}
+                      isInvalid={!!errors.date}
+                    />
+                  )}
                 />
+                <Form.Control.Feedback type="invalid">
+                  {errors.date}
+                </Form.Control.Feedback>
               </Form.Group>
-
               <Form.Group controlId="formService">
                 <Form.Label>Service</Form.Label>
                 <Form.Control
                   type="text"
                   value={editRecord.service}
                   onChange={(e) => setEditRecord({ ...editRecord, service: e.target.value })}
+                  isInvalid={!!errors.service}
                 />
+                <Form.Control.Feedback type="invalid">
+                  {errors.service}
+                </Form.Control.Feedback>
               </Form.Group>
-
               <Form.Group controlId="formVet">
                 <Form.Label>Veterinarian</Form.Label>
                 <Form.Control
                   type="text"
                   value={editRecord.vet}
                   onChange={(e) => setEditRecord({ ...editRecord, vet: e.target.value })}
+                  isInvalid={!!errors.vet}
                 />
+                <Form.Control.Feedback type="invalid">
+                  {errors.vet}
+                </Form.Control.Feedback>
               </Form.Group>
             </Form>
           </Modal.Body>
