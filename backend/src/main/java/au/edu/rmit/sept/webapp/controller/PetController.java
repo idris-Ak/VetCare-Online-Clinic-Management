@@ -88,6 +88,7 @@ public class PetController {
     @PutMapping("/{petId}")
     public ResponseEntity<Pet> updatePet(
             @PathVariable Long petId,
+            @RequestParam Long userId, 
             @RequestParam("name") String name,
             @RequestParam("type") String type,
             @RequestParam("breed") String breed,
@@ -98,6 +99,11 @@ public class PetController {
         Optional<Pet> existingPet = petService.findById(petId);
         if (existingPet.isPresent()) {
             Pet pet = existingPet.get();
+
+            // Ensure the pet belongs to the user making the request
+            if (!pet.getUser().getId().equals(userId)) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
+            }
             if (name != null)
                 pet.setName(name);
             if (type != null)
@@ -119,24 +125,41 @@ public class PetController {
             Pet savedPet = petService.savePet(pet);
             return ResponseEntity.ok(savedPet);
         }
-        return ResponseEntity.status(404).build(); // Return 404 if pet not found
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).build(); // Return 404 if pet not found
     }
 
     // Delete pet
     @DeleteMapping("/{petId}")
-    public ResponseEntity<Void> deletePet(@PathVariable Long petId) {
+    public ResponseEntity<Void> deletePet(@PathVariable Long petId, @RequestParam Long userId) {
+           // Fetch the pet by ID
+    Optional<Pet> existingPet = petService.findById(petId);
+    if (existingPet.isPresent()) {
+        Pet pet = existingPet.get();
+
+        // Ensure the pet belongs to the user making the request
+        if (!pet.getUser().getId().equals(userId)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); // 403 Forbidden if user doesn't own the pet
+        }
+
         petService.deletePet(petId);
         return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).build(); // Return 404 if pet not found
     }
     
     // Update pet profile picture
     @PutMapping("/{petId}/profilePicture")
     public ResponseEntity<Pet> updatePetProfilePicture(
             @PathVariable Long petId,
+            @RequestParam Long userId,
             @RequestParam("profilePicture") MultipartFile profilePicture) {
         Optional<Pet> existingPet = petService.findById(petId);
         if (existingPet.isPresent()) {
             Pet pet = existingPet.get();
+            // Ensure the pet belongs to the user making the request
+            if (!pet.getUser().getId().equals(userId)) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); // 403 Forbidden if user doesn't own the pet
+            }
 
             if (profilePicture != null && !profilePicture.isEmpty()) {
                 try {
@@ -155,10 +178,14 @@ public class PetController {
 
     // Delete pet profile picture
     @DeleteMapping("/{petId}/profilePicture")
-    public ResponseEntity<Pet> removePetProfilePicture(@PathVariable Long petId) {
+    public ResponseEntity<Pet> removePetProfilePicture(@PathVariable Long petId, @RequestParam Long userId) {
         Optional<Pet> existingPet = petService.findById(petId);
         if (existingPet.isPresent()) {
             Pet pet = existingPet.get();
+            // Ensure the pet belongs to the user making the request
+            if (!pet.getUser().getId().equals(userId)) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); // 403 Forbidden if user doesn't own the pet
+            }
             pet.setProfilePicture(null); // Remove the profile picture from the pet
 
             Pet savedPet = petService.savePet(pet); // Save the updated pet
