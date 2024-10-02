@@ -18,6 +18,7 @@ au/edu/rmit/sept/webapp/controller/UserController.class
 au/edu/rmit/sept/webapp/model/Vet.class
 au/edu/rmit/sept/webapp/service/PetService.class
 au/edu/rmit/sept/webapp/service/UserService.class
+au/edu/rmit/sept/webapp/SecurityConfig.class
 au/edu/rmit/sept/webapp/repository/PaymentRepository.class
 au/edu/rmit/sept/webapp/service/AppointmentService.class
 au/edu/rmit/sept/webapp/controller/PaymentController.class
