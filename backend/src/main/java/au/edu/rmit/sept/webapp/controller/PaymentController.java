@@ -1,7 +1,13 @@
 package au.edu.rmit.sept.webapp.controller;
 
 import au.edu.rmit.sept.webapp.model.Payment;
+import au.edu.rmit.sept.webapp.model.Transaction;
+import au.edu.rmit.sept.webapp.model.User;
+import au.edu.rmit.sept.webapp.model.Pet;
 import au.edu.rmit.sept.webapp.service.PaymentService;
+import au.edu.rmit.sept.webapp.service.UserService;
+import au.edu.rmit.sept.webapp.service.PetService;
+import au.edu.rmit.sept.webapp.service.TransactionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -9,6 +15,7 @@ import org.springframework.http.HttpStatus;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.time.LocalDateTime;
 
 @RestController
 @RequestMapping("/api/payment")
@@ -17,9 +24,19 @@ public class PaymentController {
     @Autowired
     private PaymentService paymentService;
 
+    @Autowired
+    private UserService userService;
+
+    @Autowired
+    private PetService petService;
+
+    @Autowired
+    private TransactionService transactionService;
+
     // Handle PayPal Payment
     @PostMapping("/paypal")
-    public ResponseEntity<Map<String, String>> handlePayPalPayment(@RequestBody Map<String, Object> paymentData) {
+    public ResponseEntity<Map<String, String>> handlePayPalPayment(@RequestBody Map<String, Object> paymentData, 
+            @RequestParam Long userId, @RequestParam Long petId, @RequestParam String serviceType) {
         String orderId = (String) paymentData.get("orderId");
         // Handle the amount conversion from Integer or Double
         double amount;
@@ -34,6 +51,19 @@ public class PaymentController {
         if (orderId != null) {
             // Record successful PayPal transaction
             Payment transaction = paymentService.recordPayment("PayPal", orderId, amount);
+            User currentUser = userService.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
+            Pet pet = petService.findById(petId).orElseThrow(() -> new RuntimeException("Pet not found"));
+
+            // Save the transaction in the transaction history
+            Transaction newTransaction = new Transaction();
+            newTransaction.setAmount(amount);
+            newTransaction.setPetName(pet.getName());
+            newTransaction.setDateTime(LocalDateTime.now()); // Store date and time
+            newTransaction.setUser(currentUser);
+            newTransaction.setPaymentMethod("PayPal"); // Set payment method
+            newTransaction.setServiceType(serviceType); // Save the service type
+            transactionService.saveTransaction(newTransaction); // Save the transaction
+
             Map<String, String> response = new HashMap<>();
             response.put("message", "PayPal payment successful");
             response.put("transactionId", transaction.getTransactionId());
@@ -47,7 +77,8 @@ public class PaymentController {
 
     // Simulate Credit/Debit Card Payment
     @PostMapping("/credit-card")
-    public ResponseEntity<Map<String, String>> handleCreditCardPayment(@RequestBody Map<String, Object> paymentDetails) {
+    public ResponseEntity<Map<String, String>> handleCreditCardPayment(@RequestBody Map<String, Object> paymentDetails,
+            @RequestParam Long userId, @RequestParam Long petId, @RequestParam String serviceType) {
         String cardNumber = (String) paymentDetails.get("cardNumber");
         String expiryDate = (String) paymentDetails.get("expiryDate");
         String cvv = (String) paymentDetails.get("cvv");
@@ -65,6 +96,21 @@ public class PaymentController {
         if (cardNumber.length() == 19 && expiryDate.matches("\\d{2}/\\d{2}") && cvv.length() == 3) {
             // Simulate successful payment
             Payment transaction = paymentService.recordPayment("CreditCard", "mock-transaction-id", amount);
+            // Fetch the user and pet information
+            User currentUser = userService.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
+            Pet pet = petService.findById(petId).orElseThrow(() -> new RuntimeException("Pet not found"));
+
+            // Save the transaction in the transaction history
+            Transaction newTransaction = new Transaction();
+            newTransaction.setAmount(amount);
+            newTransaction.setPetName(pet.getName());
+            newTransaction.setDateTime(LocalDateTime.now()); // Store date and time
+            newTransaction.setUser(currentUser);
+            newTransaction.setPaymentMethod("Credit/Debit Card"); // Set payment method
+            newTransaction.setServiceType(serviceType); // Save the service type
+
+            transactionService.saveTransaction(newTransaction); // Save the transaction
+
             Map<String, String> response = new HashMap<>();
             response.put("message", "Credit/Debit card payment successful");
             response.put("transactionId", transaction.getTransactionId());
