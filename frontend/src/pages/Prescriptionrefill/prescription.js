@@ -154,15 +154,42 @@ const addPrescriptionToMedicalRecords = () => {
 };
 
   // Handle Payment Submission
-const handlePaymentSubmit = (e) => {
-    e.preventDefault();
-    if (validatePaymentForm()) {
-    setShowPaymentModal(false);
-    setShowConfirmationModal(true);
-      addPrescriptionToMedicalRecords(); // Automatically add prescription to medical records
-    }
-};
+ const handlePaymentSubmit = async (e) => {
+      e.preventDefault();
+      if (validatePaymentForm()) {
+        // Send payment details to the backend
+        try {
+          const response = await fetch('http://localhost:8080/api/payment/credit-card', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                cardNumber: paymentDetails.cardNumber,
+                expiryDate: paymentDetails.expiryDate,
+                cvv: paymentDetails.cvv,
+                amount: 50.00 // Pass the actual amount here once the amount variable has been created
+            }),
+          });
 
+          // Handle the response correctly
+            if (!response.ok) {
+                const errorResponse = await response.json(); // Read the response as JSON once
+                console.error("Error processing payment:", errorResponse);
+                return;
+            }
+
+            // Payment successful
+            setShowPaymentModal(false);
+            setShowConfirmationModal(true);
+            addPrescriptionToMedicalRecords(); // Automatically add prescription to medical records
+        } catch (error) {
+          console.error('Error processing payment:', error);
+          alert('An error occurred while processing the payment. Please try again.');
+        }
+      }
+    };
+   
 const handleCloseConfirmationModal = () => {
     // Reset form or navigate to home page
     setShowConfirmationModal(false);
@@ -303,13 +330,36 @@ const handleCloseConfirmationModal = () => {
                         });
                     }}
                     onApprove={(data, actions) => {
-                        return actions.order.capture().then((details) => {
-                        setShowPaymentMethodModal(false);
-                        setShowPayPalButtons(false);
-                        setShowConfirmationModal(true);
-                          addPrescriptionToMedicalRecords(); // Add the prescription when PayPal payment is approved
+                        return actions.order.capture().then(async (details) => {
+                         // Send orderID and other details to the backend
+                          try {
+                            const response = await fetch('http://localhost:8080/api/payment/paypal', {
+                              method: 'POST',
+                              headers: {
+                                'Content-Type': 'application/json',
+                              },
+                              body: JSON.stringify({
+                                orderId: data.orderID,
+                                amount: 50.00, // Pass the actual amount here after a amount variable has been made
+                            }),
                         });
-                    }}
+                            if (response.ok) {
+                              setShowPaymentMethodModal(false);
+                              setShowPayPalButtons(false);
+                              setShowConfirmationModal(true);
+                              addPrescriptionToMedicalRecords(); // Add the prescription when PayPal payment is approved
+                            } else {
+                              // Handle payment failure
+                              const errorData = await response.json();
+                              console.error('Payment failed:', errorData);
+                              alert('Payment failed. Please try again.');
+                            }
+                          } catch (error) {
+                            console.error('Error processing payment:', error);
+                            alert('An error occurred while processing the payment. Please try again.');
+                          }
+                        });
+                      }}
                     onCancel={() => {
                         setShowPayPalButtons(false);
                         setShowPaymentMethodModal(true);
