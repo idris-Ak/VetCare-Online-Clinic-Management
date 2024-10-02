@@ -7,7 +7,7 @@ import pet2Image from 'frontend/src/components/assets/about2.jpg';
 import pet1Image from 'frontend/src/components/assets/blog3.jpg';
 import successfulPaymentCheck from 'frontend/src/components/assets/check.png';
 
-const Prescription = () => {
+const Prescription = ({ user }) => {
     const [selectedPet, setSelectedPet] = useState(null);
     const [prescriptionDetail, setPrescriptionDetail] = useState('');
     const [preferredPharmacy, setPreferredPharmacy] = useState('');
@@ -44,7 +44,11 @@ const Prescription = () => {
     };
   
     const handleSubmit = (e) => {
-      e.preventDefault();
+    e.preventDefault();
+    if (!selectedPet) {
+        alert("Please select a pet before proceeding.");
+        return;
+    } 
       // Show payment method modal on submit
       setShowPaymentMethodModal(true);
     };
@@ -157,9 +161,13 @@ const addPrescriptionToMedicalRecords = () => {
  const handlePaymentSubmit = async (e) => {
       e.preventDefault();
       if (validatePaymentForm()) {
+        if (!user || !selectedPet) {
+            alert('User or pet information is missing.');
+            return;
+        }
         // Send payment details to the backend
         try {
-          const response = await fetch('http://localhost:8080/api/payment/credit-card', {
+            const response = await fetch(`http://localhost:8080/api/payment/credit-card?userId=${user.id}&petId=${selectedPet.id}`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -168,6 +176,7 @@ const addPrescriptionToMedicalRecords = () => {
                 cardNumber: paymentDetails.cardNumber,
                 expiryDate: paymentDetails.expiryDate,
                 cvv: paymentDetails.cvv,
+                serviceType: 'prescription',
                 amount: 50.00 // Pass the actual amount here once the amount variable has been created
             }),
           });
@@ -331,9 +340,13 @@ const handleCloseConfirmationModal = () => {
                     }}
                     onApprove={(data, actions) => {
                         return actions.order.capture().then(async (details) => {
+                            if (!user || !selectedPet) {
+                                alert('User or pet information is missing.');
+                                return;
+                            }
                          // Send orderID and other details to the backend
                           try {
-                            const response = await fetch('http://localhost:8080/api/payment/paypal', {
+                              const response = await fetch(`http://localhost:8080/api/payment/paypal?userId=${user.id}&petId=${selectedPet.id}`, {
                               method: 'POST',
                               headers: {
                                 'Content-Type': 'application/json',
@@ -341,6 +354,7 @@ const handleCloseConfirmationModal = () => {
                               body: JSON.stringify({
                                 orderId: data.orderID,
                                 amount: 50.00, // Pass the actual amount here after a amount variable has been made
+                                serviceType: 'prescription',
                             }),
                         });
                             if (response.ok) {

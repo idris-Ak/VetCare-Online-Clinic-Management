@@ -1,14 +1,17 @@
 package au.edu.rmit.sept.webapp.controller;
 
 import au.edu.rmit.sept.webapp.model.User;
+import au.edu.rmit.sept.webapp.model.Transaction;
 import au.edu.rmit.sept.webapp.service.UserService;
 import au.edu.rmit.sept.webapp.service.ImageService;
+import au.edu.rmit.sept.webapp.service.TransactionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.http.HttpStatus;
 
+import java.util.List;
 import java.util.Optional;
 import java.io.IOException;
 import java.util.Base64;
@@ -47,7 +50,7 @@ public class UserController {
         Optional<User> user = userService.findById(userId);
         return user.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
-    
+
     // Update user profile
     @PutMapping("/{userId}")
     public ResponseEntity<User> updateUser(

@@ -11,6 +11,7 @@ import HomePage from './pages/HomePage';
 import Login from './pages/User and Pet Management/Login';
 import MedicalRecords from './pages/MedicalRec/MedicalRecords';
 import MyProfile from './pages/User and Pet Management/MyProfile'; // Assuming MyProfile is located in the 'pages' directory
+import TransactionHistory from './pages/User and Pet Management/TransactionHistory';
 import Prescription from './pages/Prescriptionrefill/prescription';
 import SignUp from './pages/User and Pet Management/SignUp';
 import VetProfilePage from './pages/VetProfilePage'; // Adjusted relative path
@@ -85,6 +86,12 @@ function App() {
               path="/myprofile" 
               element={<MyProfile user={user} setUser={setUser} logoutUser={logoutUser} />} 
             />
+            <Route path="/transaction-history" element={
+            <PrivateRoute isLoggedIn={isLoggedIn}>
+                  <TransactionHistory user={user} />
+            </PrivateRoute>
+              } 
+            />
             
             {/* Protected Routes */}
             <Route 
@@ -107,7 +114,7 @@ function App() {
               path="/prescription" 
               element={
                 <PrivateRoute isLoggedIn={isLoggedIn}>
-                  <Prescription />
+                <Prescription user={user} />
                 </PrivateRoute>
               } 
             />

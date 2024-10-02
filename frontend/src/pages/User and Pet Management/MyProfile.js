@@ -509,6 +509,7 @@ const updateUserPets = (updatedPets) => {
           backgroundColor: '#fff',
           borderRadius: '20px',
           boxShadow: '0 6px 20px rgba(0,0,0,0.1)',
+          position: 'relative',
         }}
       >
         {/* User Profile Picture */}
@@ -583,6 +584,22 @@ const updateUserPets = (updatedPets) => {
             Delete Account
           </Button>
         </div>
+
+      {/* View Transaction History Button */}
+      {user.role === 'Pet Owner' && (
+        <Button
+          variant="outline-primary"
+          onClick={() => navigate('/transaction-history')}
+          className="mb-3"
+          style={{
+            position: 'absolute',
+            top: '10px',
+            right: '10px',
+          }}
+        >
+          View Transaction History
+        </Button>
+      )}
 
       {/* Edit Profile Modal */}
       <Modal show={showEditProfileModal} onHide={() => setShowEditProfileModal(false)}>
