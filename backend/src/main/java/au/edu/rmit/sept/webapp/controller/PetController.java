@@ -54,8 +54,8 @@ public class PetController {
             @PathVariable Long userId,
             @RequestParam("name") String name,
             @RequestParam("type") String type,
-            @RequestParam("breed") String breed,
-            @RequestParam("age") int age,
+            @RequestParam(value = "breed", required = false) String breed,
+            @RequestParam(value = "age", required = false) Integer age,
             @RequestParam(value = "profilePicture", required = false) MultipartFile profilePicture) 
         throws IOException {
         
@@ -91,8 +91,8 @@ public class PetController {
             @RequestParam Long userId, 
             @RequestParam("name") String name,
             @RequestParam("type") String type,
-            @RequestParam("breed") String breed,
-            @RequestParam("age") Integer age,
+            @RequestParam(value = "breed", required = false) String breed,
+            @RequestParam(value = "age", required = false) Integer age,
             @RequestParam(value = "profilePicture", required = false) MultipartFile profilePicture)
             throws IOException {
 
