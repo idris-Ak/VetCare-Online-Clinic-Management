@@ -13,14 +13,35 @@ public class Vet {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(unique = true)
     private String name;
+
     private String title;
+
     @Column(length = 1024)
     private String shortDescription;
+
     @Column(length = 4096)
     private String longDescription;
+
     private String imagePath;
     private String detailPath;
+
+    // Default constructor
+    public Vet() {
+    }
+
+    // Constructor with parameters
+    public Vet(long l, String name, String title, String shortDescription, String longDescription, String imagePath, String detailPath) {
+        this.id = l;
+        this.name = name;
+        this.title = title;
+        this.shortDescription = shortDescription;
+        this.longDescription = longDescription;
+        this.imagePath = imagePath;
+        this.detailPath = detailPath;
+    }
 
     // Getters and Setters
     public Long getId() {
