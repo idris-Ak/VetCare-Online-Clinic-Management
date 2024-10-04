@@ -19,8 +19,8 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        // Allow /signup and /login endpoints to be accessed without authentication
-        http.csrf().disable().authorizeHttpRequests((requests) -> requests.anyRequest().permitAll());  // Allow all requests without authentication
+        // Allow all requests without authentication
+        http.csrf().disable().authorizeHttpRequests((requests) -> requests.anyRequest().permitAll());
         return http.build();
     }
 }

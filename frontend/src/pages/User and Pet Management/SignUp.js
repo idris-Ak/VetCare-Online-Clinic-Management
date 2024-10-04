@@ -203,13 +203,13 @@ try {
                 <i className="bi bi-info-circle"></i>
               </OverlayTrigger>
             </Form.Label>
-        <Form.Control type="password" name="password" value={user.password} onChange={handleChange} required style={{ borderRadius: '15px' }} />
+        <Form.Control type="password" name="password" maxLength={100} value={user.password} onChange={handleChange} required style={{ borderRadius: '15px' }} />
         {errors.passwordError && <div style={{ color: 'red', fontSize: '0.85rem', marginTop: '0.25rem' }}>{errors.passwordError}</div>}
         </Form.Group>
 
         <Form.Group className="mb-4" controlId="userConfirmPassword">
           <Form.Label style={{fontFamily: 'Lato, sans-serif', fontSize:'20px'}}>Confirm Password</Form.Label>
-          <Form.Control type="password" name="confirmPassword" value={user.confirmPassword} onChange={handleChange} required style={{ borderRadius: '15px'}}/>
+          <Form.Control type="password" name="confirmPassword"  maxLength={100} value={user.confirmPassword} onChange={handleChange} required style={{ borderRadius: '15px'}}/>
           {errors.confirmPasswordError && <div style={{ color: 'red', fontSize: '0.85rem', marginTop: '0.25rem' }}>{errors.confirmPasswordError}</div>}
         </Form.Group>
         <div className="d-grid gap-2">
