@@ -1,11 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Container, Row, Col, Card, Spinner, Alert } from 'react-bootstrap';
+import { Button, Container, Row, Col, Card, Spinner, Alert, Pagination, Form } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 
 function TransactionHistory({ user }) {
   const [transactions, setTransactions] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
+  const [currentPage, setCurrentPage] = useState(1); // Pagination: current page
+  const [itemsPerPage] = useState(10); // Number of transactions per page
+  const [searchTerm, setSearchTerm] = useState(''); // Single search term state
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -68,6 +71,27 @@ function TransactionHistory({ user }) {
     return `${dateTime.toLocaleDateString()} at ${dateTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })}`;
   };
 
+  // Filter transactions based on the single search input
+  const filteredTransactions = transactions.filter(transaction => {
+    const searchLower = searchTerm.toLowerCase();
+    return (
+      transaction.petName.toLowerCase().includes(searchLower) ||
+      transaction.serviceType.toLowerCase().includes(searchLower) ||
+      transaction.amount.toString().includes(searchTerm) ||
+      formatDateTime(transaction.dateTime).toLowerCase().includes(searchLower) ||
+      transaction.paymentMethod.toLowerCase().includes(searchLower)
+    );
+  });
+
+  // Pagination logic
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentTransactions = filteredTransactions.slice(indexOfFirstItem, indexOfLastItem);
+
+  const totalPages = Math.ceil(filteredTransactions.length / itemsPerPage);
+
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
+
   return (
     <Container style={{ marginTop: '100px', marginBottom: '1000px' }}>
       <div className="d-flex justify-content-between align-items-center mb-4">
@@ -78,11 +102,23 @@ function TransactionHistory({ user }) {
         </div>
       <hr />
 
-      {transactions.length === 0 ? (
+      {/* Search Bar */}
+      <Form className="mb-4">
+        <Form.Group controlId="searchBar">
+          <Form.Control
+            type="text"
+            placeholder="Search transactions (pet name, service, amount, date, payment method)"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </Form.Group>
+      </Form>
+
+      {filteredTransactions.length === 0 ? (
         <Alert variant="info" className="text-center">No transaction history available.</Alert>
       ) : (
         <div>
-        {transactions.map((transaction) => (
+        {currentTransactions.map((transaction) => (
             <Card
               key={transaction.id}
               className="my-4 p-4"
@@ -120,6 +156,21 @@ function TransactionHistory({ user }) {
               </Row>
             </Card>
           ))}
+
+          {/* Pagination Controls */}
+          <div className="d-flex justify-content-center mt-4">
+            <Pagination size="lg">
+              <Pagination.First onClick={() => paginate(1)} disabled={currentPage === 1} />
+              <Pagination.Prev onClick={() => paginate(currentPage - 1)} disabled={currentPage === 1} />
+              {[...Array(totalPages)].map((_, index) => (
+                <Pagination.Item key={index + 1} active={index + 1 === currentPage} onClick={() => paginate(index + 1)}>
+                  {index + 1}
+                </Pagination.Item>
+              ))}
+              <Pagination.Next onClick={() => paginate(currentPage + 1)} disabled={currentPage === totalPages} />
+              <Pagination.Last onClick={() => paginate(totalPages)} disabled={currentPage === totalPages} />
+            </Pagination>
+          </div>
         </div>
       )}
     </Container>
