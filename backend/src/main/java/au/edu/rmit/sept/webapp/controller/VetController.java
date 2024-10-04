@@ -22,10 +22,18 @@ public class VetController {
 
     @GetMapping("/{vetId}")
     public ResponseEntity<Vet> getVetById(@PathVariable Long vetId) {
+        System.out.println("Fetching vet with ID: " + vetId);
         return vetService.findById(vetId)
-                .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+                .map(vet -> {
+                    System.out.println("Found vet: " + vet);
+                    return ResponseEntity.ok(vet);
+                })
+                .orElseGet(() -> {
+                    System.out.println("No vet found with ID: " + vetId);
+                    return ResponseEntity.notFound().build();
+                });
     }
+    
 
     @PostMapping
     public ResponseEntity<Vet> createVet(@RequestBody Vet vet) {
