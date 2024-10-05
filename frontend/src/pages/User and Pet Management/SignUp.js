@@ -16,7 +16,7 @@ function SignUp({loginUser}) {
     confirmPasswordError: '',
   });
   const [showSuccessAlert, setShowSuccessAlert] = useState(false);
-  const [isLoading, setIsLoading] = useState(true); // Loading state
+  const [isLoading, setIsLoading] = useState(false); // Loading state
   const navigate = useNavigate();
 
   const handleChange = (event) => {

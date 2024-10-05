@@ -85,7 +85,41 @@ const Prescription = ({ user }) => {
     ...prevDetails,
     [name]: formattedValue
     }));
-};
+      // Trigger validation on each change
+      validateSingleField(name, formattedValue);
+    };
+
+    // Real-time validation for individual fields
+    const validateSingleField = (fieldName, value) => {
+        let newErrors = { ...errors };
+
+        if (fieldName === 'cardNumber') {
+            const cardNumberDigits = value.replace(/\D/g, '');
+            if (cardNumberDigits.length !== 16) {
+                newErrors.cardNumberError = "Card number must be 16 digits.";
+            } else {
+                newErrors.cardNumberError = ''; // Clear error if valid
+            }
+        }
+
+        if (fieldName === 'expiryDate') {
+            if (!validateExpiryDate(value)) {
+                newErrors.expiryDateError = "Invalid or expired date. Use MM/YY format.";
+            } else {
+                newErrors.expiryDateError = ''; // Clear error if valid
+            }
+        }
+
+        if (fieldName === 'cvv') {
+            if (value.length !== 3) {
+                newErrors.cvvError = "CVV must be 3 digits.";
+            } else {
+                newErrors.cvvError = ''; // Clear error if valid
+            }
+        }
+
+        setErrors(newErrors); // Update the errors state
+    };
 
   // Validate credit card expiry date
 const validateExpiryDate = (expiryDate) => {
