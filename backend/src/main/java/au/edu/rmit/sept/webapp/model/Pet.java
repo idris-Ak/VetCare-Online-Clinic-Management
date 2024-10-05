@@ -16,7 +16,7 @@ public class Pet {
     private String name;
     private String type;
     private String breed;
-    private int age;
+    private Integer age;
     private String profilePicture; 
 
     @ManyToOne
@@ -57,11 +57,11 @@ public class Pet {
         this.breed = breed;
     }
 
-    public int getAge() {
+    public Integer getAge() {
         return age;
     }
 
-    public void setAge(int age) {
+    public void setAge(Integer age) {
         this.age = age;
     }
 

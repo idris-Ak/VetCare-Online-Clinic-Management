@@ -11,7 +11,7 @@
 	<groupId>au.edu.rmit.sept</groupId>
 	<artifactId>webapp</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>webapp</name>
+	<name>VetCare Online Veterinary Clinic System</name>
 	<description>COSC2299 SEPT WebApplication</description>
 	<url/>
 	<licenses>
