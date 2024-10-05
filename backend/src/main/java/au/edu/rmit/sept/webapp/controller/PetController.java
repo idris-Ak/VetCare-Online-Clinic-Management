@@ -104,14 +104,6 @@ public class PetController {
             if (!pet.getUser().getId().equals(userId)) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
             }
-            if (name != null)
-                pet.setName(name);
-            if (type != null)
-                pet.setType(type);
-            if (breed != null)
-                pet.setBreed(breed);
-            if (age != null)
-                pet.setAge(age);
 
             if (profilePicture != null && !profilePicture.isEmpty()) {
                 try {

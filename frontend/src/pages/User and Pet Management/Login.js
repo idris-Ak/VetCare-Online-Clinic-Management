@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState} from 'react';
 import { Button, Form, Alert, Container, ToggleButtonGroup, ToggleButton, Spinner } from 'react-bootstrap';
 import { useNavigate, Link, useLocation } from "react-router-dom";
 
@@ -10,11 +10,6 @@ function Login({loginUser}) {
   const [isLoading, setIsLoading] = useState(true); // Loading state
   const navigate = useNavigate();
   const location = useLocation();
-  
-
-  useEffect(() => {
-    setTimeout(() => setIsLoading(false), 500);
-  });
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -71,6 +66,9 @@ function Login({loginUser}) {
     }
   } catch (error) {
     console.error('Error during login:', error);
+  }
+  finally {
+    setIsLoading(false);
   }
 }
 

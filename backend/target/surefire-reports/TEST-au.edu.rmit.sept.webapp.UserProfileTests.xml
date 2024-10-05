@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report-3.0.xsd" version="3.0" name="au.edu.rmit.sept.webapp.LoginTests" time="1.242" tests="10" errors="0" skipped="0" failures="0">
+<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report-3.0.xsd" version="3.0" name="au.edu.rmit.sept.webapp.UserProfileTests" time="7.524" tests="5" errors="0" skipped="0" failures="0">
   <properties>
     <property name="java.specification.version" value="23"/>
     <property name="sun.jnu.encoding" value="UTF-8"/>
@@ -48,7 +48,7 @@
     <property name="localRepository" value="/Users/shreyas/.m2/repository"/>
     <property name="java.vendor.url.bug" value="https://github.com/Homebrew/homebrew-core/issues"/>
     <property name="java.io.tmpdir" value="/var/folders/m4/4_jjb4715p11658ww14tq8q00000gn/T/"/>
-    <property name="com.zaxxer.hikari.pool_number" value="4"/>
+    <property name="com.zaxxer.hikari.pool_number" value="1"/>
     <property name="java.version" value="23"/>
     <property name="user.dir" value="/Users/shreyas/github-classroom/Software Engineering Process and Tools/team-project-group-p06-02/backend"/>
     <property name="os.arch" value="x86_64"/>
@@ -65,10 +65,10 @@
     <property name="socksNonProxyHosts" value="local|*.local|169.254/16|*.169.254/16"/>
     <property name="java.class.version" value="67.0"/>
   </properties>
-  <testcase name="testBlankPasswordField" classname="au.edu.rmit.sept.webapp.LoginTests" time="0.009">
-    <system-out><![CDATA[2024-10-04T22:39:41.033+10:00  INFO 55399 --- [           main] t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [au.edu.rmit.sept.webapp.LoginTests]: LoginTests does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
-2024-10-04T22:39:41.035+10:00  INFO 55399 --- [           main] .b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration au.edu.rmit.sept.webapp.WebappApplication for test class au.edu.rmit.sept.webapp.LoginTests
-2024-10-04T22:39:41.043+10:00  INFO 55399 --- [           main] o.s.b.d.r.RestartApplicationListener     : Restart disabled due to context in which it is running
+  <testcase name="testInvalidEmailForVet" classname="au.edu.rmit.sept.webapp.UserProfileTests" time="0.033">
+    <system-out><![CDATA[22:39:30.725 [main] INFO org.springframework.test.context.support.AnnotationConfigContextLoaderUtils -- Could not detect default configuration classes for test class [au.edu.rmit.sept.webapp.UserProfileTests]: UserProfileTests does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+22:39:30.883 [main] INFO org.springframework.boot.test.context.SpringBootTestContextBootstrapper -- Found @SpringBootConfiguration au.edu.rmit.sept.webapp.WebappApplication for test class au.edu.rmit.sept.webapp.UserProfileTests
+22:39:31.083 [main] INFO org.springframework.boot.devtools.restart.RestartApplicationListener -- Restart disabled due to context in which it is running
 
   .   ____          _            __ _ _
  /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
@@ -79,20 +79,25 @@
 
  :: Spring Boot ::                (v3.3.2)
 
-2024-10-04T22:39:41.083+10:00  INFO 55399 --- [           main] au.edu.rmit.sept.webapp.LoginTests       : Starting LoginTests using Java 23 with PID 55399 (started by shreyas in /Users/shreyas/github-classroom/Software Engineering Process and Tools/team-project-group-p06-02/backend)
-2024-10-04T22:39:41.083+10:00  INFO 55399 --- [           main] au.edu.rmit.sept.webapp.LoginTests       : The following 1 profile is active: "test"
-2024-10-04T22:39:41.258+10:00  INFO 55399 --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
-2024-10-04T22:39:41.269+10:00  INFO 55399 --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 10 ms. Found 6 JPA repository interfaces.
-2024-10-04T22:39:41.510+10:00  INFO 55399 --- [           main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
-2024-10-04T22:39:41.515+10:00  INFO 55399 --- [           main] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
-2024-10-04T22:39:41.529+10:00  INFO 55399 --- [           main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
-2024-10-04T22:39:41.543+10:00  INFO 55399 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-4 - Starting...
-2024-10-04T22:39:41.544+10:00  INFO 55399 --- [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-4 - Added connection conn20: url=jdbc:h2:mem:testdb user=SA
-2024-10-04T22:39:41.545+10:00  INFO 55399 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-4 - Start completed.
-2024-10-04T22:39:41.545+10:00  WARN 55399 --- [           main] org.hibernate.orm.deprecation            : HHH90000025: H2Dialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
-2024-10-04T22:39:41.711+10:00  INFO 55399 --- [           main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2024-10-04T22:39:31.423+10:00  INFO 55399 --- [           main] a.edu.rmit.sept.webapp.UserProfileTests  : Starting UserProfileTests using Java 23 with PID 55399 (started by shreyas in /Users/shreyas/github-classroom/Software Engineering Process and Tools/team-project-group-p06-02/backend)
+2024-10-04T22:39:31.424+10:00  INFO 55399 --- [           main] a.edu.rmit.sept.webapp.UserProfileTests  : The following 1 profile is active: "test"
+2024-10-04T22:39:32.337+10:00  INFO 55399 --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2024-10-04T22:39:32.427+10:00  INFO 55399 --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 80 ms. Found 6 JPA repository interfaces.
+2024-10-04T22:39:34.432+10:00  INFO 55399 --- [           main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2024-10-04T22:39:34.522+10:00  INFO 55399 --- [           main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.5.2.Final
+2024-10-04T22:39:34.565+10:00  INFO 55399 --- [           main] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2024-10-04T22:39:34.755+10:00  INFO 55399 --- [           main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2024-10-04T22:39:34.792+10:00  INFO 55399 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2024-10-04T22:39:35.072+10:00  INFO 55399 --- [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection conn0: url=jdbc:h2:mem:testdb user=SA
+2024-10-04T22:39:35.074+10:00  INFO 55399 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2024-10-04T22:39:35.108+10:00  WARN 55399 --- [           main] org.hibernate.orm.deprecation            : HHH90000025: H2Dialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2024-10-04T22:39:36.196+10:00  INFO 55399 --- [           main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+Hibernate: create table appointments (id integer generated by default as identity, appointment_date date not null, appointment_time_id integer not null, clinic_id integer not null, pet_id integer not null, user_id integer not null, primary key (id))
+Hibernate: create table payment (id bigint generated by default as identity, amount float(53) not null, payment_method varchar(255), status varchar(255), transaction_date timestamp(6), transaction_id varchar(255), primary key (id))
+Hibernate: create table payment_transaction (id bigint generated by default as identity, amount float(53) not null, date_time timestamp(6), payment_method varchar(255), pet_name varchar(255), service_type varchar(255), user_id bigint, primary key (id))
+Hibernate: create table pet (id bigint generated by default as identity, age integer, breed varchar(255), name varchar(255), profile_picture varchar(255), type varchar(255), user_id bigint, primary key (id))
 Hibernate: create table user (id bigint generated by default as identity, email varchar(255), name varchar(255), password varchar(255), profile_picture varchar(255), role varchar(255), primary key (id))
-2024-10-04T22:39:41.713+10:00  WARN 55399 --- [           main] o.h.t.s.i.ExceptionHandlerLoggedImpl     : GenerationTarget encountered exception accepting command : Error executing DDL "create table user (id bigint generated by default as identity, email varchar(255), name varchar(255), password varchar(255), profile_picture varchar(255), role varchar(255), primary key (id))" via JDBC [Syntax error in SQL statement "create table [*]user (id bigint generated by default as identity, email varchar(255), name varchar(255), password varchar(255), profile_picture varchar(255), role varchar(255), primary key (id))"; expected "identifier";]
+2024-10-04T22:39:36.292+10:00  WARN 55399 --- [           main] o.h.t.s.i.ExceptionHandlerLoggedImpl     : GenerationTarget encountered exception accepting command : Error executing DDL "create table user (id bigint generated by default as identity, email varchar(255), name varchar(255), password varchar(255), profile_picture varchar(255), role varchar(255), primary key (id))" via JDBC [Syntax error in SQL statement "create table [*]user (id bigint generated by default as identity, email varchar(255), name varchar(255), password varchar(255), profile_picture varchar(255), role varchar(255), primary key (id))"; expected "identifier";]
 
 org.hibernate.tool.schema.spi.CommandAcceptanceException: Error executing DDL "create table user (id bigint generated by default as identity, email varchar(255), name varchar(255), password varchar(255), profile_picture varchar(255), role varchar(255), primary key (id))" via JDBC [Syntax error in SQL statement "create table [*]user (id bigint generated by default as identity, email varchar(255), name varchar(255), password varchar(255), profile_picture varchar(255), role varchar(255), primary key (id))"; expected "identifier";]
 	at org.hibernate.tool.schema.internal.exec.GenerationTargetToDatabase.accept(GenerationTargetToDatabase.java:94) ~[hibernate-core-6.5.2.Final.jar:6.5.2.Final]
@@ -235,10 +240,11 @@ create table user (id bigint generated by default as identity, email varchar(255
 	at org.hibernate.tool.schema.internal.exec.GenerationTargetToDatabase.accept(GenerationTargetToDatabase.java:80) ~[hibernate-core-6.5.2.Final.jar:6.5.2.Final]
 	... 115 common frames omitted
 
+Hibernate: create table vets (id bigint generated by default as identity, detail_path varchar(255), image_path varchar(255), long_description varchar(4096), name varchar(255), short_description varchar(1024), title varchar(255), primary key (id))
 Hibernate: alter table if exists user drop constraint if exists UKob8kqyqqgmefl0aco34akdtpe
 Hibernate: alter table if exists user add constraint UKob8kqyqqgmefl0aco34akdtpe unique (email)
 Hibernate: alter table if exists payment_transaction add constraint FKgb2j41meoqx9t219ccuyiui43 foreign key (user_id) references user
-2024-10-04T22:39:41.716+10:00  WARN 55399 --- [           main] o.h.t.s.i.ExceptionHandlerLoggedImpl     : GenerationTarget encountered exception accepting command : Error executing DDL "alter table if exists payment_transaction add constraint FKgb2j41meoqx9t219ccuyiui43 foreign key (user_id) references user" via JDBC [Syntax error in SQL statement "alter table if exists payment_transaction add constraint FKgb2j41meoqx9t219ccuyiui43 foreign key (user_id) references [*]user"; expected "identifier";]
+2024-10-04T22:39:36.303+10:00  WARN 55399 --- [           main] o.h.t.s.i.ExceptionHandlerLoggedImpl     : GenerationTarget encountered exception accepting command : Error executing DDL "alter table if exists payment_transaction add constraint FKgb2j41meoqx9t219ccuyiui43 foreign key (user_id) references user" via JDBC [Syntax error in SQL statement "alter table if exists payment_transaction add constraint FKgb2j41meoqx9t219ccuyiui43 foreign key (user_id) references [*]user"; expected "identifier";]
 
 org.hibernate.tool.schema.spi.CommandAcceptanceException: Error executing DDL "alter table if exists payment_transaction add constraint FKgb2j41meoqx9t219ccuyiui43 foreign key (user_id) references user" via JDBC [Syntax error in SQL statement "alter table if exists payment_transaction add constraint FKgb2j41meoqx9t219ccuyiui43 foreign key (user_id) references [*]user"; expected "identifier";]
 	at org.hibernate.tool.schema.internal.exec.GenerationTargetToDatabase.accept(GenerationTargetToDatabase.java:94) ~[hibernate-core-6.5.2.Final.jar:6.5.2.Final]
@@ -382,7 +388,7 @@ alter table if exists payment_transaction add constraint FKgb2j41meoqx9t219ccuyi
 	... 114 common frames omitted
 
 Hibernate: alter table if exists pet add constraint FK9hxka0oqkd15dmqstdarori08 foreign key (user_id) references user
-2024-10-04T22:39:41.718+10:00  WARN 55399 --- [           main] o.h.t.s.i.ExceptionHandlerLoggedImpl     : GenerationTarget encountered exception accepting command : Error executing DDL "alter table if exists pet add constraint FK9hxka0oqkd15dmqstdarori08 foreign key (user_id) references user" via JDBC [Syntax error in SQL statement "alter table if exists pet add constraint FK9hxka0oqkd15dmqstdarori08 foreign key (user_id) references [*]user"; expected "identifier";]
+2024-10-04T22:39:36.306+10:00  WARN 55399 --- [           main] o.h.t.s.i.ExceptionHandlerLoggedImpl     : GenerationTarget encountered exception accepting command : Error executing DDL "alter table if exists pet add constraint FK9hxka0oqkd15dmqstdarori08 foreign key (user_id) references user" via JDBC [Syntax error in SQL statement "alter table if exists pet add constraint FK9hxka0oqkd15dmqstdarori08 foreign key (user_id) references [*]user"; expected "identifier";]
 
 org.hibernate.tool.schema.spi.CommandAcceptanceException: Error executing DDL "alter table if exists pet add constraint FK9hxka0oqkd15dmqstdarori08 foreign key (user_id) references user" via JDBC [Syntax error in SQL statement "alter table if exists pet add constraint FK9hxka0oqkd15dmqstdarori08 foreign key (user_id) references [*]user"; expected "identifier";]
 	at org.hibernate.tool.schema.internal.exec.GenerationTargetToDatabase.accept(GenerationTargetToDatabase.java:94) ~[hibernate-core-6.5.2.Final.jar:6.5.2.Final]
@@ -525,26 +531,26 @@ alter table if exists pet add constraint FK9hxka0oqkd15dmqstdarori08 foreign key
 	at org.hibernate.tool.schema.internal.exec.GenerationTargetToDatabase.accept(GenerationTargetToDatabase.java:80) ~[hibernate-core-6.5.2.Final.jar:6.5.2.Final]
 	... 114 common frames omitted
 
-2024-10-04T22:39:41.720+10:00  INFO 55399 --- [           main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
-2024-10-04T22:39:41.861+10:00  WARN 55399 --- [           main] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
-2024-10-04T22:39:41.876+10:00  WARN 55399 --- [           main] .s.s.UserDetailsServiceAutoConfiguration : 
+2024-10-04T22:39:36.311+10:00  INFO 55399 --- [           main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2024-10-04T22:39:36.851+10:00  WARN 55399 --- [           main] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2024-10-04T22:39:36.880+10:00  WARN 55399 --- [           main] .s.s.UserDetailsServiceAutoConfiguration : 
 
-Using generated security password: dd4ffca0-8e98-4a6e-a485-50210f8acdbc
+Using generated security password: 110c0804-d31c-4952-b95d-64d7012e19b5
 
 This generated password is for development use only. Your security configuration must be updated before running your application in production.
 
-2024-10-04T22:39:41.878+10:00  INFO 55399 --- [           main] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with UserDetailsService bean with name inMemoryUserDetailsManager
-2024-10-04T22:39:42.135+10:00  WARN 55399 --- [           main] ion$DefaultTemplateResolverConfiguration : Cannot find template location: classpath:/templates/ (please add some templates, check your Thymeleaf configuration, or set spring.thymeleaf.check-template-location=false)
-2024-10-04T22:39:42.211+10:00  INFO 55399 --- [           main] au.edu.rmit.sept.webapp.LoginTests       : Started LoginTests in 1.169 seconds (process running for 12.686)
+2024-10-04T22:39:36.887+10:00  INFO 55399 --- [           main] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with UserDetailsService bean with name inMemoryUserDetailsManager
+2024-10-04T22:39:37.721+10:00  WARN 55399 --- [           main] ion$DefaultTemplateResolverConfiguration : Cannot find template location: classpath:/templates/ (please add some templates, check your Thymeleaf configuration, or set spring.thymeleaf.check-template-location=false)
+2024-10-04T22:39:37.858+10:00  INFO 55399 --- [           main] a.edu.rmit.sept.webapp.UserProfileTests  : Started UserProfileTests in 6.788 seconds (process running for 8.334)
 ]]></system-out>
+    <system-err><![CDATA[WARNING: A Java agent has been loaded dynamically (/Users/shreyas/.m2/repository/net/bytebuddy/byte-buddy-agent/1.14.18/byte-buddy-agent-1.14.18.jar)
+WARNING: If a serviceability tool is in use, please run with -XX:+EnableDynamicAgentLoading to hide this warning
+WARNING: If a serviceability tool is not in use, please run with -Djdk.instrument.traceUsage for more information
+WARNING: Dynamic loading of agents will be disallowed by default in a future release
+]]></system-err>
   </testcase>
-  <testcase name="testInvalidPasswordLogin" classname="au.edu.rmit.sept.webapp.LoginTests" time="0.009"/>
-  <testcase name="testPasswordWithTrailingSpaces" classname="au.edu.rmit.sept.webapp.LoginTests" time="0.004"/>
-  <testcase name="testLoginSuccess" classname="au.edu.rmit.sept.webapp.LoginTests" time="0.005"/>
-  <testcase name="testInvalidEmailFormat" classname="au.edu.rmit.sept.webapp.LoginTests" time="0.003"/>
-  <testcase name="testLoginFailure" classname="au.edu.rmit.sept.webapp.LoginTests" time="0.004"/>
-  <testcase name="testWrongRoleLogin" classname="au.edu.rmit.sept.webapp.LoginTests" time="0.004"/>
-  <testcase name="testBlankEmailField" classname="au.edu.rmit.sept.webapp.LoginTests" time="0.003"/>
-  <testcase name="testEmailWithTrailingSpaces" classname="au.edu.rmit.sept.webapp.LoginTests" time="0.003"/>
-  <testcase name="testVetEmailValidation" classname="au.edu.rmit.sept.webapp.LoginTests" time="0.003"/>
+  <testcase name="testDeleteUserAccount" classname="au.edu.rmit.sept.webapp.UserProfileTests" time="0.034"/>
+  <testcase name="testUserPasswordUpdate" classname="au.edu.rmit.sept.webapp.UserProfileTests" time="0.011"/>
+  <testcase name="testUserUpdateProfile" classname="au.edu.rmit.sept.webapp.UserProfileTests" time="0.004"/>
+  <testcase name="testRemoveProfilePicture" classname="au.edu.rmit.sept.webapp.UserProfileTests" time="0.005"/>
 </testsuite>

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Container, Row, Col, Card, Spinner, Alert, Pagination, Form } from 'react-bootstrap';
+import { Button, Container, Row, Col, Card, Spinner, Alert, Pagination, Form, InputGroup } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 
 function TransactionHistory({ user }) {
@@ -105,12 +105,17 @@ function TransactionHistory({ user }) {
       {/* Search Bar */}
       <Form className="mb-4">
         <Form.Group controlId="searchBar">
+          <InputGroup>
+            <InputGroup.Text>
+                <i className="fas fa-search" aria-hidden="true"></i>
+            </InputGroup.Text>
           <Form.Control
             type="text"
             placeholder="Search transactions (pet name, service, amount, date, payment method)"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
+          </InputGroup>
         </Form.Group>
       </Form>
 

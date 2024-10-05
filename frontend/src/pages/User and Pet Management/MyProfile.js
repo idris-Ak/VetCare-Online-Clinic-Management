@@ -53,7 +53,7 @@ const fetchPets = useCallback(async () => {
     if (user) {
       fetchPets();
     }
-    setTimeout(() => setIsLoading(false), 1000);
+    setTimeout(() => setIsLoading(false), 500);
   }, [user, fetchPets]);
 
   useEffect(() => {

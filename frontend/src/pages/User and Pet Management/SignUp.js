@@ -1,4 +1,4 @@
-import React, { useState, useEffect} from 'react';
+import React, { useState} from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Button, Form, Alert, Container, ToggleButtonGroup, ToggleButton, OverlayTrigger, Tooltip, Spinner} from 'react-bootstrap';
 
@@ -18,10 +18,6 @@ function SignUp({loginUser}) {
   const [showSuccessAlert, setShowSuccessAlert] = useState(false);
   const [isLoading, setIsLoading] = useState(true); // Loading state
   const navigate = useNavigate();
-
-  useEffect(() => {
-    setTimeout(() => setIsLoading(false), 500);
-  });
 
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -111,6 +107,9 @@ try {
     }
   } catch (error) {
     console.error('Error during sign-up:', error);
+  }
+  finally {
+    setIsLoading(false);
   }
     if (user.role === 'Vet') {
       user.medRecSent = []; // Array to hold multiple medical records
