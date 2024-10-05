@@ -7,7 +7,7 @@ function Login({loginUser}) {
   const [errorMessage, setErrorMessage] = useState('');
   const [showErrorMessage, setShowErrorMessage] = useState(false);
   const [showSuccessAlert, setShowSuccessAlert] = useState(false);
-  const [isLoading, setIsLoading] = useState(true); // Loading state
+  const [isLoading, setIsLoading] = useState(false); // Loading state
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -27,7 +27,7 @@ function Login({loginUser}) {
   const handleSubmit = async(event) => {
     event.preventDefault();
     setShowErrorMessage(false);
-
+  
     //Check if the Vet's email ends with @vetcare.com
     if (userDetails.role === 'Vet' && !userDetails.email.endsWith('@vetcare.com')) {
       setErrorMessage("Vets must use an email that ends with '@vetcare.com'.");
