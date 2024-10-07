@@ -29,7 +29,7 @@ public class PetProfileTests {
 
     @BeforeEach
     public void setup() {
-        user = new User("John Doe", "john@example.com", "Password123!", "Pet Owner");
+        user = new User("John Smith", "john@example.com", "Password123!", "Pet Owner");
         pet = new Pet();
         pet.setId(1L);
         pet.setName("Buddy");
@@ -44,8 +44,10 @@ public class PetProfileTests {
         // Mock pet creation
         Mockito.when(petRepository.save(Mockito.any(Pet.class))).thenReturn(pet);
 
+        // Save the created pet
         Pet createdPet = petService.savePet(pet);
 
+        //Verify the pet has been created
         assertNotNull(createdPet);
         assertEquals("Buddy", createdPet.getName());
     }
@@ -55,9 +57,11 @@ public class PetProfileTests {
         // Mock pet update
         Mockito.when(petRepository.findById(pet.getId())).thenReturn(Optional.of(pet));
 
+        // Update the pet by setting a new name
         pet.setName("Max");
         Mockito.when(petRepository.save(pet)).thenReturn(pet);
 
+        // Verify the pet's name has been updated
         Pet updatedPet = petService.savePet(pet);
         assertEquals("Max", updatedPet.getName());
     }
@@ -69,6 +73,7 @@ public class PetProfileTests {
 
         petService.deletePet(pet.getId());
 
+        // Verify the pet has been deleted
         Mockito.verify(petRepository, Mockito.times(1)).deleteById(pet.getId());
     }
 
@@ -77,10 +82,12 @@ public class PetProfileTests {
         // Mock pet profile picture update
         pet.setProfilePicture("some-image-data");
         Mockito.when(petRepository.findById(pet.getId())).thenReturn(Optional.of(pet));
-
+        
+        // Update the pet profile picture
         pet.setProfilePicture("updated-image-data");
         Mockito.when(petRepository.save(pet)).thenReturn(pet);
 
+        // Verify the pet profile picture has been updated
         Pet updatedPet = petService.savePet(pet);
         assertEquals("updated-image-data", updatedPet.getProfilePicture());
     }
@@ -91,9 +98,11 @@ public class PetProfileTests {
         pet.setProfilePicture("some-image-data");
         Mockito.when(petRepository.findById(pet.getId())).thenReturn(Optional.of(pet));
 
+        // Set the profile picture to null
         pet.setProfilePicture(null);
         Mockito.when(petRepository.save(pet)).thenReturn(pet);
 
+        // Verify the profile picture has been removed
         Pet updatedPet = petService.savePet(pet);
         assertNull(updatedPet.getProfilePicture(), "Pet profile picture should be removed.");
     }
@@ -104,6 +113,7 @@ public class PetProfileTests {
         pet.setAge(null);
         Mockito.when(petRepository.save(pet)).thenReturn(pet);
 
+        // Verify the null pet's age is saved
         Pet savedPet = petService.savePet(pet);
         assertNull(savedPet.getAge(), "Age should be optional.");
     }
@@ -113,6 +123,8 @@ public class PetProfileTests {
         // Test invalid pet age by setting an age greater than the allowed limit
         pet.setAge(50); 
         boolean isValidAge = pet.getAge() <= 40;
+
+        // Verify the pet's age does not exceed 40
         assertFalse(isValidAge, "Pet age should not exceed 40.");
     }
 
@@ -122,6 +134,7 @@ public class PetProfileTests {
         pet.setBreed(null);
         Mockito.when(petRepository.save(pet)).thenReturn(pet);
 
+        // Verify the null pet's breed is saved
         Pet savedPet = petService.savePet(pet);
         assertNull(savedPet.getBreed(), "Breed should be optional.");
     }

@@ -37,8 +37,7 @@ class SignUpTests {
     @Test
     public void testSignUpWithExistingEmail() {
         // Mock an existing email scenario returning null (indicating a conflict or failure)
-        Mockito.when(userService.signUp(Mockito.any(User.class)))
-                .thenReturn(null);
+        Mockito.when(userService.signUp(Mockito.any(User.class))).thenReturn(null);
 
         User response = userService.signUp(user);
         assertNull(response, "Expected null when trying to sign up with an existing email.");
@@ -111,8 +110,7 @@ class SignUpTests {
     @Test
     public void testAllowedNameCharacters() {
         String nameWithSpecialChars = "John123";
-        assertFalse(nameWithSpecialChars.matches("[a-zA-Z ]+"),
-                "Expected name to only allow alphabetic characters and spaces.");
+        assertFalse(nameWithSpecialChars.matches("[a-zA-Z ]+"),"Expected name to only allow alphabetic characters and spaces.");
     }
 
 }

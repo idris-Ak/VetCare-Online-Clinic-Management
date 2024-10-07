@@ -27,8 +27,7 @@ class LoginTests {
     @Test
     public void testLoginSuccess() {
         // Mock user retrieval
-        Mockito.when(userService.findByEmail("john@example.com"))
-                .thenReturn(Optional.of(user));
+        Mockito.when(userService.findByEmail("john@example.com")).thenReturn(Optional.of(user));
 
         Optional<User> response = userService.findByEmail("john@example.com");
         assertTrue(response.isPresent());
@@ -39,8 +38,7 @@ class LoginTests {
     @Test
     public void testLoginFailure() {
         // Mock login failure by returning an empty Optional
-        Mockito.when(userService.findByEmail("john@example.com"))
-                .thenReturn(Optional.empty());
+        Mockito.when(userService.findByEmail("john@example.com")).thenReturn(Optional.empty());
 
         Optional<User> response = userService.findByEmail("john@example.com");
         assertFalse(response.isPresent());
@@ -49,8 +47,7 @@ class LoginTests {
     @Test
     public void testInvalidPasswordLogin() {
         // Mock incorrect password scenario
-        Mockito.when(userService.findByEmail("john@example.com"))
-                .thenReturn(Optional.of(user));
+        Mockito.when(userService.findByEmail("john@example.com")).thenReturn(Optional.of(user));
 
         assertNotEquals("WrongPassword", user.getPassword(), "Expected wrong password to fail.");
     }
@@ -58,8 +55,7 @@ class LoginTests {
     @Test
     public void testWrongRoleLogin() {
         // Mock incorrect role login scenario
-        Mockito.when(userService.findByEmail("john@example.com"))
-                .thenReturn(Optional.of(user));
+        Mockito.when(userService.findByEmail("john@example.com")).thenReturn(Optional.of(user));
 
         assertNotEquals("Vet", user.getRole(), "Expected login to fail when the wrong role is selected.");
     }
