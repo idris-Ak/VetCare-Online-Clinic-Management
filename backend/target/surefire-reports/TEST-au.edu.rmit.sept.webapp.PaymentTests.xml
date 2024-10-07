@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report-3.0.xsd" version="3.0" name="au.edu.rmit.sept.webapp.UserProfileTests" time="7.165" tests="5" errors="0" skipped="0" failures="0">
+<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report-3.0.xsd" version="3.0" name="au.edu.rmit.sept.webapp.PaymentTests" time="1.291" tests="8" errors="0" skipped="0" failures="0">
   <properties>
     <property name="java.specification.version" value="23"/>
     <property name="sun.jnu.encoding" value="UTF-8"/>
@@ -48,7 +48,7 @@
     <property name="localRepository" value="/Users/shreyas/.m2/repository"/>
     <property name="java.vendor.url.bug" value="https://github.com/Homebrew/homebrew-core/issues"/>
     <property name="java.io.tmpdir" value="/var/folders/m4/4_jjb4715p11658ww14tq8q00000gn/T/"/>
-    <property name="com.zaxxer.hikari.pool_number" value="1"/>
+    <property name="com.zaxxer.hikari.pool_number" value="3"/>
     <property name="java.version" value="23"/>
     <property name="user.dir" value="/Users/shreyas/github-classroom/Software Engineering Process and Tools/team-project-group-p06-02/backend"/>
     <property name="os.arch" value="x86_64"/>
@@ -65,10 +65,10 @@
     <property name="socksNonProxyHosts" value="local|*.local|169.254/16|*.169.254/16"/>
     <property name="java.class.version" value="67.0"/>
   </properties>
-  <testcase name="testInvalidEmailForVet" classname="au.edu.rmit.sept.webapp.UserProfileTests" time="0.033">
-    <system-out><![CDATA[22:14:35.348 [main] INFO org.springframework.test.context.support.AnnotationConfigContextLoaderUtils -- Could not detect default configuration classes for test class [au.edu.rmit.sept.webapp.UserProfileTests]: UserProfileTests does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
-22:14:35.538 [main] INFO org.springframework.boot.test.context.SpringBootTestContextBootstrapper -- Found @SpringBootConfiguration au.edu.rmit.sept.webapp.WebappApplication for test class au.edu.rmit.sept.webapp.UserProfileTests
-22:14:35.759 [main] INFO org.springframework.boot.devtools.restart.RestartApplicationListener -- Restart disabled due to context in which it is running
+  <testcase name="testHandlePayPalPaymentInvalidServiceType" classname="au.edu.rmit.sept.webapp.PaymentTests" time="0.024">
+    <system-out><![CDATA[2024-10-07T22:14:43.195+11:00  INFO 30098 --- [           main] t.c.s.AnnotationConfigContextLoaderUtils : Could not detect default configuration classes for test class [au.edu.rmit.sept.webapp.PaymentTests]: PaymentTests does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+2024-10-07T22:14:43.199+11:00  INFO 30098 --- [           main] .b.t.c.SpringBootTestContextBootstrapper : Found @SpringBootConfiguration au.edu.rmit.sept.webapp.WebappApplication for test class au.edu.rmit.sept.webapp.PaymentTests
+2024-10-07T22:14:43.206+11:00  INFO 30098 --- [           main] o.s.b.d.r.RestartApplicationListener     : Restart disabled due to context in which it is running
 
   .   ____          _            __ _ _
  /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
@@ -79,49 +79,36 @@
 
  :: Spring Boot ::                (v3.3.2)
 
-2024-10-07T22:14:36.126+11:00  INFO 30098 --- [           main] a.edu.rmit.sept.webapp.UserProfileTests  : Starting UserProfileTests using Java 23 with PID 30098 (started by shreyas in /Users/shreyas/github-classroom/Software Engineering Process and Tools/team-project-group-p06-02/backend)
-2024-10-07T22:14:36.128+11:00  INFO 30098 --- [           main] a.edu.rmit.sept.webapp.UserProfileTests  : The following 1 profile is active: "test"
-2024-10-07T22:14:36.991+11:00  INFO 30098 --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
-2024-10-07T22:14:37.074+11:00  INFO 30098 --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 74 ms. Found 6 JPA repository interfaces.
-2024-10-07T22:14:38.956+11:00  INFO 30098 --- [           main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
-2024-10-07T22:14:39.044+11:00  INFO 30098 --- [           main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.5.2.Final
-2024-10-07T22:14:39.088+11:00  INFO 30098 --- [           main] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
-2024-10-07T22:14:39.250+11:00  INFO 30098 --- [           main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
-2024-10-07T22:14:39.286+11:00  INFO 30098 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
-2024-10-07T22:14:39.555+11:00  INFO 30098 --- [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection conn0: url=jdbc:h2:mem:testdb user=SA
-2024-10-07T22:14:39.557+11:00  INFO 30098 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
-2024-10-07T22:14:39.590+11:00  WARN 30098 --- [           main] org.hibernate.orm.deprecation            : HHH90000025: H2Dialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
-2024-10-07T22:14:40.647+11:00  INFO 30098 --- [           main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
-Hibernate: create table appointments (id integer generated by default as identity, appointment_date date not null, appointment_time_id integer not null, clinic_id integer not null, pet_id integer not null, user_id integer not null, primary key (id))
-Hibernate: create table payment (id bigint generated by default as identity, amount float(53) not null, payment_method varchar(255), status varchar(255), transaction_date timestamp(6), transaction_id varchar(255), primary key (id))
-Hibernate: create table payment_transaction (id bigint generated by default as identity, amount float(53) not null, date_time timestamp(6), payment_method varchar(255), pet_name varchar(255), service_type varchar(255), user_id bigint, primary key (id))
-Hibernate: create table pet (id bigint generated by default as identity, age integer, breed varchar(255), name varchar(255), profile_picture varchar(255), type varchar(255), user_id bigint, primary key (id))
-Hibernate: create table users (id bigint generated by default as identity, email varchar(255), name varchar(255), password varchar(255), profile_picture varchar(255), role varchar(255), primary key (id))
-Hibernate: create table vets (id bigint generated by default as identity, detail_path varchar(255), image_path varchar(255), long_description varchar(4096), name varchar(255), short_description varchar(1024), title varchar(255), primary key (id))
-Hibernate: alter table if exists users drop constraint if exists UK6dotkott2kjsp8vw4d0m25fb7
-Hibernate: alter table if exists users add constraint UK6dotkott2kjsp8vw4d0m25fb7 unique (email)
-Hibernate: alter table if exists payment_transaction add constraint FKde3rthyu0pi1qiabat0t2rca foreign key (user_id) references users
-Hibernate: alter table if exists pet add constraint FKhg3enfwsufxjb6enqetxx2ku0 foreign key (user_id) references users
-2024-10-07T22:14:40.751+11:00  INFO 30098 --- [           main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
-2024-10-07T22:14:41.315+11:00  WARN 30098 --- [           main] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
-2024-10-07T22:14:41.341+11:00  WARN 30098 --- [           main] .s.s.UserDetailsServiceAutoConfiguration : 
+2024-10-07T22:14:43.239+11:00  INFO 30098 --- [           main] au.edu.rmit.sept.webapp.PaymentTests     : Starting PaymentTests using Java 23 with PID 30098 (started by shreyas in /Users/shreyas/github-classroom/Software Engineering Process and Tools/team-project-group-p06-02/backend)
+2024-10-07T22:14:43.240+11:00  INFO 30098 --- [           main] au.edu.rmit.sept.webapp.PaymentTests     : The following 1 profile is active: "test"
+2024-10-07T22:14:43.459+11:00  INFO 30098 --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2024-10-07T22:14:43.473+11:00  INFO 30098 --- [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 13 ms. Found 6 JPA repository interfaces.
+2024-10-07T22:14:43.585+11:00  INFO 30098 --- [           main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2024-10-07T22:14:43.589+11:00  INFO 30098 --- [           main] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2024-10-07T22:14:43.597+11:00  INFO 30098 --- [           main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2024-10-07T22:14:43.599+11:00  INFO 30098 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-3 - Starting...
+2024-10-07T22:14:43.600+11:00  INFO 30098 --- [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-3 - Added connection conn20: url=jdbc:h2:mem:testdb user=SA
+2024-10-07T22:14:43.601+11:00  INFO 30098 --- [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-3 - Start completed.
+2024-10-07T22:14:43.601+11:00  WARN 30098 --- [           main] org.hibernate.orm.deprecation            : HHH90000025: H2Dialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2024-10-07T22:14:43.705+11:00  INFO 30098 --- [           main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2024-10-07T22:14:43.709+11:00  INFO 30098 --- [           main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2024-10-07T22:14:43.820+11:00  WARN 30098 --- [           main] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2024-10-07T22:14:43.831+11:00  WARN 30098 --- [           main] .s.s.UserDetailsServiceAutoConfiguration : 
 
-Using generated security password: 19caed63-6655-43e9-864b-ae0526cc03a6
+Using generated security password: c32f6436-536b-43ad-8eb8-aa05d3ba2480
 
 This generated password is for development use only. Your security configuration must be updated before running your application in production.
 
-2024-10-07T22:14:41.349+11:00  INFO 30098 --- [           main] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with UserDetailsService bean with name inMemoryUserDetailsManager
-2024-10-07T22:14:41.997+11:00  WARN 30098 --- [           main] ion$DefaultTemplateResolverConfiguration : Cannot find template location: classpath:/templates/ (please add some templates, check your Thymeleaf configuration, or set spring.thymeleaf.check-template-location=false)
-2024-10-07T22:14:42.118+11:00  INFO 30098 --- [           main] a.edu.rmit.sept.webapp.UserProfileTests  : Started UserProfileTests in 6.373 seconds (process running for 8.027)
+2024-10-07T22:14:43.833+11:00  INFO 30098 --- [           main] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with UserDetailsService bean with name inMemoryUserDetailsManager
+2024-10-07T22:14:44.002+11:00  WARN 30098 --- [           main] ion$DefaultTemplateResolverConfiguration : Cannot find template location: classpath:/templates/ (please add some templates, check your Thymeleaf configuration, or set spring.thymeleaf.check-template-location=false)
+2024-10-07T22:14:44.048+11:00  INFO 30098 --- [           main] au.edu.rmit.sept.webapp.PaymentTests     : Started PaymentTests in 0.842 seconds (process running for 9.956)
 ]]></system-out>
-    <system-err><![CDATA[WARNING: A Java agent has been loaded dynamically (/Users/shreyas/.m2/repository/net/bytebuddy/byte-buddy-agent/1.14.18/byte-buddy-agent-1.14.18.jar)
-WARNING: If a serviceability tool is in use, please run with -XX:+EnableDynamicAgentLoading to hide this warning
-WARNING: If a serviceability tool is not in use, please run with -Djdk.instrument.traceUsage for more information
-WARNING: Dynamic loading of agents will be disallowed by default in a future release
-]]></system-err>
   </testcase>
-  <testcase name="testDeleteUserAccount" classname="au.edu.rmit.sept.webapp.UserProfileTests" time="0.033"/>
-  <testcase name="testUserPasswordUpdate" classname="au.edu.rmit.sept.webapp.UserProfileTests" time="0.007"/>
-  <testcase name="testUserUpdateProfile" classname="au.edu.rmit.sept.webapp.UserProfileTests" time="0.004"/>
-  <testcase name="testRemoveProfilePicture" classname="au.edu.rmit.sept.webapp.UserProfileTests" time="0.004"/>
+  <testcase name="testHandlePayPalPaymentMissingOrderId" classname="au.edu.rmit.sept.webapp.PaymentTests" time="0.022"/>
+  <testcase name="testGetTransactionsByUserIdSuccess" classname="au.edu.rmit.sept.webapp.PaymentTests" time="0.016"/>
+  <testcase name="testHandlePayPalPaymentSuccess" classname="au.edu.rmit.sept.webapp.PaymentTests" time="0.021"/>
+  <testcase name="testHandleCreditCardPaymentInvalidAmountFormat" classname="au.edu.rmit.sept.webapp.PaymentTests" time="0.01"/>
+  <testcase name="testHandleCreditCardPaymentNegativeAmount" classname="au.edu.rmit.sept.webapp.PaymentTests" time="0.01"/>
+  <testcase name="testGetTransactionsByUserIdNoTransactionsFound" classname="au.edu.rmit.sept.webapp.PaymentTests" time="0.011"/>
+  <testcase name="testHandleCreditCardPaymentSuccess" classname="au.edu.rmit.sept.webapp.PaymentTests" time="0.016"/>
 </testsuite>
