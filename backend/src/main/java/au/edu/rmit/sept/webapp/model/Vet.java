@@ -4,8 +4,11 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Column;
 import jakarta.persistence.Table;
+
+import java.util.List;
 
 @Entity
 @Table(name = "vets")
@@ -21,6 +24,10 @@ public class Vet {
     private String longDescription;
     private String imagePath;
     private String detailPath;
+
+    // New field to hold shared medical records
+    @OneToMany(mappedBy = "vet")
+    private List<MedicalRecord> sharedRecords;
 
     // Getters and Setters
     public Long getId() {
@@ -77,5 +84,13 @@ public class Vet {
 
     public void setDetailPath(String detailPath) {
         this.detailPath = detailPath;
+    }
+
+    public List<MedicalRecord> getSharedRecords() {
+        return sharedRecords;
+    }
+
+    public void setSharedRecords(List<MedicalRecord> sharedRecords) {
+        this.sharedRecords = sharedRecords;
     }
 }
