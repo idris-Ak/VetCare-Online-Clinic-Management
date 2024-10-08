@@ -1,0 +1,54 @@
+name: Team Group-06-02 CI tasks 
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+
+    - name: Install Maven
+      run: sudo apt-get update && sudo apt-get install -y maven
+      
+    - name: Cache Maven packages
+      uses: actions/cache@v4
+      with:
+        path: ~/.m2/repository
+        key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+        restore-keys: |
+          ${{ runner.os }}-maven
+
+    - name: Change directory to backend (or your subdirectory containing pom.xml)
+      run: cd backend
+    
+    - name: Build with Maven
+      run: mvn clean install --no-transfer-progress
+      working-directory: backend
+
+    - name: Run Tests
+      run: mvn clean test --no-transfer-progress
+      working-directory: backend
+
+    - name: Display Test Results on Failure
+      if: failure()
+      run: cat target/surefire-reports/*.txt
+      working-directory: backend
+
+    - name: Package the Application
+      run: mvn package --no-transfer-progress
+      working-directory: backend
