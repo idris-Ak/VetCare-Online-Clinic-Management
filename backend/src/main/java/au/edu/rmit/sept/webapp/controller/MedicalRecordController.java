@@ -48,27 +48,37 @@ public class MedicalRecordController {
     @PostMapping("/pet/{petId}")
     public ResponseEntity<MedicalRecord> createMedicalRecord(
             @PathVariable Long petId,
-            @RequestParam("description") String description,
-            @RequestParam("diagnosis") String diagnosis,
-            @RequestParam("treatment") String treatment,
-            @RequestParam("vet") String vet,
-            @RequestParam(value = "recordDate", required = false) LocalDate recordDate) {
-
+            @RequestBody Map<String, Object> requestBody) {
+        
         Optional<Pet> pet = petService.findById(petId);
         if (pet.isPresent()) {
             MedicalRecord medicalRecord = new MedicalRecord();
             medicalRecord.setPet(pet.get());
+            
+            // Parse fields from the requestBody
+            String description = (String) requestBody.get("description");
+            String diagnosis = (String) requestBody.get("diagnosis");
+            String treatment = (String) requestBody.get("treatment");
+            String vetId = (String) requestBody.get("vetId");
+            
+            // Optionally handle the recordDate
+            LocalDate recordDate = requestBody.get("recordDate") != null 
+                    ? LocalDate.parse((String) requestBody.get("recordDate")) 
+                    : LocalDate.now();
+    
             medicalRecord.setDescription(description);
             medicalRecord.setDiagnosis(diagnosis);
             medicalRecord.setTreatment(treatment);
-            medicalRecord.setRecordDate(recordDate != null ? recordDate : LocalDate.now());
-
+            medicalRecord.setRecordDate(recordDate);
+    
+            // Save the record and return response
             MedicalRecord savedRecord = medicalRecordService.saveMedicalRecord(medicalRecord);
             return ResponseEntity.ok(savedRecord);
         }
+    
         return ResponseEntity.notFound().build();
     }
-
+    
     @PutMapping("/{recordId}")
     public ResponseEntity<MedicalRecord> updateMedicalRecord(
             @PathVariable Long recordId,

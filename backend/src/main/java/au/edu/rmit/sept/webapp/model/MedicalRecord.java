@@ -10,6 +10,8 @@ import jakarta.persistence.ManyToOne;
 
 import java.time.LocalDate;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 @Entity
 public class MedicalRecord {
 
@@ -22,7 +24,10 @@ public class MedicalRecord {
     @JoinColumn(name = "pet_id", nullable = false)
     private Pet pet;
 
-    private String vet; 
+    @ManyToOne
+    @JoinColumn(name = "vet_id")
+    @JsonIgnore // Prevent circular reference
+    private Vet vet; 
     private String description;
     private String diagnosis;
     private String treatment;
@@ -50,11 +55,11 @@ public class MedicalRecord {
         this.pet = pet;
     }
 
-    public String getVet() {
+    public Vet getVet() {
         return vet;
     }
 
-    public void setVet(String vet) {
+    public void setVet(Vet vet) {
         this.vet = vet;
     }
 
