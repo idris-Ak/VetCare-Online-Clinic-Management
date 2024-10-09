@@ -26,18 +26,21 @@ function HomePage() {
   const [vets, setVets] = useState([]); // This holds the vet data
 
   useEffect(() => {
-    fetch('http://localhost:5001/api/vets') // Adjust the URL as per your actual backend URL
-      .then(response => response.json())
-      .then(data => {
-        if (data.message === 'success') {
-          setVets(data.data); // Set the vet data in state
-        } else {
-          console.error('Failed to fetch vets');
+    fetch(`http://localhost:8080/api/vets`) // Adjust the URL as per your actual backend URL
+      .then(response => {
+        if (!response.ok) { // Check if response is ok (status in the range 200-299)
+          throw new Error('Network response was not ok');
         }
+        return response.json();
       })
-      .catch(error => console.error('Error fetching data:', error));
-  }, []); // Empty dependency array means this effect runs once after the initial render
-
+      .then(data => {
+        setVets(data); // Directly set the fetched data to the state assuming it's the array of vets
+      })
+      .catch(error => {
+        console.error('Error fetching data:', error.message);
+      });
+  }, []);
+  
   return (
     <div>
      
