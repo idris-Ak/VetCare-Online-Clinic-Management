@@ -45,39 +45,25 @@ public class MedicalRecordController {
         return record.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    @PostMapping("/pet/{petId}")
-    public ResponseEntity<MedicalRecord> createMedicalRecord(
-            @PathVariable Long petId,
-            @RequestBody Map<String, Object> requestBody) {
-        
-        Optional<Pet> pet = petService.findById(petId);
-        if (pet.isPresent()) {
-            MedicalRecord medicalRecord = new MedicalRecord();
-            medicalRecord.setPet(pet.get());
-            
-            // Parse fields from the requestBody
-            String description = (String) requestBody.get("description");
-            String diagnosis = (String) requestBody.get("diagnosis");
-            String treatment = (String) requestBody.get("treatment");
-            String vetId = (String) requestBody.get("vetId");
-            
-            // Optionally handle the recordDate
-            LocalDate recordDate = requestBody.get("recordDate") != null 
-                    ? LocalDate.parse((String) requestBody.get("recordDate")) 
-                    : LocalDate.now();
+    @PostMapping("/share")
+    public ResponseEntity<MedicalRecord> shareMedicalRecord(@RequestBody Map<String, Long> shareRequest) {
+        Long recordId = shareRequest.get("recordId");
+        Long vetId = shareRequest.get("vetId");
     
-            medicalRecord.setDescription(description);
-            medicalRecord.setDiagnosis(diagnosis);
-            medicalRecord.setTreatment(treatment);
-            medicalRecord.setRecordDate(recordDate);
+        // Find the vet and the medical record
+        Optional<Vet> vet = vetService.findById(vetId);
+        Optional<MedicalRecord> medicalRecord = medicalRecordService.findById(recordId);
     
-            // Save the record and return response
-            MedicalRecord savedRecord = medicalRecordService.saveMedicalRecord(medicalRecord);
-            return ResponseEntity.ok(savedRecord);
+        if (vet.isPresent() && medicalRecord.isPresent()) {
+            // Add the record to the vet's shared records
+            vet.get().getSharedRecords().add(medicalRecord.get());
+            vetService.saveVet(vet.get()); // Save the vet with updated shared records
+            return ResponseEntity.ok(medicalRecord.get()); // Return the shared medical record
         }
     
         return ResponseEntity.notFound().build();
     }
+    
     
     @PutMapping("/{recordId}")
     public ResponseEntity<MedicalRecord> updateMedicalRecord(
@@ -113,23 +99,23 @@ public class MedicalRecordController {
     }
 
 
-    @PostMapping("/share")
-    public ResponseEntity<String> shareMedicalRecord(@RequestBody Map<String, Long> shareRequest) {
-        Long recordId = shareRequest.get("recordId");
-        Long vetId = shareRequest.get("vetId");
+    // @PostMapping("/share")
+    // public ResponseEntity<String> shareMedicalRecord(@RequestBody Map<String, Long> shareRequest) {
+    //     Long recordId = shareRequest.get("recordId");
+    //     Long vetId = shareRequest.get("vetId");
 
-        // Find the vet and the medical record
-        Optional<Vet> vet = vetService.findById(vetId);
-        Optional<MedicalRecord> medicalRecord = medicalRecordService.findById(recordId);
+    //     // Find the vet and the medical record
+    //     Optional<Vet> vet = vetService.findById(vetId);
+    //     Optional<MedicalRecord> medicalRecord = medicalRecordService.findById(recordId);
 
-        if (vet.isPresent() && medicalRecord.isPresent()) {
-            // Add the record to the vet's shared records
-            vet.get().getSharedRecords().add(medicalRecord.get());
-            vetService.saveVet(vet.get()); // Save the vet with updated shared records
-            return ResponseEntity.ok("Medical record shared with vet ID: " + vetId);
-        }
+    //     if (vet.isPresent() && medicalRecord.isPresent()) {
+    //         // Add the record to the vet's shared records
+    //         vet.get().getSharedRecords().add(medicalRecord.get());
+    //         vetService.saveVet(vet.get()); // Save the vet with updated shared records
+    //         return ResponseEntity.ok("Medical record shared with vet ID: " + vetId);
+    //     }
 
-        return ResponseEntity.notFound().build();
-    }
+    //     return ResponseEntity.notFound().build();
+    // }
 
 }

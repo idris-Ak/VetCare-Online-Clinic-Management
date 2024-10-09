@@ -49,6 +49,7 @@ function MedicalRecords({ user }) {
       try {
         const response = await fetch('http://localhost:8080/api/vets');
         const vetData = await response.json();
+        console.log("vetData: ",vetData);
         setVets(vetData);
       } catch (error) {
         console.error('Error fetching vets:', error);
@@ -96,7 +97,9 @@ function MedicalRecords({ user }) {
           throw new Error('Network response was not ok');
         }
         const records = await response.json();
+        console.log("records is :", records);
         setAllRecords(Array.isArray(records) ? records : []);
+        console.log("all records is :", records);
       } catch (error) {
         console.error('Error fetching medical records:', error);
         setAllRecords([]); // On error, set to empty array
@@ -104,6 +107,7 @@ function MedicalRecords({ user }) {
     };
   
     fetchRecords();
+    console.log("fetchRecords called:",)
   }, [selectedPet]);
   
 
@@ -196,14 +200,13 @@ function MedicalRecords({ user }) {
         description: newRecord.service,  // Map `service` to `description` as per backend
         diagnosis: newRecord.diagnosis || "",  // Optional fields can be empty strings if not provided
         treatment: newRecord.treatment || "",  // Optional fields
-        vet: newRecord.vet,
+        vetId: selectedVet.id, // Send vet ID to backend
         recordDate: dayjs(newRecord.date).format('YYYY-MM-DD') // Ensure correct date format
       };
 
       console.log("recordData ",recordData);
 
       try {
-        console.log("add record call");
         const response = await fetch(`http://localhost:8080/api/medicalRecords/pet/${selectedPet}`, {
           method: "POST",
           headers: {
@@ -211,9 +214,6 @@ function MedicalRecords({ user }) {
           },
           body: JSON.stringify(recordData),
         });
-        console.log("response", response);
-        const responseData = await response.json();  // Wait for the promise to resolve
-        console.log("response", responseData);
 
         if (response.ok) {
           console.log("add record begin");
@@ -231,7 +231,9 @@ function MedicalRecords({ user }) {
             medications: ""
           });
         } else {
-          alert("Failed to add medical record.");
+          const errorData = await response.json();  // Read the error response body
+          console.error("Failed to add medical record:", errorData);
+          alert("Failed to add medical record: " + (errorData.message || "Unknown error"));
         }
       } catch (error) {
         console.error("Error saving new record:", error);
@@ -449,12 +451,12 @@ function MedicalRecords({ user }) {
               </Form.Group>
               <Form.Group controlId="formVet">
                 <Form.Label>Veterinarian</Form.Label>
-                <Form.Control
-                  type="text"
-                  value={newRecord.vet}
-                  onChange={(e) => setNewRecord({ ...newRecord, vet: e.target.value })}
-                  isInvalid={!!errors.vet}
-                />
+                <Form.Control as="select" value={newRecord.vet} onChange={(e) => setNewRecord({ ...newRecord, vet: e.target.value })} isInvalid={!!errors.vet}>
+                  <option value="">Select Vet</option>
+                  {vets.map(vet => (
+                    <option key={vet.id} value={vet.name}>{vet.name}</option>
+                  ))}
+                </Form.Control>
                 <Form.Control.Feedback type="invalid">
                   {errors.vet}
                 </Form.Control.Feedback>
@@ -530,7 +532,8 @@ function MedicalRecords({ user }) {
           <Modal.Body>
             <Form.Group>
               <Form.Label>Select Veterinarian</Form.Label>
-              <Form.Control as="select" onChange={(e) => setSelectedVet(vets.find(vet => vet.id === parseInt(e.target.value)))}>
+              <Form.Control as="select"
+               onChange={(e) => setSelectedVet(vets.find(vet => vet.id === parseInt(e.target.value)))}>
                 <option value="">Select Vet</option>
                 {vets.map(vet => (
                   <option key={vet.id} value={vet.id}>{vet.name}</option>
@@ -568,16 +571,16 @@ function MedicalRecords({ user }) {
                   {errors.date}
                 </Form.Control.Feedback>
               </Form.Group>
-              <Form.Group controlId="formService">
-                <Form.Label>Service</Form.Label>
-                <Form.Control
-                  type="text"
-                  value={editRecord.service}
-                  onChange={(e) => setEditRecord({ ...editRecord, service: e.target.value })}
-                  isInvalid={!!errors.service}
-                />
+              <Form.Group controlId="formVet">
+                <Form.Label>Veterinarian</Form.Label>
+                <Form.Control as="select" value={editRecord.vet} onChange={(e) => setEditRecord({ ...editRecord, vet: e.target.value })} isInvalid={!!errors.vet}>
+                  <option value="">Select Vet</option>
+                  {vets.map(vet => (
+                    <option key={vet.id} value={vet.name}>{vet.name}</option>
+                  ))}
+                </Form.Control>
                 <Form.Control.Feedback type="invalid">
-                  {errors.service}
+                  {errors.vet}
                 </Form.Control.Feedback>
               </Form.Group>
               <Form.Group controlId="formVet">
