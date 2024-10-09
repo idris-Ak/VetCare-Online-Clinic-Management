@@ -106,7 +106,7 @@ function App() {
               path="/MedicalRecords" 
               element={
                 <PrivateRoute isLoggedIn={isLoggedIn}>
-                  <MedicalRecords />
+                  <MedicalRecords user={user}/>
                 </PrivateRoute>
               } 
             />

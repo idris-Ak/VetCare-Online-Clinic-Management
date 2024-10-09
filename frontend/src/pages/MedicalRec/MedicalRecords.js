@@ -6,62 +6,123 @@ import { jsPDF } from 'jspdf';
 import React, { useEffect, useState } from 'react';
 import { Button, Container, Dropdown, DropdownButton, Form, Modal, Table } from 'react-bootstrap';
 
-import pet3Image from 'frontend/src/components/assets/about1.jpg';
-import pet2Image from 'frontend/src/components/assets/about2.jpg';
-import pet1Image from 'frontend/src/components/assets/blog3.jpg';
 import './MedicalRecords.css';
 
-function MedicalRecords() {
-  const pets = [
-    { id: 1, name: 'Goatie', image: pet1Image, age: '2 years', breed: 'Goat' },
-    { id: 2, name: 'Pookie', image: pet2Image, age: '1 year', breed: 'Cat' },
-    { id: 3, name: 'Dogie', image: pet3Image, age: '3 years', breed: 'Dog' }
-  ];
-
+function MedicalRecords({ user }) {
   const [vets, setVets] = useState([]);
+  const [petData, setPetData] = useState([]); // Added state for pets
   const [selectedVet, setSelectedVet] = useState(null);
   const [showVetModal, setShowVetModal] = useState(false);
   const [allRecords, setAllRecords] = useState([]);
   const [category, setCategory] = useState('All');
-
-  const initialRecords = [
-    { petId: 1, date: '01/01/2023', service: 'Annual Check-up', vet: 'Dr. Doofenshmirtz', id: 1, weight: '25kg', healthStatus: 'Healthy', diet: 'Grass only' },
-    { petId: 1, date: '01/06/2023', service: 'Vaccination', vet: 'Dr. Perry', id: 2, vaccine: 'Rabies', dose: '10mg', nextDose: '06/06/2023', vetComments: 'All went well' },
-    { petId: 1, date: '01/10/2023', service: 'Treatment Plan', vet: 'Dr. Doofenshmirtz', id: 5, treatment: 'Allergy Treatment', medications: 'Antihistamine', dosage: '10mg', duration: '2 weeks', symptoms: 'Itchy skin', diagnosis: 'Seasonal allergies', followUpDate: '02/01/2023' },
-    { petId: 2, date: '02/01/2023', service: 'Surgery', vet: 'Dr. Doofenshmirtz', id: 3, procedure: 'Spay', preOpDiagnosis: 'Healthy', postOpMedications: 'Painkillers', followUpPlan: 'Check-up in 1 week' },
-    { petId: 3, date: '03/10/2023', service: 'General Check-up', vet: 'Dr. Perry', id: 4, weight: '12kg', healthStatus: 'Healthy', diet: 'Standard dry food' },
-    { petId: 2, date: '03/15/2023', service: 'Vaccination', vet: 'Dr. Perry', id: 6, vaccine: 'Distemper', dose: '5mg', nextDose: '09/15/2023', vetComments: 'Minor swelling at injection site' },
-    { petId: 3, date: '04/10/2023', service: 'Treatment Plan', vet: 'Dr. Perry', id: 7, treatment: 'Post-Surgery Recovery', medications: 'Painkillers', dosage: '20mg', duration: '1 month', symptoms: 'Post-op pain', diagnosis: 'Expected recovery', followUpDate: '05/10/2023' }
-  ];
-
   const [selectedPet, setSelectedPet] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedRecord, setSelectedRecord] = useState(null);
   const [showRecordModal, setShowRecordModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
-  const [newRecord, setNewRecord] = useState({ 
-    date: null, service: "", vet: "", weight: "", healthStatus: "", diet: "", allergies: "", medications: "" 
-  });
-  const [editRecord, setEditRecord] = useState({
+  const [newRecord, setNewRecord] = useState({
     date: null,
     service: "",
-    vet: ""
-  });  
+    vet: "",
+    weight: "",
+    healthStatus: "",
+    diet: "",
+    allergies: "",
+    medications: ""
+  });
+  const [editRecord, setEditRecord] = useState({
+    id: null,
+    date: null,
+    service: "",
+    vet: "",
+    weight: "",
+    healthStatus: "",
+    diet: "",
+    allergies: "",
+    medications: ""
+  });
   const [errors, setErrors] = useState({ date: "", service: "", vet: "" });
 
   useEffect(() => {
-    const storedVets = JSON.parse(localStorage.getItem('users'))?.filter(user => user.role === 'Vet') || [];
-    setVets(storedVets);
+    const fetchVets = async () => {
+      try {
+        const response = await fetch('http://localhost:8080/api/vets');
+        const vetData = await response.json();
+        console.log("vetData: ",vetData);
+        setVets(vetData);
+      } catch (error) {
+        console.error('Error fetching vets:', error);
+      }
+    };
 
-    const storedRecords = JSON.parse(localStorage.getItem('medicalRecords'));
-    if (storedRecords) {
-      setAllRecords(storedRecords);
-    } else {
-      setAllRecords(initialRecords);
-      localStorage.setItem('medicalRecords', JSON.stringify(initialRecords));
-    }
+    fetchVets();
   }, []);
+
+  // LOAD PET DATA FROM DATABASE
+  useEffect(() => {
+    if (user) {
+      async function getUserPets() {
+        const storedUserPets = await getPetInfo();
+        setPetData(storedUserPets || []);
+
+      }
+      getUserPets();
+    }
+
+  }, []); // Add user dependency to ensure it fetches when user is defined
+  
+  const getPetInfo = async () => {
+    try {
+      const response = await fetch(`http://localhost:8080/api/pets/user/${user.id}`);
+      return response.ok ? response.json() : null;
+    } catch (error) {
+      console.error('Error fetching pets:', error);
+      return null;
+    }
+  };
+
+  useEffect(() => {
+    const fetchRecords = async () => {
+      if (!selectedPet) return;
+      console.log("Fetching records for pet ID:", selectedPet);
+      try {
+        const response = await fetch(`http://localhost:8080/api/medicalRecords/pet/${selectedPet}`);
+        if (!response.ok) {
+          if (response.status === 404) {
+            console.error('No records found for this pet ID:', selectedPet);
+            setAllRecords([]); // Set to empty array on 404
+            return;
+          }
+          throw new Error('Network response was not ok');
+        }
+        const records = await response.json();
+        console.log("records is :", records);
+        setAllRecords(Array.isArray(records) ? records : []);
+        console.log("all records is :", records);
+      } catch (error) {
+        console.error('Error fetching medical records:', error);
+        setAllRecords([]); // On error, set to empty array
+      }
+    };
+  
+    fetchRecords();
+    console.log("fetchRecords called:",)
+  }, [selectedPet]);
+  
+
+  const formatRecordDetails = (record) => {
+    return `
+      Date: ${record.date}
+      Service: ${record.service}
+      Veterinarian: ${record.vet}
+      Weight: ${record.weight}
+      Health Status: ${record.healthStatus}
+      Diet: ${record.diet}
+      Allergies: ${record.allergies}
+      Medications: ${record.medications}
+    `;
+  };
 
   const handleDownload = (record) => {
     const doc = new jsPDF();
@@ -76,66 +137,43 @@ function MedicalRecords() {
       doc.text(`Health Status: ${record.healthStatus}`, 10, 60);
       doc.text(`Diet: ${record.diet}`, 10, 70);
     }
-    if (record.vaccine) {
-      doc.text(`Vaccine: ${record.vaccine}`, 10, 80);
-      doc.text(`Dose: ${record.dose}`, 10, 90);
-      doc.text(`Next Dose: ${record.nextDose}`, 10, 100);
-      doc.text(`Vet Comments: ${record.vetComments}`, 10, 110);
-    }
-    if (record.treatment) {
-      doc.text(`Treatment: ${record.treatment}`, 10, 120);
-      doc.text(`Medications: ${record.medications}`, 10, 130);
-      doc.text(`Dosage: ${record.dosage}`, 10, 140);
-      doc.text(`Duration: ${record.duration}`, 10, 150);
-      doc.text(`Symptoms: ${record.symptoms}`, 10, 160);
-      doc.text(`Diagnosis: ${record.diagnosis}`, 10, 170);
-      doc.text(`Follow-up Date: ${record.followUpDate}`, 10, 180);
-    }
-    if (record.procedure) {
-      doc.text(`Procedure: ${record.procedure}`, 10, 190);
-      doc.text(`Pre-op Diagnosis: ${record.preOpDiagnosis}`, 10, 200);
-      doc.text(`Post-op Medications: ${record.postOpMedications}`, 10, 210);
-      doc.text(`Follow-up Plan: ${record.followUpPlan}`, 10, 220);
-    }
     doc.save(`medical-record-${record.id}.pdf`);
   };
 
-  const handleSendToVet = () => {
+  const handleSendToVet = async () => {
     if (!selectedVet || !selectedRecord) return;
-    const sharedRecords = JSON.parse(localStorage.getItem('sharedRecords')) || [];
-    sharedRecords.push({
-      recordId: selectedRecord.id,
-      vetEmail: selectedVet.email,
-      pdfFile: `medical-record-${selectedRecord.id}.pdf`,
-      dateShared: new Date().toISOString(),
-    });
-    localStorage.setItem('sharedRecords', JSON.stringify(sharedRecords));
-    setShowVetModal(false);
-    alert(`Record shared with ${selectedVet.email}`);
-  };
 
-  const formatRecordDetails = (record) => {
-    let details = `Date: ${record.date}\nService: ${record.service}\nVeterinarian: ${record.vet}`;
-    if (record.weight) {
-      details += `\n\nWeight: ${record.weight}\nHealth Status: ${record.healthStatus}\nDiet: ${record.diet}`;
+    const shareData = {
+      recordId: selectedRecord.id,
+      vetId: selectedVet.id
+    };
+
+    try {
+      const response = await fetch("http://localhost:8080/api/medicalRecords/share", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(shareData),
+      });
+
+      const result = await response.json();
+      if (response.ok) {
+        alert(`Record shared with ${selectedVet.name}`);
+        setShowVetModal(false);
+      } else {
+        alert(`Failed to share record: ${result.message}`);
+      }
+    } catch (error) {
+      console.error("Error sharing record:", error);
     }
-    if (record.vaccine) {
-      details += `\n\nVaccine: ${record.vaccine}\nDose: ${record.dose}\nNext Dose: ${record.nextDose}\nVet Comments: ${record.vetComments}`;
-    }
-    if (record.treatment) {
-      details += `\n\nTreatment: ${record.treatment}\nMedications: ${record.medications}\nDosage: ${record.dosage}\nDuration: ${record.duration}\nSymptoms: ${record.symptoms}\nDiagnosis: ${record.diagnosis}\nFollow-up Date: ${record.followUpDate}`;
-    }
-    if (record.procedure) {
-      details += `\n\nProcedure: ${record.procedure}\nPre-op Diagnosis: ${record.preOpDiagnosis}\nPost-op Medications: ${record.postOpMedications}\nFollow-up Plan: ${record.followUpPlan}`;
-    }
-    return details;
   };
 
   const handleAddRecord = () => {
     setShowAddModal(true);
   };
 
-  const handleSaveNewRecord = () => {
+  const handleSaveNewRecord = async () => {
     let valid = true;
     const newErrors = { date: "", service: "", vet: "" };
 
@@ -143,12 +181,12 @@ function MedicalRecords() {
       newErrors.date = "Date is required.";
       valid = false;
     }
-    
+
     if (newRecord.service.trim() === "") {
       newErrors.service = "Service is required.";
       valid = false;
     }
-    
+
     if (!newRecord.vet.startsWith("Dr.")) {
       newErrors.vet = "Veterinarian must start with 'Dr.'";
       valid = false;
@@ -157,103 +195,167 @@ function MedicalRecords() {
     setErrors(newErrors);
 
     if (valid) {
-      const updatedRecords = [...allRecords, { id: allRecords.length + 1, ...newRecord, petId: selectedPet, date: dayjs(newRecord.date).format('MM/DD/YYYY') }];
-      setAllRecords(updatedRecords);
-      localStorage.setItem('medicalRecords', JSON.stringify(updatedRecords));
-      setShowAddModal(false);
-      setNewRecord({ date: null, service: "", vet: "" });
-      setErrors({ date: "", service: "", vet: "" });
+      const recordData = {
+        petId: selectedPet,  // Assuming `selectedPet` is defined and holds the pet's ID
+        description: newRecord.service,  // Map `service` to `description` as per backend
+        diagnosis: newRecord.diagnosis || "",  // Optional fields can be empty strings if not provided
+        treatment: newRecord.treatment || "",  // Optional fields
+        vetId: selectedVet.id, // Send vet ID to backend
+        recordDate: dayjs(newRecord.date).format('YYYY-MM-DD') // Ensure correct date format
+      };
+
+      console.log("recordData ",recordData);
+
+      try {
+        const response = await fetch(`http://localhost:8080/api/medicalRecords/pet/${selectedPet}`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(recordData),
+        });
+
+        if (response.ok) {
+          console.log("add record begin");
+          const createdRecord = await response.json();
+          setAllRecords(prev => [...prev, createdRecord]);
+          setShowAddModal(false);
+          setNewRecord({
+            date: null,
+            service: "",
+            vet: "",
+            weight: "",
+            healthStatus: "",
+            diet: "",
+            allergies: "",
+            medications: ""
+          });
+        } else {
+          const errorData = await response.json();  // Read the error response body
+          console.error("Failed to add medical record:", errorData);
+          alert("Failed to add medical record: " + (errorData.message || "Unknown error"));
+        }
+      } catch (error) {
+        console.error("Error saving new record:", error);
+      }
     }
   };
 
-  const handleSaveEdit = () => {
+  const handleSaveEdit = async () => {
     let valid = true;
     const newErrors = { date: "", service: "", vet: "" };
-  
+
     if (!editRecord.date) {
       newErrors.date = "Date is required.";
       valid = false;
     }
-    
+
     if (editRecord.service.trim() === "") {
       newErrors.service = "Service is required.";
       valid = false;
     }
-    
+
     if (!editRecord.vet.startsWith("Dr.")) {
       newErrors.vet = "Veterinarian must start with 'Dr.'";
       valid = false;
     }
-  
+
     setErrors(newErrors);
-  
+
     if (valid) {
-      const updatedRecords = allRecords.map((record) =>
-        record.id === editRecord.id
-          ? { ...record, ...editRecord, date: dayjs(editRecord.date).format('MM/DD/YYYY') }
-          : record
-      );
-  
-      setAllRecords(updatedRecords);
-      localStorage.setItem('medicalRecords', JSON.stringify(updatedRecords));
-      setShowEditModal(false);
-      setErrors({ date: "", service: "", vet: "" });
+      const updatedRecordData = {
+        ...editRecord,
+        date: dayjs(editRecord.date).format('MM/DD/YYYY')
+      };
+
+      try {
+        const response = await fetch(`http://localhost:8080/api/medicalRecords/${editRecord.id}`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(updatedRecordData),
+        });
+
+        if (response.ok) {
+          const updatedRecord = await response.json();
+          setAllRecords(prev => prev.map(record => (record.id === updatedRecord.id ? updatedRecord : record)));
+          setShowEditModal(false);
+        } else {
+          alert("Failed to update medical record.");
+        }
+      } catch (error) {
+        console.error("Error saving edited record:", error);
+      }
     }
   };
 
   const handleClose = () => {
-    setShowEditModal(false); 
-    setShowAddModal(false);  
-    setErrors({ date: "", service: "", vet: "" }); 
+    setShowEditModal(false);
+    setShowAddModal(false);
+    setErrors({ date: "", service: "", vet: "" });
   };
 
-  const handleDeleteRecord = (id) => {
-    const updatedRecords = allRecords.filter(record => record.id !== id);
-    setAllRecords(updatedRecords);
-    localStorage.setItem('medicalRecords', JSON.stringify(updatedRecords));
+  const handleDeleteRecord = async (id) => {
+    try {
+      const response = await fetch(`http://localhost:8080/api/medicalRecords/${id}`, {
+        method: "DELETE",
+      });
+
+      if (response.ok) {
+        setAllRecords(prev => prev.filter(record => record.id !== id));
+      } else {
+        alert("Failed to delete medical record.");
+      }
+    } catch (error) {
+      console.error("Error deleting record:", error);
+    }
   };
 
   const handleShowEditModal = (record) => {
-    setEditRecord({ ...record, date: dayjs(record.date, 'MM/DD/YYYY') });  
-    setShowEditModal(true); 
+    setEditRecord(record);
+    setShowEditModal(true);
   };
 
   const filteredRecords = allRecords
     .filter(record =>
-      (!selectedPet || record.petId === selectedPet) &&
-      ((record.service && record.service.toLowerCase().includes(searchTerm.toLowerCase())) || 
-      (record.date && record.date.includes(searchTerm)))
+      (!selectedPet || record.pet.id === selectedPet) &&
+      ((record.service && record.service.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (record.date && record.date.includes(searchTerm)))
     );
 
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
       <Container className="medical-records-page">
         <div className="pet-section">
-          <h2>Pets</h2>
-          <div className="pet-selection">
-            <div className="pet-list">
-              {pets.map((pet) => (
-                <div
-                  key={pet.id}
-                  className={`pet ${selectedPet === pet.id ? 'selected' : ''}`}
-                >
-                  <img src={pet.image} alt={pet.name} className="pet-image" />
-                  <div className="pet-name">{pet.name}</div>
-                  <Button
-                    className={`select ${selectedPet === pet.id ? 'selected-green' : ''}`}  
-                    onClick={() => setSelectedPet(selectedPet === pet.id ? null : pet.id)} 
-                  >
-                    {selectedPet === pet.id ? 'Selected' : 'Select'}
-                  </Button>
-                </div>
-              ))}
+          <section className="appointment-pet-selection">
+          <h2>Select Pet Profile</h2>
+            <div className="appointment-pet-profiles">
+              {petData.length > 0 ? (
+                petData.map((pet) => (
+                  <div key={pet.id} className="pet">
+                    <img src={`data:image/jpeg;base64,${pet.profilePicture}`} alt={pet.name} />
+                    <p className="pet-name">{pet.name}</p>
+                    <button
+                      className={selectedPet === pet.id ? 'selected' : 'select'}
+                      onClick={() => {
+                        setSelectedPet(selectedPet === pet.id ? null : pet.id);
+                      }}
+                    >
+                      {selectedPet === pet.id ? 'Selected' : 'Select'}
+                    </button>
+                  </div>
+                ))
+              ) : (
+                <h2>Please add your pets on the profile page.</h2>
+              )}
             </div>
-          </div>
+          </section>
         </div>
 
         <div>
-          <h2>{selectedPet ? `${pets.find(pet => pet.id === selectedPet).name}'s Medical Records` : 'All Pets Medical Records'}</h2>
-          
+          <h2>{selectedPet ? `${petData.find(pet => pet.id === selectedPet).name}'s Medical Records` : 'All Pets Medical Records'}</h2>
+
           <div className="d-flex justify-content-between align-items-center mb-3">
             <DropdownButton
               id="dropdown-basic-button"
@@ -327,6 +429,7 @@ function MedicalRecords() {
                     <Form.Control
                       {...params.inputProps}
                       isInvalid={!!errors.date}
+                      value={params.inputProps.value} //
                     />
                   )}
                 />
@@ -348,15 +451,55 @@ function MedicalRecords() {
               </Form.Group>
               <Form.Group controlId="formVet">
                 <Form.Label>Veterinarian</Form.Label>
-                <Form.Control
-                  type="text"
-                  value={newRecord.vet}
-                  onChange={(e) => setNewRecord({ ...newRecord, vet: e.target.value })}
-                  isInvalid={!!errors.vet}
-                />
+                <Form.Control as="select" value={newRecord.vet} onChange={(e) => setNewRecord({ ...newRecord, vet: e.target.value })} isInvalid={!!errors.vet}>
+                  <option value="">Select Vet</option>
+                  {vets.map(vet => (
+                    <option key={vet.id} value={vet.name}>{vet.name}</option>
+                  ))}
+                </Form.Control>
                 <Form.Control.Feedback type="invalid">
                   {errors.vet}
                 </Form.Control.Feedback>
+              </Form.Group>
+              <Form.Group controlId="formWeight">
+                <Form.Label>Weight</Form.Label>
+                <Form.Control
+                  type="text"
+                  value={newRecord.weight}
+                  onChange={(e) => setNewRecord({ ...newRecord, weight: e.target.value })}
+                />
+              </Form.Group>
+              <Form.Group controlId="formHealthStatus">
+                <Form.Label>Health Status</Form.Label>
+                <Form.Control
+                  type="text"
+                  value={newRecord.healthStatus}
+                  onChange={(e) => setNewRecord({ ...newRecord, healthStatus: e.target.value })}
+                />
+              </Form.Group>
+              <Form.Group controlId="formDiet">
+                <Form.Label>Diet</Form.Label>
+                <Form.Control
+                  type="text"
+                  value={newRecord.diet}
+                  onChange={(e) => setNewRecord({ ...newRecord, diet: e.target.value })}
+                />
+              </Form.Group>
+              <Form.Group controlId="formAllergies">
+                <Form.Label>Allergies</Form.Label>
+                <Form.Control
+                  type="text"
+                  value={newRecord.allergies}
+                  onChange={(e) => setNewRecord({ ...newRecord, allergies: e.target.value })}
+                />
+              </Form.Group>
+              <Form.Group controlId="formMedications">
+                <Form.Label>Medications</Form.Label>
+                <Form.Control
+                  type="text"
+                  value={newRecord.medications}
+                  onChange={(e) => setNewRecord({ ...newRecord, medications: e.target.value })}
+                />
               </Form.Group>
             </Form>
           </Modal.Body>
@@ -389,10 +532,11 @@ function MedicalRecords() {
           <Modal.Body>
             <Form.Group>
               <Form.Label>Select Veterinarian</Form.Label>
-              <Form.Control as="select" onChange={(e) => setSelectedVet(vets.find(vet => vet.email === e.target.value))}>
+              <Form.Control as="select"
+               onChange={(e) => setSelectedVet(vets.find(vet => vet.id === parseInt(e.target.value)))}>
                 <option value="">Select Vet</option>
                 {vets.map(vet => (
-                  <option key={vet.email} value={vet.email}>{vet.name}</option>
+                  <option key={vet.id} value={vet.id}>{vet.name}</option>
                 ))}
               </Form.Control>
             </Form.Group>
@@ -427,16 +571,16 @@ function MedicalRecords() {
                   {errors.date}
                 </Form.Control.Feedback>
               </Form.Group>
-              <Form.Group controlId="formService">
-                <Form.Label>Service</Form.Label>
-                <Form.Control
-                  type="text"
-                  value={editRecord.service}
-                  onChange={(e) => setEditRecord({ ...editRecord, service: e.target.value })}
-                  isInvalid={!!errors.service}
-                />
+              <Form.Group controlId="formVet">
+                <Form.Label>Veterinarian</Form.Label>
+                <Form.Control as="select" value={editRecord.vet} onChange={(e) => setEditRecord({ ...editRecord, vet: e.target.value })} isInvalid={!!errors.vet}>
+                  <option value="">Select Vet</option>
+                  {vets.map(vet => (
+                    <option key={vet.id} value={vet.name}>{vet.name}</option>
+                  ))}
+                </Form.Control>
                 <Form.Control.Feedback type="invalid">
-                  {errors.service}
+                  {errors.vet}
                 </Form.Control.Feedback>
               </Form.Group>
               <Form.Group controlId="formVet">
@@ -451,6 +595,46 @@ function MedicalRecords() {
                   {errors.vet}
                 </Form.Control.Feedback>
               </Form.Group>
+              <Form.Group controlId="formWeight">
+                <Form.Label>Weight</Form.Label>
+                <Form.Control
+                  type="text"
+                  value={editRecord.weight}
+                  onChange={(e) => setEditRecord({ ...editRecord, weight: e.target.value })}
+                />
+              </Form.Group>
+              <Form.Group controlId="formHealthStatus">
+                <Form.Label>Health Status</Form.Label>
+                <Form.Control
+                  type="text"
+                  value={editRecord.healthStatus}
+                  onChange={(e) => setEditRecord({ ...editRecord, healthStatus: e.target.value })}
+                />
+              </Form.Group>
+              <Form.Group controlId="formDiet">
+                <Form.Label>Diet</Form.Label>
+                <Form.Control
+                  type="text"
+                  value={editRecord.diet}
+                  onChange={(e) => setEditRecord({ ...editRecord, diet: e.target.value })}
+                />
+              </Form.Group>
+              <Form.Group controlId="formAllergies">
+                <Form.Label>Allergies</Form.Label>
+                <Form.Control
+                  type="text"
+                  value={editRecord.allergies}
+                  onChange={(e) => setEditRecord({ ...editRecord, allergies: e.target.value })}
+                />
+              </Form.Group>
+              <Form.Group controlId="formMedications">
+                <Form.Label>Medications</Form.Label>
+                <Form.Control
+                  type="text"
+                  value={editRecord.medications}
+                  onChange={(e) => setEditRecord({ ...editRecord, medications: e.target.value })}
+                />
+              </Form.Group>
             </Form>
           </Modal.Body>
           <Modal.Footer>
@@ -462,7 +646,6 @@ function MedicalRecords() {
             </Button>
           </Modal.Footer>
         </Modal>
-
       </Container>
     </LocalizationProvider>
   );
