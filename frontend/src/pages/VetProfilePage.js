@@ -10,7 +10,7 @@ const VetProfilePage = () => {
 
   useEffect(() => {
     // Fetch the specific vet data by ID
-    fetch(`http://localhost:5001/api/vets/${id}`)
+    fetch(`http://localhost:8080/api/vets/${id}`)
       .then(response => {
         if (!response.ok) {
           throw new Error('Failed to fetch vet data');
@@ -18,12 +18,8 @@ const VetProfilePage = () => {
         return response.json();
       })
       .then(data => {
-        if (data.message === 'success') {
-          setVet(data.data); // Set the vet data
-          setLoading(false); // Stop loading
-        } else {
-          throw new Error('Vet data not found');
-        }
+        setVet(data); // Assuming the response is directly the vet object
+        setLoading(false); // Stop loading
       })
       .catch(error => {
         setError(error.message); // Set the error state
@@ -39,6 +35,10 @@ const VetProfilePage = () => {
     return <div>Error: {error}</div>; // Handle error state
   }
 
+  if (!vet) {
+    return <div>No vet data available.</div>; // In case no data is returned
+  }
+
   return (
     <div className="vet-profile-page">
       <div className="profile-header">
@@ -46,8 +46,8 @@ const VetProfilePage = () => {
         <h2>{vet.name}</h2>
       </div>
       <div className="profile-body">
-        <img src={vet.image_path} alt={`Portrait of ${vet.name}`} className="profile-image" />
-        <p>{vet.long_description}</p>
+        <img src={`http://localhost:8080${vet.imagePath}`} alt={`Portrait of ${vet.name}`} className="profile-image" />
+        <p>{vet.longDescription}</p>
         <div className="button-container">
           <Link to="/all-vets">
             <button className="see-all-members-btn">See All Members</button>
@@ -59,4 +59,3 @@ const VetProfilePage = () => {
 };
 
 export default VetProfilePage;
-
