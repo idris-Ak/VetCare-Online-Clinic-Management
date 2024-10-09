@@ -53,7 +53,7 @@ const fetchPets = useCallback(async () => {
     if (user) {
       fetchPets();
     }
-    setTimeout(() => setIsLoading(false), 1000);
+    setTimeout(() => setIsLoading(false), 500);
   }, [user, fetchPets]);
 
   useEffect(() => {
@@ -332,7 +332,7 @@ const handleRemoveProfilePic = async () => {
       let response;
         if (currentPet) {
             // If currentPet is defined, we are editing an existing pet
-            response = await fetch(`http://localhost:8080/api/pets/${currentPet.id}`, {
+            response = await fetch(`http://localhost:8080/api/pets/${currentPet.id}?userId=${user.id}`, {
                 method: 'PUT',
                 body: petData,
             });
@@ -377,7 +377,7 @@ const handlePetProfilePicChange = async (event, petId) => {
     formData.append('profilePicture', file);
 
     try {
-        const response = await fetch(`http://localhost:8080/api/pets/${petId}/profilePicture`, {
+        const response = await fetch(`http://localhost:8080/api/pets/${petId}/profilePicture?userId=${user.id}`, {
         method: 'PUT',
         body: formData,
       });
@@ -417,7 +417,7 @@ const handlePetProfilePicChange = async (event, petId) => {
 const handleRemovePetProfilePic = async (petId) => {
   try {
     // Send a PUT request to the backend to update the pet and remove the profile picture
-    const response = await fetch(`http://localhost:8080/api/pets/${petId}/profilePicture`, {
+    const response = await fetch(`http://localhost:8080/api/pets/${petId}/profilePicture?userId=${user.id}`, {
       method: 'DELETE',
     });
 
@@ -474,7 +474,7 @@ const updateUserPets = (updatedPets) => {
     return;
   }
     try {
-      const response = await fetch(`http://localhost:8080/api/pets/${petToDelete}`, {
+      const response = await fetch(`http://localhost:8080/api/pets/${petToDelete}?userId=${user.id}`, {
         method: 'DELETE',
       });
       if (response.ok) {
@@ -509,6 +509,7 @@ const updateUserPets = (updatedPets) => {
           backgroundColor: '#fff',
           borderRadius: '20px',
           boxShadow: '0 6px 20px rgba(0,0,0,0.1)',
+          position: 'relative',
         }}
       >
         {/* User Profile Picture */}
@@ -583,6 +584,22 @@ const updateUserPets = (updatedPets) => {
             Delete Account
           </Button>
         </div>
+
+      {/* View Transaction History Button */}
+      {user.role === 'Pet Owner' && (
+        <Button
+          variant="outline-primary"
+          onClick={() => navigate('/transaction-history')}
+          className="mb-3"
+          style={{
+            position: 'absolute',
+            top: '10px',
+            right: '10px',
+          }}
+        >
+          View Transaction History
+        </Button>
+      )}
 
       {/* Edit Profile Modal */}
       <Modal show={showEditProfileModal} onHide={() => setShowEditProfileModal(false)}>
@@ -860,7 +877,7 @@ const updateUserPets = (updatedPets) => {
                     border: '2px dashed #ccc',
                     borderRadius: '10px',
                     cursor: 'pointer',
-                    minHeight: '286px',
+                    minHeight: '400px',
                   }}
                   onClick={() => {
                     setCurrentPet(null); // Reset currentPet

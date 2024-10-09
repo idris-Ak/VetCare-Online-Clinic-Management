@@ -1,0 +1,17 @@
+# Use Node.js image to build the frontend
+FROM node:16 AS frontend-build
+WORKDIR /frontend
+
+# Copy package.json and package-lock.json and install dependencies
+COPY package*.json ./
+RUN npm install
+
+# Copy the rest of the frontend source code
+COPY . .
+RUN npm run build
+
+# Expose port 3000
+EXPOSE 3000
+
+# Start the frontend server
+CMD ["npm", "start"]

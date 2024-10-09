@@ -1,4 +1,4 @@
 -------------------------------------------------------------------------------
 Test set: au.edu.rmit.sept.webapp.WebappApplicationTests
 -------------------------------------------------------------------------------
-Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 8.262 s -- in au.edu.rmit.sept.webapp.WebappApplicationTests
+Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 2.142 s -- in au.edu.rmit.sept.webapp.WebappApplicationTests

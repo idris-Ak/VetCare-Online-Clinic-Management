@@ -1,10 +1,13 @@
 au/edu/rmit/sept/webapp/repository/UserRepository.class
+au/edu/rmit/sept/webapp/model/Transaction.class
 au/edu/rmit/sept/webapp/controller/AppointmentController.class
 au/edu/rmit/sept/webapp/model/Appointment.class
 au/edu/rmit/sept/webapp/repository/VetRepository.class
 au/edu/rmit/sept/webapp/service/ImageService.class
 au/edu/rmit/sept/webapp/WebConfig.class
+au/edu/rmit/sept/webapp/repository/TransactionRepository.class
 au/edu/rmit/sept/webapp/WebappApplication.class
+au/edu/rmit/sept/webapp/controller/TransactionController.class
 au/edu/rmit/sept/webapp/repository/PetRepository.class
 au/edu/rmit/sept/webapp/model/Payment.class
 au/edu/rmit/sept/webapp/service/PaymentService.class
@@ -15,9 +18,11 @@ au/edu/rmit/sept/webapp/controller/UserController.class
 au/edu/rmit/sept/webapp/model/Vet.class
 au/edu/rmit/sept/webapp/service/PetService.class
 au/edu/rmit/sept/webapp/service/UserService.class
+au/edu/rmit/sept/webapp/SecurityConfig.class
 au/edu/rmit/sept/webapp/repository/PaymentRepository.class
 au/edu/rmit/sept/webapp/service/AppointmentService.class
 au/edu/rmit/sept/webapp/controller/PaymentController.class
+au/edu/rmit/sept/webapp/service/TransactionService.class
 au/edu/rmit/sept/webapp/controller/AppointmentController$AppointmentRequest.class
 au/edu/rmit/sept/webapp/service/VetService.class
 au/edu/rmit/sept/webapp/model/User.class

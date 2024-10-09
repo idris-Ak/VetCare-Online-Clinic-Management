@@ -1,0 +1,26 @@
+# Use Maven to build the backend
+FROM maven:3.8.5-openjdk-17 AS backend-build
+WORKDIR /backend
+
+# Copy pom.xml and Maven wrapper files
+COPY pom.xml ./
+COPY .mvn/ .mvn/
+COPY mvnw ./
+RUN ./mvnw dependency:resolve
+
+# Copy the source code and build the backend
+COPY src ./src
+RUN ./mvnw clean package -DskipTests
+
+# Use OpenJDK to run the backend
+FROM openjdk:17-jdk-slim
+WORKDIR /app
+
+# Copy the built JAR file from the Maven build stage
+COPY --from=backend-build /backend/target/*.jar backend.jar
+
+# Expose port 8080
+EXPOSE 8080
+
+# Run the application
+CMD ["java", "-jar", "backend.jar"]

@@ -1,4 +1,4 @@
 -------------------------------------------------------------------------------
 Test set: au.edu.rmit.sept.webapp.LoginTests
 -------------------------------------------------------------------------------
-Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.792 s -- in au.edu.rmit.sept.webapp.LoginTests
+Tests run: 10, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.806 s -- in au.edu.rmit.sept.webapp.LoginTests

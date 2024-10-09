@@ -1,14 +1,18 @@
 package au.edu.rmit.sept.webapp.controller;
 
 import au.edu.rmit.sept.webapp.model.User;
+import au.edu.rmit.sept.webapp.model.Transaction;
 import au.edu.rmit.sept.webapp.service.UserService;
 import au.edu.rmit.sept.webapp.service.ImageService;
+import au.edu.rmit.sept.webapp.service.TransactionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.util.List;
 import java.util.Optional;
 import java.io.IOException;
 import java.util.Base64;
@@ -23,6 +27,9 @@ public class UserController {
     @Autowired
     private ImageService imageService; // ImageService for processing images
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     @PostMapping("/signup")
     public ResponseEntity<User> signUp(@RequestBody User user) {
         Optional<User> existingUser = userService.findByEmail(user.getEmail());
@@ -36,8 +43,11 @@ public class UserController {
     @PostMapping("/login")
     public ResponseEntity<User> login(@RequestBody User loginRequest) {
         Optional<User> user = userService.findByEmail(loginRequest.getEmail());
-        if (user.isPresent() && user.get().getPassword().equals(loginRequest.getPassword())) {
-            return ResponseEntity.ok(user.get());
+        if (user.isPresent()) {
+            // Compare the entered password with the hashed password in the database
+            if (passwordEncoder.matches(loginRequest.getPassword(), user.get().getPassword())) {
+                return ResponseEntity.ok(user.get());
+            }
         }
         return ResponseEntity.status(401).build();
     }
@@ -47,7 +57,7 @@ public class UserController {
         Optional<User> user = userService.findById(userId);
         return user.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
-    
+
     // Update user profile
     @PutMapping("/{userId}")
     public ResponseEntity<User> updateUser(
@@ -70,7 +80,8 @@ public class UserController {
                 user.setEmail(email.trim()); // Update the email, even if it's an empty string
             }
             if (password != null) {
-                user.setPassword(password); // Update the password if provided
+                // Hash the new password before saving it
+                user.setPassword(passwordEncoder.encode(password));
             }
 
             if (profilePicture != null && !profilePicture.isEmpty()) {

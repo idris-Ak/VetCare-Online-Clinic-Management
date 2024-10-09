@@ -28,7 +28,7 @@ function Footer() {
         <p>Sunday: CLOSED</p>
       </div>
       <div className="footer-section social">
-      <h5>Follow Us</h5>
+      <h3>Follow Us</h3>
             <ul className="list-unstyled">
               {/*<a href="https://www.flaticon.com/free-icons/facebook" title="facebook icons">Facebook icons created by Freepik - Flaticon</a>*/}
               <li>  
