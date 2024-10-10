@@ -41,6 +41,7 @@ public class PetController {
             return ResponseEntity.badRequest().build(); // Return bad request without a body
         }
         Optional<User> user = userService.findById(userId);
+        // Fetch the user pets by the user
         if (user.isPresent()) {
             List<Pet> pets = petService.getPetsByUser(user.get());
             return ResponseEntity.ok(pets);
@@ -59,6 +60,7 @@ public class PetController {
             @RequestParam(value = "profilePicture", required = false) MultipartFile profilePicture) 
         throws IOException {
         
+        // Find the user by userId to add a new pet
         Optional<User> user = userService.findById(userId);
         if (user.isPresent()) {
             Pet pet = new Pet();
@@ -70,9 +72,9 @@ public class PetController {
 
             try {
                 if (profilePicture != null && !profilePicture.isEmpty()) {
-                    // Process and resize the image if necessary
+                    // Process the profile picture image to ensure the file size is as minimal as it can be
                     String base64Image = imageService.processImage(profilePicture);
-                    pet.setProfilePicture(base64Image); // Store Base64 image string
+                    pet.setProfilePicture(base64Image); // Store Base64 image string in the database
                 }
             } catch (IOException e) {
                 return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
@@ -95,7 +97,8 @@ public class PetController {
             @RequestParam(value = "age", required = false) Integer age,
             @RequestParam(value = "profilePicture", required = false) MultipartFile profilePicture)
             throws IOException {
-
+        
+        // Update the pet by petId
         Optional<Pet> existingPet = petService.findById(petId);
         if (existingPet.isPresent()) {
             Pet pet = existingPet.get();
@@ -123,7 +126,7 @@ public class PetController {
     // Delete pet
     @DeleteMapping("/{petId}")
     public ResponseEntity<Void> deletePet(@PathVariable Long petId, @RequestParam Long userId) {
-           // Fetch the pet by ID
+    // Fetch the pet by petId
     Optional<Pet> existingPet = petService.findById(petId);
     if (existingPet.isPresent()) {
         Pet pet = existingPet.get();

@@ -28,20 +28,23 @@ public class UserController {
     private ImageService imageService; // ImageService for processing images
 
     @Autowired
-    private PasswordEncoder passwordEncoder;
+    private PasswordEncoder passwordEncoder; // Password encoder for hashing user passwords using Bcrypt
 
     @PostMapping("/signup")
     public ResponseEntity<User> signUp(@RequestBody User user) {
+        // Find the user by email to check it doesn't already exist when signing up
         Optional<User> existingUser = userService.findByEmail(user.getEmail());
         if (existingUser.isPresent()) {
             return ResponseEntity.status(409).build(); // Email already exists
         }
+        // Save the new user in the database
         User savedUser = userService.signUp(user);
         return ResponseEntity.ok(savedUser);
     }
 
     @PostMapping("/login")
     public ResponseEntity<User> login(@RequestBody User loginRequest) {
+        // Find the user by email
         Optional<User> user = userService.findByEmail(loginRequest.getEmail());
         if (user.isPresent()) {
             // Compare the entered password with the hashed password in the database
@@ -54,6 +57,7 @@ public class UserController {
 
     @GetMapping("/{userId}")
     public ResponseEntity<User> getUserById(@PathVariable Long userId) {
+        // Find the user by userId
         Optional<User> user = userService.findById(userId);
         return user.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
@@ -86,8 +90,9 @@ public class UserController {
 
             if (profilePicture != null && !profilePicture.isEmpty()) {
                 try {
+                    // Process the profile picture image to ensure the file size is as minimal as it can be
                     String base64Image = imageService.processImage(profilePicture);
-                    user.setProfilePicture(base64Image);
+                    user.setProfilePicture(base64Image); // Store the Base64 image string in the database
                 } catch (IOException e) {
                     return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
                 }
@@ -96,7 +101,7 @@ public class UserController {
             User savedUser = userService.saveUser(user); // Save the updated user in the database
             return ResponseEntity.ok(savedUser);
         }
-        return ResponseEntity.status(404).build(); // Return 404 if user not found
+        return ResponseEntity.status(404).build();
     }
 
     // Update user profile picture 
@@ -111,10 +116,10 @@ public class UserController {
 
             if (profilePicture != null && !profilePicture.isEmpty()) {
                 try {
-                    // Process the image and save it
+                    // Process the profile picture image to ensure the file size is as minimal as it can be
                     String base64Image = imageService.processImage(profilePicture);
-                    user.setProfilePicture(base64Image); // Store Base64 image string in the database (optional)
-                    userService.saveUser(user); // Save updated user in the database
+                    user.setProfilePicture(base64Image); // Store the Base64 image string in the database
+                    userService.saveUser(user); // Save the updated user in the database
 
                     return ResponseEntity.ok(user);
 
@@ -145,6 +150,7 @@ public class UserController {
     @DeleteMapping("/{userId}")
     public ResponseEntity<Void> deleteUser(@PathVariable Long userId) {
         Optional<User> existingUser = userService.findById(userId);
+        // Check the user is present by userId so that the user can be deleted
         if (existingUser.isPresent()) {
             userService.deleteUser(userId);
             return ResponseEntity.noContent().build();

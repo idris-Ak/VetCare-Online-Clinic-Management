@@ -15,7 +15,7 @@ public class UserService {
     private UserRepository userRepository;
 
     @Autowired
-    private PasswordEncoder passwordEncoder;
+    private PasswordEncoder passwordEncoder; // Password encoder for hashing user passwords using Bcrypt
 
     public User signUp(User user) {
         // Hash the password before saving the user

@@ -28,7 +28,7 @@ function Login({loginUser}) {
     event.preventDefault();
     setShowErrorMessage(false);
   
-    //Check if the Vet's email ends with @vetcare.com
+    // Check if the Vet's email ends with @vetcare.com
     if (userDetails.role === 'Vet' && !userDetails.email.endsWith('@vetcare.com')) {
       setErrorMessage("Vets must use an email that ends with '@vetcare.com'.");
       setShowErrorMessage(true);
@@ -37,11 +37,13 @@ function Login({loginUser}) {
     }
 
     try {
+    // Try getting a response from the api
     const response = await fetch('http://localhost:8080/api/users/login', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
+      // Send the user details to the backend to verify they are correct
       body: JSON.stringify({
         email: userDetails.email.trim(),
         password: userDetails.password,
@@ -49,12 +51,14 @@ function Login({loginUser}) {
       }),
     });
 
+    // Set the appropriate error message if the response status is 401
     if (response.status === 401) {
       setErrorMessage('Invalid email, password, or role selection.');
       setShowErrorMessage(true);
       setTimeout(() => setShowErrorMessage(false), 3000);
       setUserDetails(prevDetails => ({ ...prevDetails, password: '' }));
     } else if (response.ok) {
+      // Otherwise, log the user in and navigate them to the last page they navigated to
       const user = await response.json();
       setShowSuccessAlert(true);
       setTimeout(() => {
