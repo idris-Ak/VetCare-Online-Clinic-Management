@@ -11,14 +11,14 @@ import { Navigation, Autoplay } from 'swiper/modules';
 import { useState, useEffect } from 'react';
 
 
-import blog1 from '../components/assets/blog1.jpg';
-import blog2 from '../components/assets/blog2.jpg';
-import blog3 from '../components/assets/blog3.jpg';
-import VetCard from '../components/VetCard';
-import about1 from "../components/assets/about1.jpg";
-import about2 from "../components/assets/about2.jpg";
+import blog1 from "../../components/assets/blog1.jpg";
+import blog2 from  "../../components/assets/blog2.jpg";
+import blog3 from  "../../components/assets/blog3.jpg";
+import VetCard from '../../components/VetCard/VetCard';
+import about1 from  "../../components/assets/about1.jpg";
+import about2 from  "../../components/assets/about2.jpg";
 
-import CustomerReviews from "../components/CustomerReviews";
+import CustomerReviews from "../../components/CustomerReviews";
 import "./HomePage.css";
 
 

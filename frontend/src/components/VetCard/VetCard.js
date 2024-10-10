@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import "../components/VetCard.css"; // Ensure this path is correct for your CSS
+import "./VetCard.css"; // Ensure this path is correct for your CSS
 
 const VetCard = ({ vet }) => {
   // Now use the vet object directly instead of fetching it again
