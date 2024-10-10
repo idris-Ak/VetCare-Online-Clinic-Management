@@ -233,9 +233,10 @@ function MedicalRecords({ user }) {
     if (valid) {
       const recordData = {
         petId: selectedPet,  // Assuming `selectedPet` is defined and holds the pet's ID
-        description: newRecord.service,  // Map `service` to `description` as per backend
+        service: newRecord.service,  // Map `service` to `description` as per backend
         diagnosis: newRecord.diagnosis || "",  // Optional fields can be empty strings if not provided
         treatment: newRecord.treatment || "",  // Optional fields
+        desciption: newRecord.desciption || "",  // Optional fields
         vetId: selectedVet.id, // Send vet ID to backend
         recordDate: dayjs(newRecord.date).format('YYYY-MM-DD') // Ensure correct date format
       };
@@ -430,7 +431,7 @@ function MedicalRecords({ user }) {
                 <tr key={record.id}>
                   <td>{record.recordDate}</td>
                   <td>{record.service}</td>
-                  <td>{record.vet}</td>
+                  <td>{record.vet.name}</td>
                   <td>
                     <Button variant="info" size="sm" onClick={() => {
                       setSelectedRecord(record);
@@ -472,33 +473,65 @@ function MedicalRecords({ user }) {
               </Form.Group>
               <Form.Group controlId="formService">
                 <Form.Label>Service</Form.Label>
-                <Form.Control
-                  type="text"
+                <Form.Select
                   value={newRecord.service}
-                  onChange={(e) => setNewRecord({ ...newRecord, service: e.target.value })}
+                  onChange={(e) => {
+                    const selectedService = e.target.value;
+                    setNewRecord((prevRecord) => ({
+                      ...prevRecord,
+                      service: selectedService,
+                      ...(selectedService !== "Other" && { customService: '' })  // Only reset customService when not 'Other'
+                    }));
+                  }}
                   isInvalid={!!errors.service}
-                />
+                >
+                  <option value="">Select Service</option>
+                  <option value="Treatment Plan">Treatment Plan</option>
+                  <option value="Vaccination">Vaccination</option>
+                  <option value="Other">Other</option>
+                </Form.Select>
                 <Form.Control.Feedback type="invalid">
                   {errors.service}
                 </Form.Control.Feedback>
               </Form.Group>
+
+              {/* Conditional input for custom service */}
+              {newRecord.service === 'Other' && (
+                <Form.Group controlId="formCustomService">
+                  <Form.Label>Custom Service</Form.Label>
+                  <Form.Control
+                    type="text"
+                    value={newRecord.customService}
+                    onChange={(e) => setNewRecord((prevRecord) => ({
+                      ...prevRecord,
+                      customService: e.target.value
+                    }))}
+                    isInvalid={!!errors.customService}
+                  />
+                  <Form.Control.Feedback type="invalid">
+                    {errors.customService}
+                  </Form.Control.Feedback>
+                </Form.Group>
+              )}
+
+
               <Form.Group controlId="formVet">
-  <Form.Label>Veterinarian</Form.Label>
-  <Form.Control as="select" value={newRecord.vet} onChange={(e) => {
-    const selectedVetName = e.target.value; // Get the selected vet name
-    const selectedVet = vets.find(vet => vet.name === selectedVetName); // Find the vet object based on the name
-    setSelectedVet(selectedVet); // Update selectedVet state
-    setNewRecord({ ...newRecord, vet: selectedVetName }); // Update newRecord.vet with the selected vet name
-  }} isInvalid={!!errors.vet}>
-    <option value="">Select Vet</option>
-    {vets.map(vet => (
-      <option key={vet.id} value={vet.name}>{vet.name}</option>
-    ))}
-  </Form.Control>
-  <Form.Control.Feedback type="invalid">
-    {errors.vet}
-  </Form.Control.Feedback>
-</Form.Group>
+                <Form.Label>Veterinarian</Form.Label>
+                <Form.Control as="select" value={newRecord.vet} onChange={(e) => {
+                  const selectedVetName = e.target.value; // Get the selected vet name
+                  const selectedVet = vets.find(vet => vet.name === selectedVetName); // Find the vet object based on the name
+                  setSelectedVet(selectedVet); // Update selectedVet state
+                  setNewRecord({ ...newRecord, vet: selectedVetName }); // Update newRecord.vet with the selected vet name
+                }} isInvalid={!!errors.vet}>
+                  <option value="">Select Vet</option>
+                  {vets.map(vet => (
+                    <option key={vet.id} value={vet.name}>{vet.name}</option>
+                  ))}
+                </Form.Control>
+                <Form.Control.Feedback type="invalid">
+                  {errors.vet}
+                </Form.Control.Feedback>
+              </Form.Group>
 
               <Form.Group controlId="formWeight">
                 <Form.Label>Weight</Form.Label>
@@ -538,6 +571,14 @@ function MedicalRecords({ user }) {
                   type="text"
                   value={newRecord.medications}
                   onChange={(e) => setNewRecord({ ...newRecord, medications: e.target.value })}
+                />
+              </Form.Group>
+              <Form.Group controlId="formDesciption">
+                <Form.Label>Medications</Form.Label>
+                <Form.Control
+                  type="text"
+                  value={newRecord.desciption}
+                  onChange={(e) => setNewRecord({ ...newRecord, desciption: e.target.value })}
                 />
               </Form.Group>
             </Form>
