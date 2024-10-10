@@ -22,10 +22,7 @@ public class MedicalRecord {
     @JoinColumn(name = "pet_id", nullable = false)
     private Pet pet;
 
-    @ManyToOne
-    @JoinColumn(name = "vet_id", nullable = false) // Reference to Vet entity
-    private Vet vet;
-
+    private Integer vetId;
     private String description;
     private String diagnosis;
     private String treatment;
@@ -53,12 +50,12 @@ public class MedicalRecord {
         this.pet = pet;
     }
 
-    public Vet getVet() {
-        return vet;
+    public Integer getVetId() {
+        return vetId;
     }
 
-    public void setVet(Vet vet) {
-        this.vet = vet;
+    public void setVetId(Integer vetId) {
+        this.vetId = vetId;
     }
 
     public String getDescription() {

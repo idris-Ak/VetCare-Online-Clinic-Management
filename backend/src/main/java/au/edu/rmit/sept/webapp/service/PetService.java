@@ -19,6 +19,11 @@ public class PetService {
         return petRepository.findAll();
     }
 
+    // Method to fetch pets by user ID
+    public List<Pet> findByUserId(Long userId) {
+        return petRepository.findByUser(new User(userId)); // Assuming User object with just an ID works
+    }
+    
     public List<Pet> getPetsByUser(User user) {
         return petRepository.findByUser(user);
     }

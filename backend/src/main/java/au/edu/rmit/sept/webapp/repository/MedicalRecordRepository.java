@@ -7,4 +7,7 @@ import java.util.List;
 
 public interface MedicalRecordRepository extends JpaRepository<MedicalRecord, Long> {
     List<MedicalRecord> findByPet(Pet pet);
+    
+    // New method to find records for multiple pets
+    List<MedicalRecord> findByPetIn(List<Pet> pets);
 }
