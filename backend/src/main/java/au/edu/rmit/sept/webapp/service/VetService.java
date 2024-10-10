@@ -1,5 +1,6 @@
 package au.edu.rmit.sept.webapp.service;
 
+import au.edu.rmit.sept.webapp.model.MedicalRecord;
 import au.edu.rmit.sept.webapp.model.Vet;
 import au.edu.rmit.sept.webapp.repository.VetRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,4 +30,9 @@ public class VetService {
     public void deleteVet(Long vetId) {
         vetRepository.deleteById(vetId);
     }
+
+    // public List<MedicalRecord> getSharedRecords(Long vetId) {
+    //     Optional<Vet> vet = vetRepository.findById(vetId);
+    //     return vet.map(Vet::getSharedRecords).orElse(null);
+    // }
 }

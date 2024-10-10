@@ -1,0 +1,200 @@
+.AboutUs {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative; /* Necessary for absolute positioning of images */
+  padding-top: 70px;
+}
+
+.about-images {
+  position: relative;
+  width: 40%; /* Adjust based on your layout needs */
+  height: 400px; /* Adjust height to fit your images or content */
+
+}
+
+.dog-image {
+  position: absolute;
+  top: 90px; /* Adjust top positioning for alignment */
+  left: 0; /* Aligns image to the left side */
+  width: 50%; /* Image width, adjust as needed */
+  z-index: 1; /* Lower z-index so it's under the cat image */
+}
+
+.cat-image {
+  position: absolute;
+  bottom: 90px; /* Adjust bottom positioning for alignment */
+  right: 0; /* Aligns image to the right side */
+  width: 50%; /* Image width, adjust as needed */
+  z-index: 2; /* Higher z-index to overlap over the dog image */
+}
+
+.about-content {
+  width: 50%; /* Takes up half of the AboutUs container */
+  padding: 20px;
+  text-align: left;
+}
+
+.AboutUs p {
+  padding-bottom: 100px;
+  font-size: 20px;
+}
+
+.VetTeam h1 {
+  color: azure;
+}
+
+
+
+
+.Research {
+  background-color: #272B31;
+  color: white;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 40px;
+}
+
+.Research h1 {
+  margin-bottom: 10px;
+}
+
+.Research p {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.swiper-container {
+  width: 100%;  /* Takes the full width of its parent */
+  height: 600px; /* Set a fixed height for consistent behavior */
+  margin: 20px auto 50px; /* Centered horizontally */
+  display: flex; /* Flexbox for inner alignment */
+}
+
+.swiper-slide img {
+  width: 100%; /* Image takes full width of the slide */
+  height: auto; /* Height adjusts to maintain aspect ratio */
+  margin: 0; /* Removed the margin around images for a full-width effect */
+  display: block;
+  object-fit: contain; /* Ensures the image fits without distortion */
+}
+
+
+.blog-caption {
+  font-size: 1em;
+  color: #ccc;
+  padding: 10px;
+  text-align: center;
+}
+
+.home-content-sec-one {
+  position: absolute;
+  top: 50%; /* Place it in the middle vertically */
+  left: 70%; /* Place it in the middle horizontally */
+  transform: translate(-50%, -20%); /* Center it precisely */
+  text-align: center; /* Center text */
+  color: rgb(0, 0, 0);
+}
+
+.home-content-sec-one h2 {
+  font-size: 50px;
+}
+
+.home-content-sec-one h1 {
+  font-size: 50px;
+  font-weight: 600;
+  line-height: 65px;
+}
+
+.home-content-sec-one h3 {
+  font-size: 45px;
+  font-weight: 800;
+  line-height: 70px;
+}
+
+.home-content-sec-two {
+  position: absolute;
+  top: 50%; /* Place it in the middle vertically */
+  left: 40%; /* Place it in the middle horizontally */
+  transform: translate(-50%, -20%); /* Center it precisely */
+  text-align: center; /* Center text */
+  color: rgb(0, 0, 0);
+}
+
+.home-content-sec-one h2 {
+  font-size: 50px;
+}
+
+.home-content-sec-one h1 {
+  font-size: 50px;
+  font-weight: 600;
+  line-height: 65px;
+}
+
+.home-content-sec-one h3 {
+  font-size: 45px;
+  font-weight: 800;
+  line-height: 70px;
+}
+
+.home-content-sec-three {
+  position: absolute;
+  top: 50%; /* Place it in the middle vertically */
+  left: 70%; /* Place it in the middle horizontally */
+  transform: translate(-50%, -20%); /* Center it precisely */
+  text-align: center; /* Center text */
+  color: rgb(0, 0, 0);
+}
+
+.home-content-sec-one h2 {
+  font-size: 50px;
+}
+
+.home-content-sec-one h1 {
+  font-size: 50px;
+  font-weight: 600;
+  line-height: 65px;
+}
+
+.home-content-sec-one h3 {
+  font-size: 45px;
+  font-weight: 800;
+  line-height: 70px;
+}
+
+.explore-btn {
+  background-color: antiquewhite; /* Green */
+  border: none;
+  color: black;
+  padding: 5px 25px;
+  margin-top: 20px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+}
+
+.VetTeam {
+  background-color: #272B31;
+  color: white;
+  padding: 80px 20px;
+  text-align: center;
+}
+
+.VetTeam h1 {
+  padding-bottom: 60px;
+  color: azure;
+  font-size: 40px;
+}
+
+
+
+.vet-team-container {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding-top: 20px;
+}
+

@@ -1,0 +1,76 @@
+/* src/styles/VetProfilePage.css */
+.vet-profile-page {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 80px;
+    font-family: 'Arial', sans-serif; /* Adjust the font-family as needed */
+  }
+  
+  .profile-header {
+    background-color: #f0f0f0;
+    padding: 20px;
+    text-align: center;
+    width: 100%;
+    margin-bottom: 20px;
+  }
+  
+  .profile-header h1 {
+    font-size: 19px;
+    color: #606060;
+    margin: 0;
+
+  }
+  
+  .profile-header h2 {
+    font-size: 24px;
+    color: #000;
+    margin: 10px 0;
+    font-size: 40px;
+  }
+  
+  .profile-body {
+    width: 60%;
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    background-color: white;
+    text-align: left;
+  }
+  
+  .profile-image {
+    width: 100%;
+    max-width: 300px; /* Adjust the size to fit your design */
+    height: auto;
+    border-radius: 10px;
+    display: block;
+    margin: 0 auto 20px;
+  }
+  
+  .profile-body p {
+    font-size: 18px;
+    color: #333;
+    line-height: 1.6;
+  }
+  
+  .see-all-members-btn {
+    display: inline-flex; /* Makes the button inline-flex to keep its natural size */
+    align-items: center; /* Center alignment for items inside the button */
+    justify-content: center; /* Center the text inside the button */
+    background-color: #68ccd4;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    font-size: 16px;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 20px;
+    text-align: center; /* This is not necessary since we're using flex */
+  }
+
+  .button-container {
+    display: flex; /* Enables flexbox */
+    justify-content: center; /* Centers the button horizontally */
+    width: 100%; /* Takes the full width to ensure centering over the parent */
+  }
+  
+  
