@@ -27,14 +27,6 @@ function Login({loginUser}) {
   const handleSubmit = async(event) => {
     event.preventDefault();
     setShowErrorMessage(false);
-  
-    // Check if the Vet's email ends with @vetcare.com
-    if (userDetails.role === 'Vet' && !userDetails.email.endsWith('@vetcare.com')) {
-      setErrorMessage("Vets must use an email that ends with '@vetcare.com'.");
-      setShowErrorMessage(true);
-      setTimeout(() => setShowErrorMessage(false), 3000);
-      return;
-    }
 
     try {
     // Try getting a response from the api
@@ -64,8 +56,13 @@ function Login({loginUser}) {
       setTimeout(() => {
         setShowSuccessAlert(false);
         loginUser(user);
-        const redirectTo = location.state?.from || '/';
-        navigate(redirectTo);
+        // Redirect based on user role
+        if (user.role === "Vet") {
+          navigate('/vet-dashboard');  // Redirect to vet dashboard
+        } else {
+          const redirectTo = location.state?.from || '/';
+          navigate(redirectTo);
+        }
       }, 3000);
     }
   } catch (error) {

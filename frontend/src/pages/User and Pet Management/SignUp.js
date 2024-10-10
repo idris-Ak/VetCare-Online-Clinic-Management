@@ -48,12 +48,6 @@ function SignUp({loginUser}) {
       confirmPasswordError: '',
     };
 
-    // Check if the Vet's email ends with @vetcare.com
-    if (user.role === 'Vet' && !user.email.endsWith('@vetcare.com')) {
-      newErrors.emailError = "Vets must use an email that ends with '@vetcare.com'.";
-      isValid = false; 
-    }
-
     // If password is not equal to confirmMessage, output the error message
     if(user.password !== user.confirmPassword){
       newErrors.confirmPasswordError = 'Passwords do not match.';
@@ -106,7 +100,12 @@ try {
       setTimeout(() => {
         setShowSuccessAlert(false);
         loginUser(fetchUser);
-        navigate('/');
+        // Redirect based on role
+        if (fetchUser.role === "Vet") {
+          navigate('/vet-dashboard');  // Redirect to Vet dashboard
+        } else {
+          navigate('/');
+        }
       }, 2000);
     }
   } catch (error) {
