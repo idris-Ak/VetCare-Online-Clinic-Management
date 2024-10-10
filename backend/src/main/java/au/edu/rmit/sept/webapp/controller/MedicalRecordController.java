@@ -61,10 +61,16 @@ public class MedicalRecordController {
             String description = (String) requestBody.get("description");
             String diagnosis = (String) requestBody.get("diagnosis");
             String treatment = (String) requestBody.get("treatment");
-            Integer vetId = (Integer) requestBody.get("vetId"); // Make sure the JSON being sent has vetId as a number
-            medicalRecord.setVetId(vetId);
+            Integer vetId = (Integer) requestBody.get("vetId"); // Assuming vetId is still passed as an ID
 
-            System.out.println("vetId : " + vetId); // Add this line to log the incoming data
+            // Fetch Vet by ID
+            Optional<Vet> vet = vetService.findById(Long.valueOf(vetId));
+            if (vet.isPresent()) {
+                medicalRecord.setVet(vet.get());
+            } else {
+                return ResponseEntity.badRequest().body(null); // Return 400 if vet not found
+            }
+
             // Optionally handle the recordDate
             LocalDate recordDate = requestBody.get("recordDate") != null 
                     ? LocalDate.parse((String) requestBody.get("recordDate")) 
@@ -89,7 +95,9 @@ public class MedicalRecordController {
             @RequestParam(value = "description", required = false) String description,
             @RequestParam(value = "diagnosis", required = false) String diagnosis,
             @RequestParam(value = "treatment", required = false) String treatment,
-            @RequestParam(value = "recordDate", required = false) LocalDate recordDate) {
+            @RequestParam(value = "recordDate", required = false) LocalDate recordDate,
+            @RequestParam(value = "service", required = false) String service,
+            @RequestParam(value = "vetId", required = false) Long vetId) { // Vet can also be updated
 
         Optional<MedicalRecord> existingRecord = medicalRecordService.findById(recordId);
         if (existingRecord.isPresent()) {
@@ -102,7 +110,18 @@ public class MedicalRecordController {
             if (treatment != null)
                 record.setTreatment(treatment);
             if (recordDate != null)
-                record.setRecordDate(recordDate);
+            record.setRecordDate(recordDate);
+            if (service != null)
+            record.setService(service);
+        
+            if (vetId != null) {
+                Optional<Vet> vet = vetService.findById(vetId);
+                if (vet.isPresent()) {
+                    record.setVet(vet.get());
+                } else {
+                    return ResponseEntity.badRequest().body(null); // Return 400 if vet not found
+                }
+            }
 
             MedicalRecord updatedRecord = medicalRecordService.saveMedicalRecord(record);
             return ResponseEntity.ok(updatedRecord);

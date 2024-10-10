@@ -22,10 +22,14 @@ public class MedicalRecord {
     @JoinColumn(name = "pet_id", nullable = false)
     private Pet pet;
 
-    private Integer vetId;
+    @ManyToOne
+    @JoinColumn(name = "vet_id", nullable = false) // Now referencing Vet object
+    private Vet vet;
+    
     private String description;
     private String diagnosis;
     private String treatment;
+    private String service;
     
     @Column(name = "record_date")
     private LocalDate recordDate;
@@ -50,12 +54,12 @@ public class MedicalRecord {
         this.pet = pet;
     }
 
-    public Integer getVetId() {
-        return vetId;
+    public Vet getVet() {
+        return vet;
     }
 
-    public void setVetId(Integer vetId) {
-        this.vetId = vetId;
+    public void setVet(Vet vet) {
+        this.vet = vet;
     }
 
     public String getDescription() {
@@ -64,6 +68,14 @@ public class MedicalRecord {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public String getService() {
+        return service;
+    }
+
+    public void setService(String service) {
+        this.service = service;
     }
 
     public String getDiagnosis() {
