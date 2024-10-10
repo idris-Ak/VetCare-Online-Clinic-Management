@@ -129,18 +129,18 @@ function Appointments({ user }) {
 
   const handleGoToToday = () => setCurrentDate(new Date());
 
- // FUNCTION CHECKS TO SEE IF THE SELECTED DATE IS IN THE FUTURE
- const isDateInFuture = (year, month, day) => {
-  const today = new Date();
-  const selectedDate = new Date(year, month, day);
-  return selectedDate > today;
-};
+  // FUNCTION CHECKS TO SEE IF THE SELECTED DATE IS IN THE FUTURE
+  const isDateInFuture = (year, month, day) => {
+    const today = new Date();
+    const selectedDate = new Date(year, month, day);
+    return selectedDate > today;
+  };
 
   // OPEN DAY MODAL AND LOAD APPOINTMENT INFO IF HIGHLIGHTED
   const openDayModal = (day) => {
     if (selectedPet && isDateInFuture(currentDate.getFullYear(), currentDate.getMonth(), day)) {
       setSelectedDay(day);
-
+  
       // Check if there's an appointment for the selected day
       const existingAppointment = appointments.find(appt => {
         const appointmentDate = new Date(appt.appointmentDate);
@@ -151,7 +151,7 @@ function Appointments({ user }) {
           appt.petId === selectedPet.id
         );
       });
-
+  
       if (existingAppointment) {
         // Pre-load the clinic and time slot
         setSelectedClinic(clinics.find(clinic => clinic.id === existingAppointment.clinicId));
@@ -163,12 +163,12 @@ function Appointments({ user }) {
         setSelectedAppointment(null);
         setSelectedTimeSlot("");
       }
-
+  
       setShowModal(true);
     } else {
       alert("Please select your pet.");
     }
-  };
+  };  
 
   // CHANGE HIGHLIGHTED DAYS ON CALENDAR WHEN A PET IS SELECTED
   useEffect(() => {
@@ -417,6 +417,15 @@ function Appointments({ user }) {
             <p>
               {currentDate.toLocaleString('default', { month: 'long' })} {selectedDay}, {currentDate.getFullYear()}
             </p>
+
+            {selectedAppointment && (
+              <div className="booked-appointment">
+                <p><strong>Booked Appointment:</strong></p>
+                <p>Time: {timeSlotKeys[selectedAppointment.appointmentTimeId]}</p>
+                <p>Pet: {selectedPet.name}</p>
+              </div>
+            )}
+
             <label>
               Select Clinic:
               <select
@@ -439,7 +448,7 @@ function Appointments({ user }) {
             <div className="appointment-time-slots">
               {Object.entries(timeSlotKeys).map(([key, time]) => {
                 const appointment = isTimeSlotBooked(key);
-                const isBooked = !!appointment; 
+                const isBooked = !!appointment;
                 const buttonClass = isBooked ? "booked" : (selectedTimeSlot === key ? "selected" : "");
 
                 return (
@@ -456,11 +465,9 @@ function Appointments({ user }) {
             </div>
 
             <div className="appointment-modal-actions">
-              
-            <button className={buttonLabel == "Reschedule Appointment" ? "reschedule" : "book"} onClick={handleAppointmentAction}>
-              {buttonLabel}
-            </button>
-      
+              <button className={buttonLabel == "Reschedule Appointment" ? "reschedule" : "book"} onClick={handleAppointmentAction}>
+                {buttonLabel}
+              </button>
               <button className="appointment-close" onClick={() => setShowModal(false)}>
                 Close
               </button>
@@ -468,6 +475,7 @@ function Appointments({ user }) {
           </div>
         </div>
       )}
+
     </>
   );
 }

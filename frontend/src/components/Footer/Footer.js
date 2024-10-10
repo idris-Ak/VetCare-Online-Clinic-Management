@@ -53,7 +53,7 @@ function Footer() {
       </div>
 
       <div className="footer-copyright">
-        <p className="text-center">Copyright &copy; {new Date().getFullYear()} VetCare. All rights reserved.</p>
+        <p className="text-center">&copy; {new Date().getFullYear()} VetCare. All rights reserved.</p>
       </div>
     </footer>
   );

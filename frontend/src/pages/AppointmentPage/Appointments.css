@@ -197,8 +197,8 @@ button:hover {
 }
 
 .appointment-modal-actions button {
-  background-color: grey;
-  color: black;
+  background-color: red;
+  color: white;
   border: Solid 2px black;
   padding: 5px;
   Margin: 5px;

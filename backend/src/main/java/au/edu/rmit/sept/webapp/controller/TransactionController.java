@@ -22,8 +22,10 @@ public class TransactionController {
     private UserService userService;
 
     @GetMapping("/user/{userId}")
+    // Get the list of transactions by userId
     public ResponseEntity<List<Transaction>> getTransactionsByUserId(@PathVariable Long userId) {
         List<Transaction> transactions = transactionService.getTransactionsByUserId(userId);
+        // If there are no transactions, don't build the response entity
         if (transactions.isEmpty()) {
             return ResponseEntity.noContent().build();
         }

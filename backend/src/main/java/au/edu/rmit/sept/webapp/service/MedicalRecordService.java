@@ -2,7 +2,9 @@ package au.edu.rmit.sept.webapp.service;
 
 import au.edu.rmit.sept.webapp.model.MedicalRecord;
 import au.edu.rmit.sept.webapp.model.Pet;
+import au.edu.rmit.sept.webapp.model.User;
 import au.edu.rmit.sept.webapp.repository.MedicalRecordRepository;
+import au.edu.rmit.sept.webapp.repository.PetRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -19,6 +21,10 @@ public class MedicalRecordService {
         return medicalRecordRepository.findByPet(pet);
     }
 
+    public List<MedicalRecord> getMedicalRecordsByPets(List<Pet> pets) {
+        return medicalRecordRepository.findByPetIn(pets); // Use a repository method to fetch records by a list of pets
+    }
+
     public Optional<MedicalRecord> findById(Long id) {
         return medicalRecordRepository.findById(id);
     }
@@ -30,4 +36,5 @@ public class MedicalRecordService {
     public void deleteMedicalRecord(Long id) {
         medicalRecordRepository.deleteById(id);
     }
+    
 }
