@@ -52,15 +52,6 @@ class SignUpTests {
     }
 
     @Test
-    public void testVetEmailValidation() {
-        String validVetEmail = "jane@vetcare.com";
-        String invalidVetEmail = "jane@notvet.com";
-
-        assertTrue(validVetEmail.endsWith("@vetcare.com"), "Expected valid Vet email to pass.");
-        assertFalse(invalidVetEmail.endsWith("@vetcare.com"), "Expected invalid Vet email to fail.");
-    }
-
-    @Test
     public void testBlankFields() {
         String blankName = "";
         String blankEmail = "";

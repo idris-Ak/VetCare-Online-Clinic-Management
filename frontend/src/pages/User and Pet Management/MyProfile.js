@@ -207,16 +207,6 @@ const handleRemoveProfilePic = async () => {
         return;
     }
 
-    // Email validation for Vet role
-    if (user.role === 'Vet' && !newEmail.endsWith('@vetcare.com')) {
-        setAlertContentDanger("As a Vet, your email must end with '@vetcare.com'");
-        setAlertDanger(true);
-        setTimeout(() => {
-        setAlertDanger(false);
-        }, 2500);
-        return;
-    }
-    
     //The following function was given by OpenAI (2024) ChatGPT [Large language model], accessed 3 September 2024. (*Link could not be generated successfully*)
     const isPasswordStrong = (newPassword) => {
         const re = new RegExp("^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\\$%\\^&\\*()_+\\-={}[\\]\\\\|;:'\",<.>/?~`])(?=.{8,})");
@@ -226,15 +216,6 @@ const handleRemoveProfilePic = async () => {
      //If password is not strong, output the error message
     if (currentPassword && newPassword && confirmPassword && !isPasswordStrong(newPassword)) {
      setAlertContentDanger('Your password must be at least 8 characters long and include uppercase letters, lowercase letters, numbers, and special characters.');
-     setAlertDanger(true);
-        setTimeout(() => {
-        setAlertDanger(false);
-     }, 2500);
-     return;
-    }
-
-    if(user.role === 'Pet Owner' && newEmail.endsWith('@vetcare.com')){
-     setAlertContentDanger('Your email cannot end with @vetcare.com.');
      setAlertDanger(true);
         setTimeout(() => {
         setAlertDanger(false);

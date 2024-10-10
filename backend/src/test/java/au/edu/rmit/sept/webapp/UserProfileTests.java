@@ -49,14 +49,6 @@ public class UserProfileTests {
     }
 
     @Test
-    public void testInvalidEmailForVet() {
-        // Invalid email test for vet role
-        user.setRole("Vet");
-        user.setEmail("john@notvet.com");
-        assertFalse(user.getEmail().endsWith("@vetcare.com"), "Expected vet email validation to fail.");
-    }
-
-    @Test
     public void testUserPasswordUpdate() {
         // Mock password update
         Mockito.when(passwordEncoder.encode("NewPassword123!")).thenReturn("hashedNewPassword");

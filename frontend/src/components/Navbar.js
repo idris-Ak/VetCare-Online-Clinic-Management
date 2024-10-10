@@ -54,6 +54,18 @@ function Navbar({ logoutUser, isLoggedIn, user }) {
         <NavLink to="/" className="navbar-link" activeClassName="active">Home</NavLink>
         </li>
 
+        {/* Conditional Rendering Based on User Role */}
+        {isLoggedIn && user && user.role === 'Vet' ? (
+            <>
+              {/* Vets can only see the Vet Dashboard */}
+              <li className="navbar-item">
+                <NavLink to="/vet-dashboard" className="navbar-link" onClick={() => handleNavigation('/vet-dashboard')}>
+                  Vet Dashboard
+                </NavLink>
+              </li>
+            </>
+          ) : (
+            <>
         <li className="navbar-item">
           <NavLink to="/AppointmentPage/Appointments" className="navbar-link" onClick={()=> handleNavigation('/AppointmentPage/Appointments')}>
             Book Online
@@ -75,6 +87,8 @@ function Navbar({ logoutUser, isLoggedIn, user }) {
         <li className="navbar-item">
           <NavLink to="/educational" className="navbar-link">Educational Resources</NavLink>
         </li>
+        </>
+        )}
       </ul>
 
       <ul className="navbar-list user-links ms-auto">
