@@ -50,7 +50,6 @@ function MedicalRecords({ user }) {
       try {
         const response = await fetch('http://localhost:8080/api/vets/allvets');
         const vetData = await response.json();
-        console.log("vetData: ",vetData);
         setVets(vetData);
       } catch (error) {
         console.error('Error fetching vets:', error);
@@ -94,9 +93,16 @@ function MedicalRecords({ user }) {
 
       try {
         const response = await fetch(url);
+        console.log("Fetch Response:", response); // Log response status and headers
+
         if (response.ok) {
           const records = await response.json();
-          setAllRecords(Array.isArray(records) ? records : []);
+          console.log("Fetched Records:", records); // Log the records fetched
+          setAllRecords(records);
+
+          setTimeout(() => {
+            console.log("Updated allRecords State:", allRecords);
+        }, 0);
         } else {
           console.error('Failed to fetch records');
           setAllRecords([]);
@@ -108,7 +114,32 @@ function MedicalRecords({ user }) {
     };
 
     fetchRecords();
+    console.log("Updated allRecords State: round2", allRecords);
   }, [selectedPet, user]);
+
+  useEffect(() => {
+    console.log("All Records for Filtering:", allRecords);
+    console.log("selectedPet:", selectedPet);
+    
+    const filtered = allRecords.filter(record => {
+        // Ensure record.pet exists before accessing id
+        const matchesPet = !selectedPet || (record.pet && record.pet.id === Number(selectedPet)); 
+        const matchesSearch = 
+            (record.service && record.service.toLowerCase().includes(searchTerm.toLowerCase())) ||
+            (record.recordDate && record.recordDate.includes(searchTerm)); // Use the correct date property
+
+        return matchesPet && matchesSearch;
+    });
+
+    setFilteredRecords(filtered);
+    console.log("Filtered Records:", filtered);
+}, [allRecords, selectedPet, searchTerm]);
+
+
+  useEffect(() => {
+    console.log("current allRecords: ", allRecords);
+  }, [ allRecords]);
+
 
   const formatRecordDetails = (record) => {
     return `
@@ -323,16 +354,7 @@ function MedicalRecords({ user }) {
     setShowEditModal(true);
   };
 
-  useEffect(() => {
-    const filtered = allRecords.filter(record => {
-      const matchesPet = !selectedPet || record.pet.id === selectedPet;
-      const matchesSearch = (record.service && record.service.toLowerCase().includes(searchTerm.toLowerCase())) ||
-        (record.date && record.date.includes(searchTerm));
-      return matchesPet && matchesSearch;
-    });
 
-    setFilteredRecords(filtered);
-  }, [allRecords, selectedPet, searchTerm]);
 
 
   return (
@@ -406,7 +428,7 @@ function MedicalRecords({ user }) {
             <tbody>
               {filteredRecords.map(record => (
                 <tr key={record.id}>
-                  <td>{record.date}</td>
+                  <td>{record.recordDate}</td>
                   <td>{record.service}</td>
                   <td>{record.vet}</td>
                   <td>
