@@ -48,7 +48,7 @@ function MedicalRecords({ user }) {
   useEffect(() => {
     const fetchVets = async () => {
       try {
-        const response = await fetch('http://localhost:8080/api/vets/allvets');
+        const response = await fetch('http://localhost:8080/api/vets');
         const vetData = await response.json();
         setVets(vetData);
       } catch (error) {
