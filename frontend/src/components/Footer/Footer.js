@@ -1,10 +1,10 @@
 import React from 'react';
 import './Footer.css';
 import { Link } from 'react-router-dom';
-import logo from "../components/assets/veterinary.png";
-import Facebook from "../components/assets/facebook-logo.png";
-import Instagram from "../components/assets/instagram.png"; 
-import Twitter from "../components/assets/twitter.png"; 
+import logo from "../assets/veterinary.png";
+import Facebook from "../assets/facebook-logo.png";
+import Instagram from "../assets/instagram.png"; 
+import Twitter from "../assets/twitter.png";
 
 function Footer() {
   return (

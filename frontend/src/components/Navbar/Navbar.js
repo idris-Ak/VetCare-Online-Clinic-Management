@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { NavLink, Link, useNavigate } from 'react-router-dom';
-import profilepic from '../components/assets/profilepic.png';
+import profilepic from '../assets/profilepic.png';
 import './Navbar.css'; // Import the CSS file for styling
-import logo from "../components/assets/veterinary.png";
+import logo from "../assets/veterinary.png";
 import { Modal, Button } from 'react-bootstrap';
 
 function Navbar({ logoutUser, isLoggedIn, user }) {
