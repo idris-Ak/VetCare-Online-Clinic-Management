@@ -31,8 +31,8 @@ public class VetService {
         vetRepository.deleteById(vetId);
     }
 
-    public List<MedicalRecord> getSharedRecords(Long vetId) {
-        Optional<Vet> vet = vetRepository.findById(vetId);
-        return vet.map(Vet::getSharedRecords).orElse(null);
-    }
+    // public List<MedicalRecord> getSharedRecords(Long vetId) {
+    //     Optional<Vet> vet = vetRepository.findById(vetId);
+    //     return vet.map(Vet::getSharedRecords).orElse(null);
+    // }
 }

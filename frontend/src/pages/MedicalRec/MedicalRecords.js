@@ -14,6 +14,7 @@ function MedicalRecords({ user }) {
   const [selectedVet, setSelectedVet] = useState(null);
   const [showVetModal, setShowVetModal] = useState(false);
   const [allRecords, setAllRecords] = useState([]);
+  const [filteredRecords, setFilteredRecords] = useState([]);
   const [category, setCategory] = useState('All');
   const [selectedPet, setSelectedPet] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
@@ -47,7 +48,7 @@ function MedicalRecords({ user }) {
   useEffect(() => {
     const fetchVets = async () => {
       try {
-        const response = await fetch('http://localhost:8080/api/vets');
+        const response = await fetch('http://localhost:8080/api/vets/allvets');
         const vetData = await response.json();
         console.log("vetData: ",vetData);
         setVets(vetData);
@@ -84,32 +85,30 @@ function MedicalRecords({ user }) {
 
   useEffect(() => {
     const fetchRecords = async () => {
-      if (!selectedPet) return;
-      console.log("Fetching records for pet ID:", selectedPet);
+      let url = `http://localhost:8080/api/medicalRecords`;
+      if (selectedPet) {
+        url += `/pet/${selectedPet}`;
+      } else {
+        url += `/user/${user.id}`; // Fetch records for all pets belonging to the logged-in user
+      }
+
       try {
-        const response = await fetch(`http://localhost:8080/api/medicalRecords/pet/${selectedPet}`);
-        if (!response.ok) {
-          if (response.status === 404) {
-            console.error('No records found for this pet ID:', selectedPet);
-            setAllRecords([]); // Set to empty array on 404
-            return;
-          }
-          throw new Error('Network response was not ok');
+        const response = await fetch(url);
+        if (response.ok) {
+          const records = await response.json();
+          setAllRecords(Array.isArray(records) ? records : []);
+        } else {
+          console.error('Failed to fetch records');
+          setAllRecords([]);
         }
-        const records = await response.json();
-        console.log("records is :", records);
-        setAllRecords(Array.isArray(records) ? records : []);
-        console.log("all records is :", records);
       } catch (error) {
-        console.error('Error fetching medical records:', error);
-        setAllRecords([]); // On error, set to empty array
+        console.error('Error fetching records:', error);
+        setAllRecords([]);
       }
     };
-  
+
     fetchRecords();
-    console.log("fetchRecords called:",)
-  }, [selectedPet]);
-  
+  }, [selectedPet, user]);
 
   const formatRecordDetails = (record) => {
     return `
@@ -194,6 +193,12 @@ function MedicalRecords({ user }) {
 
     setErrors(newErrors);
 
+    // Add validation for selectedVet
+    if (!selectedVet) {
+      alert("Please select a veterinarian before saving the record.");
+      return; // Exit if selectedVet is null
+    }
+    
     if (valid) {
       const recordData = {
         petId: selectedPet,  // Assuming `selectedPet` is defined and holds the pet's ID
@@ -205,6 +210,7 @@ function MedicalRecords({ user }) {
       };
 
       console.log("recordData ",recordData);
+      console.log("selectedVet.id ",selectedVet.id);
 
       try {
         const response = await fetch(`http://localhost:8080/api/medicalRecords/pet/${selectedPet}`, {
@@ -317,12 +323,17 @@ function MedicalRecords({ user }) {
     setShowEditModal(true);
   };
 
-  const filteredRecords = allRecords
-    .filter(record =>
-      (!selectedPet || record.pet.id === selectedPet) &&
-      ((record.service && record.service.toLowerCase().includes(searchTerm.toLowerCase())) ||
-        (record.date && record.date.includes(searchTerm)))
-    );
+  useEffect(() => {
+    const filtered = allRecords.filter(record => {
+      const matchesPet = !selectedPet || record.pet.id === selectedPet;
+      const matchesSearch = (record.service && record.service.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (record.date && record.date.includes(searchTerm));
+      return matchesPet && matchesSearch;
+    });
+
+    setFilteredRecords(filtered);
+  }, [allRecords, selectedPet, searchTerm]);
+
 
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -450,17 +461,23 @@ function MedicalRecords({ user }) {
                 </Form.Control.Feedback>
               </Form.Group>
               <Form.Group controlId="formVet">
-                <Form.Label>Veterinarian</Form.Label>
-                <Form.Control as="select" value={newRecord.vet} onChange={(e) => setNewRecord({ ...newRecord, vet: e.target.value })} isInvalid={!!errors.vet}>
-                  <option value="">Select Vet</option>
-                  {vets.map(vet => (
-                    <option key={vet.id} value={vet.name}>{vet.name}</option>
-                  ))}
-                </Form.Control>
-                <Form.Control.Feedback type="invalid">
-                  {errors.vet}
-                </Form.Control.Feedback>
-              </Form.Group>
+  <Form.Label>Veterinarian</Form.Label>
+  <Form.Control as="select" value={newRecord.vet} onChange={(e) => {
+    const selectedVetName = e.target.value; // Get the selected vet name
+    const selectedVet = vets.find(vet => vet.name === selectedVetName); // Find the vet object based on the name
+    setSelectedVet(selectedVet); // Update selectedVet state
+    setNewRecord({ ...newRecord, vet: selectedVetName }); // Update newRecord.vet with the selected vet name
+  }} isInvalid={!!errors.vet}>
+    <option value="">Select Vet</option>
+    {vets.map(vet => (
+      <option key={vet.id} value={vet.name}>{vet.name}</option>
+    ))}
+  </Form.Control>
+  <Form.Control.Feedback type="invalid">
+    {errors.vet}
+  </Form.Control.Feedback>
+</Form.Group>
+
               <Form.Group controlId="formWeight">
                 <Form.Label>Weight</Form.Label>
                 <Form.Control
