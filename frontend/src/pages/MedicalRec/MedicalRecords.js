@@ -242,7 +242,7 @@ function MedicalRecords({ user }) {
       };
 
       console.log("recordData ",recordData);
-      console.log("selectedVet.id ",selectedVet.id);
+      console.log("service ",recordData.service);
 
       try {
         const response = await fetch(`http://localhost:8080/api/medicalRecords/pet/${selectedPet}`, {
@@ -479,8 +479,8 @@ function MedicalRecords({ user }) {
                     const selectedService = e.target.value;
                     setNewRecord((prevRecord) => ({
                       ...prevRecord,
-                      service: selectedService,
-                      ...(selectedService !== "Other" && { customService: '' })  // Only reset customService when not 'Other'
+                      service: selectedService !== 'Other' ? selectedService : prevRecord.customService,
+                      customService: selectedService === 'Other' ? '' : prevRecord.customService,
                     }));
                   }}
                   isInvalid={!!errors.service}
@@ -574,7 +574,7 @@ function MedicalRecords({ user }) {
                 />
               </Form.Group>
               <Form.Group controlId="formDesciption">
-                <Form.Label>Medications</Form.Label>
+                <Form.Label>Desciption</Form.Label>
                 <Form.Control
                   type="text"
                   value={newRecord.desciption}
