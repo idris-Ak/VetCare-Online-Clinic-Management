@@ -9,6 +9,7 @@ function Appointments({ user }) {
   const [selectedMonth, setSelectedMonth] = useState(currentDate.getMonth());
   const [selectedDay, setSelectedDay] = useState(null);
   const [selectedTimeSlot, setSelectedTimeSlot] = useState("");
+  const [userAppointments, setUserAppointments] = useState([]);
   const [appointments, setAppointments] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [petData, setPetData] = useState([]);
@@ -76,22 +77,44 @@ function Appointments({ user }) {
   }, [user]);
 
   const getPetAppointments = async () => {
-    const storedAppointments = await getAppointments();
-    if (storedAppointments) {
-      setAppointments(storedAppointments);
+    try {
+      const [storedUserAppointments, storedAppointments] = await Promise.all([
+        getUserAppointments(),
+        getAllAppointments()
+      ]);
+  
+      if (storedUserAppointments) {
+        setUserAppointments(storedUserAppointments);
+      }
+  
+      if (storedAppointments) {
+        setAppointments(storedAppointments);
+      }
+    } catch (error) {
+      console.error('Error fetching appointments:', error);
     }
   };
-
-  const getAppointments = async () => {
+  
+  const getUserAppointments = async () => {
+    try {
+      const response = await fetch(`http://localhost:8080/api/appointments?userId=${user.id}`);
+      return response.ok ? response.json() : null;
+    } catch (error) {
+      console.error('Error fetching user appointments:', error);
+      return null;
+    }
+  };
+  
+  const getAllAppointments = async () => {
     try {
       const response = await fetch(`http://localhost:8080/api/appointments`);
       return response.ok ? response.json() : null;
     } catch (error) {
-      console.error('Error fetching appointments:', error);
+      console.error('Error fetching all appointments:', error);
       return null;
     }
   };
-
+  
   const getDaysInMonth = (year, month) => new Date(year, month + 1, 0).getDate();
 
   const generateCalendar = (year, month) => {
@@ -300,21 +323,42 @@ function Appointments({ user }) {
     }
   };
 
-  const isTimeSlotBooked = (timeSlotKey) => {
-    for (let appointment of appointments) {
-      const appointmentDate = new Date(appointment.appointmentDate);
-      if (
-        timeSlotKey == appointment.appointmentTimeId &&
-        appointmentDate.getFullYear() === currentDate.getFullYear() &&
-        appointmentDate.getMonth() === currentDate.getMonth() &&
-        appointmentDate.getDate() === selectedDay 
-      ) {
-        return appointment;
-      }
-    }
-    return false;
-  };
-
+  function renderTimeSlots(appointments, timeSlotKeys, selectedTimeSlot, setSelectedTimeSlot, userAppointments, currentUser) {
+    return Object.entries(timeSlotKeys)
+      .map(([key, time]) => {
+        // Check if the time slot is booked by any user
+        const isBookedBySomeone = appointments.some(appointment => {
+          return String(appointment.appointmentTimeId) === key;
+        });
+  
+        // Check if the time slot is booked by the current user
+        const isBookedByCurrentUser = userAppointments.some(userAppointment => {
+          return String(userAppointment.appointmentTimeId) === key && userAppointment.userId === currentUser.id;
+        });
+  
+        let buttonClass = selectedTimeSlot === key ? "selected" : "";
+  
+        if (isBookedByCurrentUser) {
+          buttonClass += "booked";
+        }
+  
+        if (!isBookedBySomeone || isBookedByCurrentUser) {
+          return (
+            <button
+              key={key}
+              disabled={isBookedByCurrentUser}
+              className={buttonClass}
+              onClick={() => setSelectedTimeSlot(key === selectedTimeSlot ? "" : key)}
+            >
+              {time}
+            </button>
+          );
+        }
+  
+        return null;
+      });
+  }
+  
 
   return (
     <>
@@ -422,6 +466,7 @@ function Appointments({ user }) {
               <div className="booked-appointment">
                 <p><strong>Booked Appointment:</strong></p>
                 <p>Time: {timeSlotKeys[selectedAppointment.appointmentTimeId]}</p>
+                <p>Clinic: {selectedAppointment.clinicId}</p>
                 <p>Pet: {selectedPet.name}</p>
               </div>
             )}
@@ -446,23 +491,9 @@ function Appointments({ user }) {
 
             <h3>Available Times:</h3>
             <div className="appointment-time-slots">
-              {Object.entries(timeSlotKeys).map(([key, time]) => {
-                const appointment = isTimeSlotBooked(key);
-                const isBooked = !!appointment;
-                const buttonClass = isBooked ? "booked" : (selectedTimeSlot === key ? "selected" : "");
-
-                return (
-                  <button
-                    key={key}
-                    className={buttonClass}
-                    onClick={() => !isBooked && setSelectedTimeSlot(key === selectedTimeSlot ? "" : key)}
-                    disabled={isBooked}
-                  >
-                    {time}
-                  </button>
-                );
-              })}
+              {renderTimeSlots(appointments, timeSlotKeys, selectedTimeSlot, setSelectedTimeSlot, userAppointments, user)}
             </div>
+
 
             <div className="appointment-modal-actions">
               <button className={buttonLabel == "Reschedule Appointment" ? "reschedule" : "book"} onClick={handleAppointmentAction}>
