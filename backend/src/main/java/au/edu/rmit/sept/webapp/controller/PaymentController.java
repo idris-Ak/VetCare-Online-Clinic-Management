@@ -63,7 +63,7 @@ public class PaymentController {
             // Save the transaction in the transaction history
             Transaction newTransaction = new Transaction();
             newTransaction.setAmount(amount);
-            newTransaction.setPetName(pet.getName());
+            newTransaction.setPetId(pet.getId()); // Store pet's ID
             newTransaction.setDateTime(LocalDateTime.now()); // Store date and time
             newTransaction.setUser(currentUser);
             newTransaction.setPaymentMethod("PayPal"); // Set payment method
@@ -114,7 +114,7 @@ public class PaymentController {
             // Save the transaction in the transaction history
             Transaction newTransaction = new Transaction();
             newTransaction.setAmount(amount);
-            newTransaction.setPetName(pet.getName());
+            newTransaction.setPetId(pet.getId()); // Store pet's ID
             newTransaction.setDateTime(LocalDateTime.now()); // Store date and time
             newTransaction.setUser(currentUser);
             newTransaction.setPaymentMethod("Credit/Debit Card"); // Set payment method

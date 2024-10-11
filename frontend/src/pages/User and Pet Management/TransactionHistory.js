@@ -111,7 +111,7 @@ function TransactionHistory({ user }) {
             </InputGroup.Text>
           <Form.Control
             type="text"
-            placeholder="Search transactions (pet name, service, amount, date, payment method)"
+            placeholder="Search transactions (pet name, service, amount, date/time, payment method)"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
@@ -146,7 +146,7 @@ function TransactionHistory({ user }) {
 
                 <Col lg={4} md={6} sm={12} className="mb-3 mb-lg-0">
                   <div style={{ fontSize: '18px', fontWeight: '700', color: '#555' }}>
-                    <span style={{ color: '#28a745' }}>Amount:</span> ${transaction.amount.toFixed(2)}
+                    <span style={{ color: '#28a745' }}>Amount:</span> A${transaction.amount.toFixed(2)}
                   </div>
                 </Col>
 
