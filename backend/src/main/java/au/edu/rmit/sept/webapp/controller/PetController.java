@@ -108,6 +108,12 @@ public class PetController {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body(null);
             }
 
+            // Set the fields to the pet
+            pet.setName(name);
+            pet.setType(type);
+            pet.setBreed(breed); // Set even if breed is null
+            pet.setAge(age); // Set even if age is null
+
             if (profilePicture != null && !profilePicture.isEmpty()) {
                 try {
                     String base64Image = imageService.processImage(profilePicture);
@@ -122,7 +128,7 @@ public class PetController {
         }
         return ResponseEntity.status(HttpStatus.NOT_FOUND).build(); // Return 404 if pet not found
     }
-
+    
     // Delete pet
     @DeleteMapping("/{petId}")
     public ResponseEntity<Void> deletePet(@PathVariable Long petId, @RequestParam Long userId) {
@@ -142,7 +148,7 @@ public class PetController {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).build(); // Return 404 if pet not found
     }
     
-    // Update pet profile picture
+    // Add or update pet profile picture
     @PutMapping("/{petId}/profilePicture")
     public ResponseEntity<Pet> updatePetProfilePicture(
             @PathVariable Long petId,
@@ -156,14 +162,12 @@ public class PetController {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); // 403 Forbidden if user doesn't own the pet
             }
 
-            if (profilePicture != null && !profilePicture.isEmpty()) {
                 try {
                     String base64Image = imageService.processImage(profilePicture);
                     pet.setProfilePicture(base64Image);
                 } catch (IOException e) {
                     return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
                 }
-            }
 
             Pet savedPet = petService.savePet(pet);
             return ResponseEntity.ok(savedPet);
@@ -181,10 +185,14 @@ public class PetController {
             if (!pet.getUser().getId().equals(userId)) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); // 403 Forbidden if user doesn't own the pet
             }
-            pet.setProfilePicture(null); // Remove the profile picture from the pet
+            pet.setProfilePicture(null); // Set the profile picture to null
 
-            Pet savedPet = petService.savePet(pet); // Save the updated pet
-            return ResponseEntity.ok(savedPet);
+            try {
+                Pet savedPet = petService.savePet(pet); // Save the updated pet
+                return ResponseEntity.ok(savedPet);
+            } catch (Exception e) {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null); // Handle potential DB errors
+            }
         }
         return ResponseEntity.status(404).build(); // Return 404 if pet not found
     }
