@@ -59,6 +59,7 @@ public class MedicalRecordController {
             
             // Parse fields from the requestBody
             String description = (String) requestBody.get("description");
+            String service = (String) requestBody.get("service");
             String diagnosis = (String) requestBody.get("diagnosis");
             String treatment = (String) requestBody.get("treatment");
             Integer vetId = (Integer) requestBody.get("vetId"); // Assuming vetId is still passed as an ID
@@ -80,6 +81,7 @@ public class MedicalRecordController {
             medicalRecord.setDiagnosis(diagnosis);
             medicalRecord.setTreatment(treatment);
             medicalRecord.setRecordDate(recordDate);
+            medicalRecord.setService(service);
 
             // Save the record and return response
             MedicalRecord savedRecord = medicalRecordService.saveMedicalRecord(medicalRecord);
