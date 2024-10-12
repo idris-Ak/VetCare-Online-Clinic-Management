@@ -31,13 +31,15 @@ public class Vet {
     private String imagePath;
     private String detailPath;
 
+    private String clinicName;
+
 
     // Default constructor
     public Vet() {
     }
 
     // Constructor with parameters
-    public Vet(long l, String name, String title, String shortDescription, String longDescription, String imagePath, String detailPath) {
+    public Vet(long l, String name, String title, String shortDescription, String longDescription, String imagePath, String detailPath, String clinicName) {
         this.id = l;
         this.name = name;
         this.title = title;
@@ -45,6 +47,7 @@ public class Vet {
         this.longDescription = longDescription;
         this.imagePath = imagePath;
         this.detailPath = detailPath;
+        this.clinicName = clinicName;
     }
 
     // Getters and Setters
@@ -102,6 +105,14 @@ public class Vet {
 
     public void setDetailPath(String detailPath) {
         this.detailPath = detailPath;
+    }
+
+    public String getClinicName() {
+        return clinicName; 
+    }
+
+    public void setClinicName(String clinicName) {
+        this.clinicName = clinicName; 
     }
 
 }

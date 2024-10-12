@@ -13,12 +13,14 @@ function Appointments({ user }) {
   const [appointments, setAppointments] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [petData, setPetData] = useState([]);
+  const [vets, setVets] = useState([]);
   const [selectedPet, setSelectedPet] = useState(null);
   const [clinics, setClinics] = useState([]);
   const [selectedClinic, setSelectedClinic] = useState(null);
   const [highlightedDays, setHighlightedDays] = useState({});
   const [buttonLabel, setButtonLabel] = useState("Book Appointment");
   const [selectedAppointment, setSelectedAppointment] = useState(null);
+
 
   const timeSlotKeys = {
     1: "09:00",
@@ -62,17 +64,20 @@ function Appointments({ user }) {
 
   // SET CLINICS INTO A VARIABLE WHEN COMPONENT IS DEPLOYED.
   useEffect(() => {
-    const defaultClinics = Array.from({ length: 5 }, (_, i) => ({
-      id: i + 1,
-      name: `Clinic ${i + 1}`
-    }));
+    const defaultClinics = [
+      { id: 1, name: 'Clinic 1', price: 80 },
+      { id: 2, name: 'Clinic 2', price: 50 },
+      { id: 3, name: 'Clinic 3', price: 60 },
+      { id: 4, name: 'Clinic 4', price: 80 }
+    ];
     setClinics(defaultClinics);
   }, []);
 
-  // GET APPOINTMENTS FROM DATABASE
+  // GET APPOINTMENTS AND VETS FROM DATABASE
   useEffect(() => {
     if (user) {
       getPetAppointments();
+      setVetData();
     }
   }, [user]);
 
@@ -112,6 +117,23 @@ function Appointments({ user }) {
     } catch (error) {
       console.error('Error fetching all appointments:', error);
       return null;
+    }
+  };
+
+  // SET VET DATA INTO STATE
+  const setVetData = async () => {
+    const data = await getVetsData();
+    if (data){
+      setVets(data)
+    }
+  }; 
+
+  const getVetsData = async () => {
+    try {
+      const response = await fetch('http://localhost:8080/api/vets'); 
+      return response.ok? response.json() : null; 
+    } catch (error) {
+      console.error("Error fetching Vet Data:", error);
     }
   };
   
@@ -178,6 +200,7 @@ function Appointments({ user }) {
       if (existingAppointment) {
         // Pre-load the clinic and time slot
         setSelectedClinic(clinics.find(clinic => clinic.id === existingAppointment.clinicId));
+        console.log(existingAppointment.clinicId)
         setSelectedTimeSlot(existingAppointment.appointmentTime);
         setButtonLabel("Reschedule Appointment");
         setSelectedAppointment(existingAppointment);
@@ -216,150 +239,165 @@ function Appointments({ user }) {
     }
   };
 
-  const bookAppointment = async () => {
-    if (!selectedPet || !selectedClinic || !selectedTimeSlot || !selectedDay) {
-      alert("Please complete all fields to book an appointment.");
-      return;
+ // FUNCTION THAT HANDLES APPOINTMENT CANCELING 
+const cancelAppointment = async (appointmentId) => {
+  try {
+    const response = await fetch(`http://localhost:8080/api/appointments/${appointmentId}`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (response.ok) {
+      alert("Appointment canceled successfully.");
+      await getPetAppointments(); // Refetch appointments after canceling
+    } else {
+      alert("Failed to cancel the appointment.");
     }
+  } catch (error) {
+    console.error("Error canceling appointment:", error);
+    alert("An error occurred while canceling the appointment.");
+  }
+};
 
-    const appointmentData = {
-      userId: user.id,
-      petId: selectedPet.id,
-      clinicId: selectedClinic.id,
-      appointmentDate: `${currentDate.getFullYear()}-${(currentDate.getMonth() + 1)
-        .toString()
-        .padStart(2, '0')}-${selectedDay.toString().padStart(2, '0')}`,
-      appointmentTimeId: selectedTimeSlot
-    };
+// FUNCTION THAT HANDLES BOOKED APPOINTMENTS
+const bookAppointment = async () => {
+  if (!selectedPet || !selectedClinic || !selectedTimeSlot || !selectedDay) {
+    alert("Please complete all fields to book an appointment.");
+    return;
+  }
 
-    try {
-      const response = await fetch("http://localhost:8080/api/appointments/book", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(appointmentData),
-      });
+  const appointmentData = {
+    userId: user.id,
+    petId: selectedPet.id,
+    clinicId: selectedClinic.id,
+    appointmentDate: `${currentDate.getFullYear()}-${(currentDate.getMonth() + 1)
+      .toString()
+      .padStart(2, '0')}-${selectedDay.toString().padStart(2, '0')}`,
+    appointmentTimeId: selectedTimeSlot
+  };
 
-      const result = await response.json();
+  try {
+    const response = await fetch("http://localhost:8080/api/appointments/book", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(appointmentData),
+    });
 
-      if (response.ok) {
-        alert(result.message || "Appointment booked successfully!");
-        setHighlightedDays((prev) => ({
-          ...prev,
-          [selectedDay]: true,
-        }));
-        setShowModal(false);
-        await getPetAppointments();
-      } else {
-        alert(result.message || "Failed to book appointment.");
-      }
-    } catch (error) {
-      console.error("Error booking appointment:", error);
-      alert("An error occurred while booking the appointment.");
+    const result = await response.json();
+
+    if (response.ok) {
+      alert(result.message || "Appointment booked successfully!");
+      setHighlightedDays((prev) => ({
+        ...prev,
+        [selectedDay]: true,
+      }));
+      setShowModal(false);
+      await getPetAppointments(); // Refetch appointments after booking
+    } else {
+      alert(result.message || "Failed to book appointment.");
+    }
+  } catch (error) {
+    console.error("Error booking appointment:", error);
+    alert("An error occurred while booking the appointment.");
+  }
+};
+
+// FUNCTION THAT HANDLES APPOINTMENT RESCHEDUALING
+const rescheduleAppointment = async () => {
+  if (!selectedAppointment || !selectedTimeSlot || !selectedDay) {
+    alert("Please complete all fields to reschedule the appointment.");
+    return;
+  }
+
+  const updatedAppointmentData = {
+    ...selectedAppointment,
+    appointmentDate: `${currentDate.getFullYear()}-${(currentDate.getMonth() + 1)
+      .toString()
+      .padStart(2, '0')}-${selectedDay.toString().padStart(2, '0')}`,
+    appointmentTimeId: selectedTimeSlot
+  };
+
+  try {
+    const response = await fetch(`http://localhost:8080/api/appointments/${selectedAppointment.id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(updatedAppointmentData),
+    });
+
+    if (response.ok) {
+      alert("Appointment rescheduled successfully!");
+      setHighlightedDays((prev) => ({
+        ...prev,
+        [selectedDay]: true,
+      }));
+      setShowModal(false);
+      await getPetAppointments(); // Refetch appointments after rescheduling
+    } else {
+      alert("Failed to reschedule appointment.");
+    }
+  } catch (error) {
+    console.error("Error rescheduling appointment:", error);
+    alert("An error occurred while rescheduling the appointment.");
+  }
+};
+
+
+  const handleClinicSelection = (clinic) => {
+    if (selectedClinic?.id === clinic.id) {
+      setSelectedClinic(null); 
+    } else {
+      setSelectedClinic(clinic); 
     }
   };
 
-  // FUNCTION THAT HANDLES APPOINTMENT CANCELING 
-  const cancelAppointment = async (appointmentId) => {
-    try {
-      const response = await fetch(`http://localhost:8080/api/appointments/${appointmentId}`, {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-        },
+  function renderTimeSlots(appointments, timeSlotKeys, selectedTimeSlot, setSelectedTimeSlot, userAppointments, currentUser, selectedClinic) {
+    return Object.entries(timeSlotKeys).map(([key, time]) => {
+      // Check if the time slot is booked by someone else in the selected clinic
+      const isBookedBySomeoneInClinic = appointments.some(appointment => {
+        return (
+          String(appointment.appointmentTimeId) === key &&
+          appointment.clinicId === selectedClinic?.id
+        );
       });
-
-      if (response.ok) {
-        alert("Appointment canceled successfully.");
-        setAppointments(prev => prev.filter(appt => appt.id !== appointmentId));
-      } else {
-        alert("Failed to cancel the appointment.");
+  
+      // Check if the time slot is booked by the current user in the selected clinic
+      const isBookedByCurrentUserInClinic = userAppointments.some(userAppointment => {
+        return (
+          String(userAppointment.appointmentTimeId) === key &&
+          userAppointment.userId === currentUser.id &&
+          userAppointment.clinicId === selectedClinic?.id
+        );
+      });
+  
+      let buttonClass = selectedTimeSlot === key ? "selected" : "";
+  
+      if (isBookedByCurrentUserInClinic) {
+        buttonClass += " booked";
       }
-    } catch (error) {
-      console.error("Error canceling appointment:", error);
-      alert("An error occurred while canceling the appointment.");
-    }
-  };
-
-  // FUNCTION THAT HANDLES APPOINTMENT RESCHEDUALING
-  const rescheduleAppointment = async () => {
-    if (!selectedAppointment || !selectedTimeSlot || !selectedDay) {
-      alert("Please complete all fields to reschedule the appointment.");
-      return;
-    }
-
-    const updatedAppointmentData = {
-      ...selectedAppointment,
-      appointmentDate: `${currentDate.getFullYear()}-${(currentDate.getMonth() + 1)
-        .toString()
-        .padStart(2, '0')}-${selectedDay.toString().padStart(2, '0')}`,
-      appointmentTimeId: selectedTimeSlot
-    };
-
-    try {
-      const response = await fetch(`http://localhost:8080/api/appointments/${selectedAppointment.id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(updatedAppointmentData),
-      });
-
-      if (response.ok) {
-        alert("Appointment rescheduled successfully!");
-        setHighlightedDays((prev) => ({
-          ...prev,
-          [selectedDay]: true,
-        }));
-        setShowModal(false);
-        await getPetAppointments();
-      } else {
-        alert("Failed to reschedule appointment.");
+  
+      if (!isBookedBySomeoneInClinic || isBookedByCurrentUserInClinic) {
+        return (
+          <button
+            key={key}
+            disabled={isBookedByCurrentUserInClinic}
+            className={buttonClass}
+            onClick={() => setSelectedTimeSlot(key === selectedTimeSlot ? "" : key)}
+          >
+            {time}
+          </button>
+        );
       }
-    } catch (error) {
-      console.error("Error rescheduling appointment:", error);
-      alert("An error occurred while rescheduling the appointment.");
-    }
-  };
-
-  function renderTimeSlots(appointments, timeSlotKeys, selectedTimeSlot, setSelectedTimeSlot, userAppointments, currentUser) {
-    return Object.entries(timeSlotKeys)
-      .map(([key, time]) => {
-        // Check if the time slot is booked by any user
-        const isBookedBySomeone = appointments.some(appointment => {
-          return String(appointment.appointmentTimeId) === key;
-        });
   
-        // Check if the time slot is booked by the current user
-        const isBookedByCurrentUser = userAppointments.some(userAppointment => {
-          return String(userAppointment.appointmentTimeId) === key && userAppointment.userId === currentUser.id;
-        });
-  
-        let buttonClass = selectedTimeSlot === key ? "selected" : "";
-  
-        if (isBookedByCurrentUser) {
-          buttonClass += "booked";
-        }
-  
-        if (!isBookedBySomeone || isBookedByCurrentUser) {
-          return (
-            <button
-              key={key}
-              disabled={isBookedByCurrentUser}
-              className={buttonClass}
-              onClick={() => setSelectedTimeSlot(key === selectedTimeSlot ? "" : key)}
-            >
-              {time}
-            </button>
-          );
-        }
-  
-        return null;
-      });
+      return null;
+    });
   }
   
-
   return (
     <>
       <section className="appointment-pet-selection">
@@ -461,48 +499,100 @@ function Appointments({ user }) {
             <p>
               {currentDate.toLocaleString('default', { month: 'long' })} {selectedDay}, {currentDate.getFullYear()}
             </p>
-
+            
             {selectedAppointment && (
               <div className="booked-appointment">
                 <p><strong>Booked Appointment:</strong></p>
                 <p>Time: {timeSlotKeys[selectedAppointment.appointmentTimeId]}</p>
-                <p>Clinic: {selectedAppointment.clinicId}</p>
                 <p>Pet: {selectedPet.name}</p>
+                
+                {clinics.length > 0 && (
+                  <p>
+                    Clinic: {
+                      clinics.find(clinic => clinic.id === selectedAppointment.clinicId)?.name || "Unknown Clinic"
+                    }
+                  </p>
+                )}
               </div>
             )}
 
-            <label>
-              Select Clinic:
-              <select
-                value={selectedClinic?.id || ""}
-                onChange={(e) => {
-                  const clinic = clinics.find(cl => cl.id === parseInt(e.target.value));
-                  setSelectedClinic(clinic);
-                }}
-              >
-                <option value="">Select a clinic</option>
-                {clinics.map(clinic => (
-                  <option key={clinic.id} value={clinic.id}>
-                    {clinic.name}
-                  </option>
-                ))}
-              </select>
-            </label>
+            <h3>Select A Clinic:</h3>
+            <table>
+              <thead>
+                <tr>
+                  <th>Clinic Name</th>
+                  <th>Vets</th>
+                  <th>Vet Specialties</th>
+                  <th>Prices</th>
+                  <th>Select Clinic</th>
+                </tr>
+              </thead>
+              <tbody>
+                {clinics.map((clinic, clinicIndex) => {
+                  const clinicVets = vets.filter(vet => vet.clinicName === clinic.name);
+                  return (
+                    <React.Fragment key={clinicIndex}>
+                      <tr>
+                       
+                        <td rowSpan={clinicVets.length}>{clinic.name}</td>
+                        <td>{clinicVets[0]?.name}</td>
+                        <td>{clinicVets[0]?.title}</td>
+                        <td rowSpan={clinicVets.length}>${clinic.price}</td>
+                        <td rowSpan={clinicVets.length}>
+                          <button
+                            onClick={() => handleClinicSelection(clinic)}
+                            className={selectedClinic?.id === clinic.id ? 'selected' : 'select'}
+                          >
+                            {selectedClinic?.id === clinic.id ? 'Selected' : 'Select'}
+                          </button>
+                        </td>
+                      </tr>
+                      
+                      {clinicVets.slice(1).map((vet, vetIndex) => (
+                        <tr key={vetIndex}>
+                          <td>{vet.name}</td>
+                          <td>{vet.title}</td>
+                        </tr>
+                      ))}
+                    </React.Fragment>
+                  );
+                })}
+              </tbody>
+            </table>
 
-            <h3>Available Times:</h3>
-            <div className="appointment-time-slots">
-              {renderTimeSlots(appointments, timeSlotKeys, selectedTimeSlot, setSelectedTimeSlot, userAppointments, user)}
-            </div>
+            {selectedClinic && (
+            <>
+              <h3>Available Times:</h3>
+              <div className="appointment-time-slots">
+                {renderTimeSlots(
+                  appointments,
+                  timeSlotKeys,
+                  selectedTimeSlot,
+                  setSelectedTimeSlot,
+                  userAppointments,
+                  user,
+                  selectedClinic // Pass the selected clinic to the function
+                )}
+              </div>
 
+              <div className="appointment-modal-actions">
+                {/* Only show Reschedule button for the clinic where the user has a booked appointment */}
+                {selectedAppointment?.clinicId === selectedClinic.id ? (
+                  <button className="reschedule" onClick={handleAppointmentAction}>
+                    Reschedule Appointment
+                  </button>
+                ) : (
+                  <button className="book" onClick={handleAppointmentAction}>
+                    Book Appointment
+                  </button>
+                )}
+                <button className="appointment-close" onClick={() => setShowModal(false)}>
+                  Close
+                </button>
+              </div>
+            </>
+          )}
 
-            <div className="appointment-modal-actions">
-              <button className={buttonLabel == "Reschedule Appointment" ? "reschedule" : "book"} onClick={handleAppointmentAction}>
-                {buttonLabel}
-              </button>
-              <button className="appointment-close" onClick={() => setShowModal(false)}>
-                Close
-              </button>
-            </div>
           </div>
         </div>
       )}
