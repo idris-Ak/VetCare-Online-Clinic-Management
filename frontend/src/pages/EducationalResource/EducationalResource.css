@@ -1,0 +1,70 @@
+/* EducationalResource.css */
+.pet-selection {
+    margin-bottom: 20px;
+  }
+  
+  .pet-list {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+  }
+  
+  .pet {
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 10px;
+    text-align: center;
+    width: 150px;
+  }
+  
+  .pet-image {
+    max-width: 100%;
+    height: auto;
+    border-radius: 50%;
+  }
+  
+  .pet-name {
+    margin: 10px 0;
+  }
+  
+  .selected {
+    background-color: #007bff;
+    color: #fff;
+  }
+  
+  .select {
+    background-color: #e9ecef;
+  }
+  
+  .search-bar {
+    margin-bottom: 20px;
+  }
+
+  .video-list {
+    display: grid;
+    justify-content: space-between;
+    grid-template-columns: repeat(auto-fill, 360px);
+    grid-gap: 10px;
+    margin: 30px;
+    .video {
+        width: 360px; 
+        margin-top: 5px;
+    }
+  }
+
+  .article-list {
+    display: flex;
+    justify-content: space-between;
+    gap: 15px;
+    flex-wrap: wrap;
+    margin: 30px;
+
+    .article{
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        padding: 10px;
+        text-align: center;
+        width: 240px;
+      }
+  }
+

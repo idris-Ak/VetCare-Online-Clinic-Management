@@ -6,7 +6,7 @@ import Footer from "./components/Footer/Footer";
 import Navbar from './components/Navbar/Navbar';
 import AllVetMembers from './pages/AllVetMembers/AllVetMembers';
 import Appointments from './pages/AppointmentPage/Appointments';
-import EducationalResource from './pages/EducationalResource';
+import EducationalResource from './pages/EducationalResource/EducationalResource';
 import HomePage from './pages/HomePage/HomePage';
 import Login from './pages/User and Pet Management/Login';
 import MedicalRecords from './pages/MedicalRec/MedicalRecords';
