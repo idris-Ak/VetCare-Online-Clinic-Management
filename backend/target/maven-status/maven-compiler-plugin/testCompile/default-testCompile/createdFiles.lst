@@ -1,6 +1,9 @@
 au/edu/rmit/sept/webapp/PaymentTests.class
 au/edu/rmit/sept/webapp/PetProfileTests.class
+<<<<<<< HEAD
+=======
 au/edu/rmit/sept/webapp/AppointmentTests.class
+>>>>>>> origin/HEAD
 au/edu/rmit/sept/webapp/UserProfileTests.class
 au/edu/rmit/sept/webapp/SignUpTests.class
 au/edu/rmit/sept/webapp/LoginTests.class

@@ -30,7 +30,8 @@ function MedicalRecords({ user }) {
     healthStatus: "",
     diet: "",
     allergies: "",
-    medications: ""
+    medications: "",
+    description: ""
   });
   const [editRecord, setEditRecord] = useState({
     id: null,
@@ -41,7 +42,8 @@ function MedicalRecords({ user }) {
     healthStatus: "",
     diet: "",
     allergies: "",
-    medications: ""
+    medications: "",
+    description: ""
   });
   const [errors, setErrors] = useState({ date: "", service: "", vet: "" });
 
@@ -70,7 +72,7 @@ function MedicalRecords({ user }) {
       getUserPets();
     }
 
-  }, []); // Add user dependency to ensure it fetches when user is defined
+  }, [user]); // Add user dependency to ensure it fetches when user is defined
   
   const getPetInfo = async () => {
     try {
@@ -84,6 +86,12 @@ function MedicalRecords({ user }) {
 
   useEffect(() => {
     const fetchRecords = async () => {
+
+      if (!user) {
+        console.error("User is not defined.");
+        return; // Exit if user is not defined
+    }
+    
       let url = `http://localhost:8080/api/medicalRecords`;
       if (selectedPet) {
         url += `/pet/${selectedPet}`;
@@ -233,16 +241,19 @@ function MedicalRecords({ user }) {
     if (valid) {
       const recordData = {
         petId: selectedPet,  // Assuming `selectedPet` is defined and holds the pet's ID
-        service: newRecord.service,  // Map `service` to `description` as per backend
-        diagnosis: newRecord.diagnosis || "",  // Optional fields can be empty strings if not provided
-        treatment: newRecord.treatment || "",  // Optional fields
-        desciption: newRecord.desciption || "",  // Optional fields
+
+        recordDate: dayjs(newRecord.date).format('YYYY-MM-DD'),
+        service: newRecord.service,
         vetId: selectedVet.id, // Send vet ID to backend
-        recordDate: dayjs(newRecord.date).format('YYYY-MM-DD') // Ensure correct date format
+        weight: newRecord.weight || "", 
+        healthStatus: newRecord.healthStatus || "", 
+        diet: newRecord.diet || "", 
+        allergies: newRecord.allergies || "", 
+        medications: newRecord.medications || "", 
+        description: newRecord.description || "",  // Optional fields
       };
 
-      console.log("recordData ",recordData);
-      console.log("selectedVet.id ",selectedVet.id);
+      console.log("new entry: ",recordData);
 
       try {
         const response = await fetch(`http://localhost:8080/api/medicalRecords/pet/${selectedPet}`, {
@@ -266,7 +277,8 @@ function MedicalRecords({ user }) {
             healthStatus: "",
             diet: "",
             allergies: "",
-            medications: ""
+            medications: "",
+            description: ""
           });
         } else {
           const errorData = await response.json();  // Read the error response body
@@ -293,7 +305,8 @@ function MedicalRecords({ user }) {
       valid = false;
     }
 
-    if (!editRecord.vet.startsWith("Dr.")) {
+    // Ensure editRecord.vet is a string before applying .startsWith
+    if (typeof editRecord.vet !== 'string' || !editRecord.vet.startsWith("Dr.")) {
       newErrors.vet = "Veterinarian must start with 'Dr.'";
       valid = false;
     }
@@ -303,8 +316,19 @@ function MedicalRecords({ user }) {
     if (valid) {
       const updatedRecordData = {
         ...editRecord,
-        date: dayjs(editRecord.date).format('MM/DD/YYYY')
+
+        recordDate: dayjs(editRecord.date).format('YYYY-MM-DD'),
+        service: editRecord.service,
+        vetId: selectedVet.id, // Send vet ID to backend
+        weight: editRecord.weight || "", 
+        healthStatus: editRecord.healthStatus || "", 
+        diet: editRecord.diet || "", 
+        allergies: editRecord.allergies || "", 
+        medications: editRecord.medications || "", 
+        description: editRecord.description || "",  // Optional fields
       };
+
+      console.log("vetId Record:", updatedRecordData.vetId); // Log the record being sent
 
       try {
         const response = await fetch(`http://localhost:8080/api/medicalRecords/${editRecord.id}`, {
@@ -351,11 +375,21 @@ function MedicalRecords({ user }) {
   };
 
   const handleShowEditModal = (record) => {
-    setEditRecord(record);
+  setEditRecord({
+      id: record.id,
+      date: dayjs(record.recordDate), 
+      service: record.service || "", 
+      vet: record.vet.name || "", 
+      weight: record.weight || "", 
+      healthStatus: record.healthStatus || "", 
+      diet: record.diet || "", 
+      allergies: record.allergies || "", 
+      medications: record.medications || "", 
+      description: record.description || "", 
+  });
+
     setShowEditModal(true);
   };
-
-
 
 
   return (
@@ -459,7 +493,8 @@ function MedicalRecords({ user }) {
                   label="Select date"
                   value={newRecord.date}
                   onChange={(date) => setNewRecord({ ...newRecord, date })}
-                  renderInput={(params) => (
+                  maxDate={dayjs()} // Set max date using Day.js
+                  textField={(params) => (
                     <Form.Control
                       {...params.inputProps}
                       isInvalid={!!errors.date}
@@ -479,8 +514,8 @@ function MedicalRecords({ user }) {
                     const selectedService = e.target.value;
                     setNewRecord((prevRecord) => ({
                       ...prevRecord,
-                      service: selectedService,
-                      ...(selectedService !== "Other" && { customService: '' })  // Only reset customService when not 'Other'
+                      service: selectedService !== 'Other' ? selectedService : prevRecord.customService,
+                      customService: selectedService === 'Other' ? '' : prevRecord.customService,
                     }));
                   }}
                   isInvalid={!!errors.service}
@@ -501,10 +536,10 @@ function MedicalRecords({ user }) {
                   <Form.Label>Custom Service</Form.Label>
                   <Form.Control
                     type="text"
-                    value={newRecord.customService}
+                    value={newRecord.customService || ""} // Ensure this defaults to an empty string
                     onChange={(e) => setNewRecord((prevRecord) => ({
                       ...prevRecord,
-                      customService: e.target.value
+                      customService: e.target.value || "", // Default to empty if undefined
                     }))}
                     isInvalid={!!errors.customService}
                   />
@@ -573,12 +608,12 @@ function MedicalRecords({ user }) {
                   onChange={(e) => setNewRecord({ ...newRecord, medications: e.target.value })}
                 />
               </Form.Group>
-              <Form.Group controlId="formDesciption">
-                <Form.Label>Medications</Form.Label>
+              <Form.Group controlId="formDescription">
+                <Form.Label>Description</Form.Label>
                 <Form.Control
                   type="text"
-                  value={newRecord.desciption}
-                  onChange={(e) => setNewRecord({ ...newRecord, desciption: e.target.value })}
+                  value={newRecord.description}
+                  onChange={(e) => setNewRecord({ ...newRecord, description: e.target.value })}
                 />
               </Form.Group>
             </Form>
@@ -591,18 +626,30 @@ function MedicalRecords({ user }) {
 
         {/* View Record Modal */}
         <Modal show={showRecordModal} onHide={() => setShowRecordModal(false)}>
-          <Modal.Header closeButton>
-            <Modal.Title>Medical Record Details</Modal.Title>
-          </Modal.Header>
-          <Modal.Body>
-            {selectedRecord && <pre>{formatRecordDetails(selectedRecord)}</pre>}
-          </Modal.Body>
-          <Modal.Footer>
-            <Button variant="secondary" onClick={() => setShowRecordModal(false)}>Close</Button>
-            <Button variant="primary" onClick={() => handleDownload(selectedRecord)}>Download PDF</Button>
-            <Button variant="primary" onClick={() => setShowVetModal(true)}>Share with Vet</Button>
-          </Modal.Footer>
-        </Modal>
+        <Modal.Header closeButton>
+          <Modal.Title>Medical Record Details</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {selectedRecord && (
+            <>
+              <p><strong>Date:</strong> {selectedRecord.recordDate}</p>
+              <p><strong>Service:</strong> {selectedRecord.service}</p>
+              <p><strong>Veterinarian:</strong> {selectedRecord.vet.name}</p>
+              <p><strong>Weight:</strong> {selectedRecord.weight}</p>
+              <p><strong>Health Status:</strong> {selectedRecord.healthStatus}</p>
+              <p><strong>Diet:</strong> {selectedRecord.diet}</p>
+              <p><strong>Allergies:</strong> {selectedRecord.allergies}</p>
+              <p><strong>Medications:</strong> {selectedRecord.medications}</p>
+              <p><strong>Description:</strong> {selectedRecord.description}</p>
+            </>
+          )}
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowRecordModal(false)}>Close</Button>
+          <Button variant="primary" onClick={() => handleDownload(selectedRecord)}>Download PDF</Button>
+          <Button variant="primary" onClick={() => setShowVetModal(true)}>Share with Vet</Button>
+        </Modal.Footer>
+      </Modal>
 
         {/* Share with Vet Modal */}
         <Modal show={showVetModal} onHide={() => setShowVetModal(false)}>
@@ -638,9 +685,10 @@ function MedicalRecords({ user }) {
                 <Form.Label>Date</Form.Label>
                 <DatePicker
                   label="Select date"
-                  value={editRecord.date}
+                  value={editRecord.date} // Ensure the value is controlled
                   onChange={(date) => setEditRecord({ ...editRecord, date })}
-                  renderInput={(params) => (
+                  maxDate={dayjs()} // Set max date using Day.js
+                  textField={(params) => (
                     <Form.Control
                       {...params.inputProps}
                       isInvalid={!!errors.date}
@@ -651,9 +699,57 @@ function MedicalRecords({ user }) {
                   {errors.date}
                 </Form.Control.Feedback>
               </Form.Group>
+            {/* Use service dropdown like Add modal */}
+            <Form.Group controlId="formService">
+              <Form.Label>Service</Form.Label>
+              <Form.Select
+                value={editRecord.service || ""} // Ensure this is controlled
+                onChange={(e) => {
+                  const selectedService = e.target.value;
+                  setEditRecord((prevRecord) => ({
+                    ...prevRecord,
+                    service: selectedService !== 'Other' ? selectedService : prevRecord.customService,
+                    customService: selectedService === 'Other' ? '' : prevRecord.customService,
+                  }));
+                }}
+                isInvalid={!!errors.service}
+              >
+                <option value="">Select Service</option>
+                <option value="Treatment Plan">Treatment Plan</option>
+                <option value="Vaccination">Vaccination</option>
+                <option value="Other">Other</option>
+              </Form.Select>
+              <Form.Control.Feedback type="invalid">
+                {errors.service}
+              </Form.Control.Feedback>
+            </Form.Group>
+
+            {/* Conditional input for custom service */}
+            {editRecord.service === 'Other' && (
+              <Form.Group controlId="formCustomService">
+                <Form.Label>Custom Service</Form.Label>
+                <Form.Control
+                  type="text"
+                  value={editRecord.customService}
+                  onChange={(e) => setEditRecord((prevRecord) => ({
+                    ...prevRecord,
+                    customService: e.target.value
+                  }))}
+                  isInvalid={!!errors.customService}
+                />
+                <Form.Control.Feedback type="invalid">
+                  {errors.customService}
+                </Form.Control.Feedback>
+              </Form.Group>
+            )}
               <Form.Group controlId="formVet">
                 <Form.Label>Veterinarian</Form.Label>
-                <Form.Control as="select" value={editRecord.vet} onChange={(e) => setEditRecord({ ...editRecord, vet: e.target.value })} isInvalid={!!errors.vet}>
+                <Form.Control as="select" value={editRecord.vet} onChange={(e) => {
+                  const selectedVetName = e.target.value; // Get the selected vet name
+                  const selectedVet = vets.find(vet => vet.name === selectedVetName); // Find the vet object based on the name
+                  setSelectedVet(selectedVet); // Update selectedVet state
+                  setEditRecord({ ...editRecord, vet: selectedVetName }); // Update newRecord.vet with the selected vet name
+                }} isInvalid={!!errors.vet}>
                   <option value="">Select Vet</option>
                   {vets.map(vet => (
                     <option key={vet.id} value={vet.name}>{vet.name}</option>
@@ -663,7 +759,8 @@ function MedicalRecords({ user }) {
                   {errors.vet}
                 </Form.Control.Feedback>
               </Form.Group>
-              <Form.Group controlId="formVet">
+
+              {/* <Form.Group controlId="formVet">
                 <Form.Label>Veterinarian</Form.Label>
                 <Form.Control
                   type="text"
@@ -674,7 +771,7 @@ function MedicalRecords({ user }) {
                 <Form.Control.Feedback type="invalid">
                   {errors.vet}
                 </Form.Control.Feedback>
-              </Form.Group>
+              </Form.Group> */}
               <Form.Group controlId="formWeight">
                 <Form.Label>Weight</Form.Label>
                 <Form.Control

@@ -18,6 +18,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -52,6 +53,7 @@ class PaymentTests {
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
+        ReflectionTestUtils.setField(transactionController, "petService", petService);
     }
 
     @Test
@@ -74,6 +76,7 @@ class PaymentTests {
         Transaction mockTransaction = new Transaction(); // Mock Transaction model constructor
         mockTransaction.setId(1001L); // Set a valid transaction ID
         mockTransaction.setAmount(50.00);
+        mockTransaction.setPetId(pet.getId()); // Set petId
 
         when(userService.findById(1L)).thenReturn(Optional.of(user));
         when(petService.findById(1L)).thenReturn(Optional.of(pet));
@@ -189,20 +192,29 @@ class PaymentTests {
         User user = new User();
         user.setId(1L); // Set userId
 
+        Pet pet = new Pet(); // Declare and initialize 'pet'
+        pet.setId(1L);
+        pet.setName("Goatie");
+
         Transaction transaction = new Transaction();
         transaction.setAmount(50.00);
-        transaction.setPetName("Goatie");
+        transaction.setPetId(pet.getId()); // Set petId
+
+        // Mock the petService to return the pet when findById is called
+        when(petService.findById(pet.getId())).thenReturn(Optional.of(pet));
 
         // Fetch the list of transactions
-        when(transactionService.getTransactionsByUserId(1L)).thenReturn(List.of(transaction));
+        when(transactionService.getTransactionsByUserId(user.getId())).thenReturn(List.of(transaction));
 
         // Get the response
-        ResponseEntity<List<Transaction>> response = transactionController.getTransactionsByUserId(1L);
+        ResponseEntity<List<Map<String, Object>>> response = transactionController.getTransactionsByUserId(user.getId());
                                                                                                 
         // Verify the transaction is fetched
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(1, response.getBody().size());
-        assertEquals(50.00, response.getBody().get(0).getAmount());
+        Map<String, Object> transactionData = response.getBody().get(0);
+        assertEquals(50.00, (Double) transactionData.get("amount"), 0.001);
+        assertEquals("Goatie", transactionData.get("petName")); // Verify pet name is correct
     }
 
     @Test
@@ -211,7 +223,7 @@ class PaymentTests {
         when(transactionService.getTransactionsByUserId(1L)).thenReturn(List.of());
 
         // Get the response
-        ResponseEntity<List<Transaction>> response = transactionController.getTransactionsByUserId(1L);
+        ResponseEntity<List<Map<String, Object>>> response = transactionController.getTransactionsByUserId(1L);
                                                                                                 
         // Verify there is no content
         assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());

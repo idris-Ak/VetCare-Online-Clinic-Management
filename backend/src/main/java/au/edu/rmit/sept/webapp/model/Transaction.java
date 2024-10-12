@@ -20,9 +20,9 @@ public class Transaction {
     
     private double amount;
     private LocalDateTime dateTime; // Store both date and time
-    private String petName;
     private String paymentMethod;
     private String serviceType; 
+    private Long petId; // Store pet's ID instead of name
 
     @ManyToOne
     @JsonBackReference // Prevents circular reference
@@ -53,14 +53,14 @@ public class Transaction {
         this.dateTime = dateTime;
     }
 
-    public String getPetName() {
-        return petName;
+    public Long getPetId() {
+        return petId;
     }
 
-    public void setPetName(String petName) {
-        this.petName = petName;
+    public void setPetId(Long petId) {
+        this.petId = petId;
     }
-
+    
     public String getPaymentMethod() {
         return paymentMethod;
     }
