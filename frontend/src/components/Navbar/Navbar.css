@@ -6,6 +6,13 @@
   height: 100px; /* Ensuring there's enough vertical space */
 }
 
+.navbar-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding-left: 275px;
+}
+
 .navbar-list {
   display: flex;
   list-style: none;
@@ -31,6 +38,10 @@
 @media (max-width: 768px) {
   .navbar-item {
     margin-bottom: 10px; /* Less margin for smaller screens */
+  }
+  .navbar-center {
+    justify-content: center;
+    margin-top: 10px;
   }
 }
 

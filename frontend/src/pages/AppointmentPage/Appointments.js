@@ -25,6 +25,7 @@ function Appointments({ user }) {
   const [showPaymentMethodModal, setShowPaymentMethodModal] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
+  const [showPayPalButtons, setShowPayPalButtons] = useState(false);
 
   
   const timeSlotKeys = {
@@ -68,7 +69,7 @@ function Appointments({ user }) {
   const currentMonth = currentDate.getMonth() + 1;
 
   // Expired if year is less than current or same year with month less than current month
-  if (year < currentYear || (year === currentYear && month < currentMonth)) {
+  if (year < currentYear || (year === currentYear && month < currentMonth) || month > 12) {
     return false;
   }
   return true;
@@ -107,7 +108,8 @@ function Appointments({ user }) {
     return isValid;
   };
 
- const handlePaymentChange = (event) => {
+ // Handle Payment Form Changes
+    const handlePaymentChange = (event) => {
     const { name, value } = event.target;
 
     let formattedValue = value;
@@ -127,20 +129,52 @@ function Appointments({ user }) {
       if (formattedValue.length > 2) {
         formattedValue = formattedValue.substring(0, 4);
         formattedValue = formattedValue.replace(/(\d{2})(\d{1,2})/, '$1/$2');
-      }
+    }
     } else if (name === 'cvv') {
       // Only digits, limit to 3
-      formattedValue = formattedValue.replace(/\D/g, '');
-      formattedValue = formattedValue.substring(0, 3);
+    formattedValue = formattedValue.replace(/\D/g, '');
+    formattedValue = formattedValue.substring(0, 3);
     }
 
     setPaymentDetails(prevDetails => ({
-      ...prevDetails,
-      [name]: formattedValue
+    ...prevDetails,
+    [name]: formattedValue
     }));
-  };
+      // Trigger validation on each change
+      validateSingleField(name, formattedValue);
+    };
 
+    // Real-time validation for individual fields
+    const validateSingleField = (fieldName, value) => {
+        let newErrors = { ...errors };
 
+        if (fieldName === 'cardNumber') {
+            const cardNumberDigits = value.replace(/\D/g, '');
+            if (cardNumberDigits.length !== 16) {
+                newErrors.cardNumberError = "Card number must be 16 digits.";
+            } else {
+                newErrors.cardNumberError = ''; // Clear error if valid
+            }
+        }
+
+        if (fieldName === 'expiryDate') {
+            if (!validateExpiryDate(value)) {
+                newErrors.expiryDateError = "Invalid or expired date. Use MM/YY format.";
+            } else {
+                newErrors.expiryDateError = ''; // Clear error if valid
+            }
+        }
+
+        if (fieldName === 'cvv') {
+            if (value.length !== 3) {
+                newErrors.cvvError = "CVV must be 3 digits.";
+            } else {
+                newErrors.cvvError = ''; // Clear error if valid
+            }
+        }
+
+        setErrors(newErrors); // Update the errors state
+    };
 
   // LOAD PET DATA FROM DATABASE
   useEffect(() => {
@@ -416,12 +450,37 @@ const finaliseAppointmentBooking = async() => {
     alert("An error occurred while booking the appointment.");
   }
 };
+// Handle Payment Submission
+ const handlePaymentSubmit = async (e) => {
+      e.preventDefault();
+      if (validatePaymentForm()) {
+        if (!user || !selectedPet) {
+            alert('User or pet information is missing.');
+            return;
+        }
+        // Send payment details to the backend
+        try {
+            const response = await fetch(`http://localhost:8080/api/payment/credit-card?userId=${user.id}&petId=${selectedPet.id}&serviceType=Appointment+Booking`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                 amount: selectedClinic?.price || 50, // Use the clinic price, default to 50 if unavailable
+            }),
+          });
 
-const handlePaymentSubmit = (e) => {
-  e.preventDefault();
-  if (validatePaymentForm()) {
-    setShowPaymentModal(false); // Close the payment modal
-    finaliseAppointmentBooking(); // Finalise the booking after payment
+          // Handle the response correctly
+            if (!response.ok) {
+                const errorResponse = await response.json(); // Read the response as JSON once
+                console.error("Error processing payment:", errorResponse);
+                return;
+            }
+        finaliseAppointmentBooking(); // Finalise the booking after payment
+    } catch (error) {
+        console.error('Error processing payment:', error);
+        alert('An error occurred while processing the payment. Please try again.');
+      }
   }
 };
 
@@ -481,13 +540,6 @@ const rescheduleAppointment = async () => {
     console.error("Error rescheduling appointment:", error);
     alert("An error occurred while rescheduling the appointment.");
   }
-};
-
-const handlePayPalApprove = () => {
-  setShowConfirmationModal(true);
-  setShowPaymentMethodModal(false);
-  // Book the appointment after PayPal payment is approved
-  bookAppointment();
 };
 
 
@@ -740,77 +792,116 @@ const handlePayPalApprove = () => {
         </div>
       )}
 
-{showPaymentMethodModal && (
-            <div className="modal">
-              <div className="modal-content payment-method-modal">
-                <h3>Select Payment Method</h3>
-                <div className="payment-options">
-                  <div
-                    className="payment-option"
-                    onClick={() => {
-                      setShowPaymentMethodModal(false);
-                      setShowPaymentModal(true);
-                    }}
-                  >
-                    <i className="fa fa-credit-card" aria-hidden="true"></i>
-                    <p>Credit/Debit Card</p>
-                  </div>
-                  <div className="vertical-line"></div>
-                  <div className="paypal-button-container">
-                  <PayPalScriptProvider
+    {/* Payment Method Selection Modal */}
+    {showPaymentMethodModal && (
+        <div className="modal">
+        <div className="modal-content payment-method-modal">
+            <h3>Select Payment Method</h3>
+            <div className="payment-options">
+            <div
+                className="payment-option"
+                onClick={() => {
+                setShowPaymentMethodModal(false);
+                setShowPaymentModal(true);
+                }}
+            >
+                <i className="fa fa-credit-card" aria-hidden="true"></i>
+                <p>Credit/Debit Card</p>
+            </div>
+            <div className="vertical-line"></div>
+                <div className="paypal-button-container">
+                <PayPalScriptProvider
                     options={{
-                      'client-id': 'AZn8taJF_Ktmts23FNW52kiR-RsyxG45Ps-vyDWgs2hje7Jv9EYFbpytQpUlyDndo_egQkb-IzD0p4jP',
-                      currency: 'AUD',
-                      intent: 'capture',
-                      'disable-funding': 'card', 
+                    'client-id': 'AZn8taJF_Ktmts23FNW52kiR-RsyxG45Ps-vyDWgs2hje7Jv9EYFbpytQpUlyDndo_egQkb-IzD0p4jP',
+                    currency: 'AUD',
+                    intent: 'capture',
+                      'disable-funding': 'card', // Disable credit/debit card option
                     }}
-                  >
+                >
                     <PayPalButtons
-                      style={{ layout: 'vertical' }}
-                      createOrder={(data, actions) => {
+                    style={{ layout: 'vertical' }}
+                    createOrder={(data, actions) => {
                         return actions.order.create({
-                          purchase_units: [
+                        purchase_units: [
                             {
-                              amount: { value: '50.00' },  
+                           amount: {
+                              value: `${selectedClinic?.price || 50}`, // Use the clinic price if available, default to 50 if not
                             },
-                          ],
+                            },
+                        ],
+                        });
+                    }}
+                    onApprove={(data, actions) => {
+                        return actions.order.capture().then(async (details) => {
+                            if (!user || !selectedPet) {
+                                alert('User or pet information is missing.');
+                                return;
+                            }
+                         // Send orderID and other details to the backend
+                          try {
+                              const response = await fetch(`http://localhost:8080/api/payment/paypal?userId=${user.id}&petId=${selectedPet.id}&serviceType=Appointment+Booking`, {
+                              method: 'POST',
+                              headers: {
+                                'Content-Type': 'application/json',
+                              },
+                              body: JSON.stringify({
+                                orderId: data.orderID,
+                                amount: 50.00, // Pass the actual amount here after a amount variable has been made
+                            }),
+                        });
+                            if (response.ok) {
+                              setShowPaymentMethodModal(false);
+                              setShowPayPalButtons(false);
+                              setShowConfirmationModal(true);
+                              } 
+                              else {
+                              // Handle payment failure
+                              const errorData = await response.json();
+                              console.error('Payment failed:', errorData);
+                              alert('Payment failed. Please try again.');
+                            }
+                          } catch (error) {
+                            console.error('Error processing payment:', error);
+                            alert('An error occurred while processing the payment. Please try again.');
+                          }
                         });
                       }}
-                      onApprove={handlePayPalApprove}
-                      onCancel={() => {
+                    onCancel={() => {
+                        setShowPayPalButtons(false);
                         setShowPaymentMethodModal(true);
-                      }}
+                    }}
                     />
-                  </PayPalScriptProvider>
-                  </div>
+                </PayPalScriptProvider>
                 </div>
-          <div className="button-row two-buttons">
+            </div>
+            {!showPayPalButtons ? (
             <button
-              onClick={() => {
-                setShowPaymentMethodModal(false); 
-                setShowModal(true); 
-              }}
-              className="back-btn"
-            >
-              Back
-            </button>
-            <button
-              onClick={() => setShowPaymentMethodModal(false)}
-              className="cancel-btn"
+                onClick={() => setShowPaymentMethodModal(false)}
+                className="cancel-btn"
             >
                 Cancel
-              </button>
-            </div>
-          </div>
+            </button>
+            ) : (
+            <button
+                onClick={() => {
+                setShowPayPalButtons(false);
+                setShowPaymentMethodModal(true);
+                }}
+                className="back-btn"
+            >
+                Back
+            </button>
+            )}
         </div>
-      )}
+        </div>
+    )}
 
           
           {showPaymentModal && (
             <div className="modal">
               <div className="modal-content payment-modal">
                 <h3>Payment Details</h3>
-                <p><strong>Total Price: </strong>$50.00</p> 
+                <p><strong>Total Price: </strong>${selectedClinic?.price || 50.00}</p>
                 <form onSubmit={handlePaymentSubmit}>
                   <div className="form-group">
                     <label htmlFor="cardNumber">Card Number:</label>
@@ -877,7 +968,7 @@ const handlePayPalApprove = () => {
                   </div>
 
                   <div className="button-row two-buttons">
-                    <button type="submit" className="submit-btn">Pay $50.00</button> 
+                  <button type="submit" className="submit-btn">Pay ${selectedClinic?.price || 50.00}</button>
                     <button
                       onClick={() => {
                         setShowPaymentModal(false);

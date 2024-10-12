@@ -39,7 +39,7 @@ public class PaymentController {
             @RequestParam Long userId, @RequestParam Long petId, @RequestParam String serviceType) {
 
         // Validate serviceType
-        if (!serviceType.equals("prescription") && !serviceType.equals("appointment")) {
+        if (!serviceType.equals("Prescription Refill") && !serviceType.equals("Appointment Booking")) {
             return ResponseEntity.badRequest().body(Map.of("error", "Invalid service type"));
         }
 
@@ -87,7 +87,7 @@ public class PaymentController {
             @RequestParam Long userId, @RequestParam Long petId, @RequestParam String serviceType) {
         
         // Validate serviceType
-        if (!serviceType.equals("prescription") && !serviceType.equals("appointment")) {
+        if (!serviceType.equals("Prescription Refill") && !serviceType.equals("Appointment Booking")) {
             return ResponseEntity.badRequest().body(Map.of("error", "Invalid service type"));
         }
 

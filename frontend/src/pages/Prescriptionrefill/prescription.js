@@ -128,7 +128,7 @@ const validateExpiryDate = (expiryDate) => {
     const currentDate = new Date();
     const currentYear = currentDate.getFullYear() % 100; // Last two digits of the year
     const currentMonth = currentDate.getMonth() + 1;
-    if (year < currentYear || (year === currentYear && month < currentMonth)) {
+    if (year < currentYear || (year === currentYear && month < currentMonth) || month > 12) {
     return false;
     }
     return true;
@@ -201,13 +201,13 @@ const addPrescriptionToMedicalRecords = () => {
         }
         // Send payment details to the backend
         try {
-            const response = await fetch(`http://localhost:8080/api/payment/credit-card?userId=${user.id}&petId=${selectedPet.id}&serviceType=prescription`, {
+            const response = await fetch(`http://localhost:8080/api/payment/credit-card?userId=${user.id}&petId=${selectedPet.id}&serviceType=Prescription+Refill`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                amount: 50.00 // Pass the actual amount here once the amount variable has been created
+                amount: 50.00
             }),
           });
 
@@ -376,7 +376,7 @@ const handleCloseConfirmationModal = () => {
                             }
                          // Send orderID and other details to the backend
                           try {
-                              const response = await fetch(`http://localhost:8080/api/payment/paypal?userId=${user.id}&petId=${selectedPet.id}&serviceType=prescription`, {
+                              const response = await fetch(`http://localhost:8080/api/payment/paypal?userId=${user.id}&petId=${selectedPet.id}&serviceType=Prescription+Refill`, {
                               method: 'POST',
                               headers: {
                                 'Content-Type': 'application/json',
@@ -505,7 +505,7 @@ const handleCloseConfirmationModal = () => {
             </div>
 
             <div className="button-row two-buttons">
-                <button type="submit" className="submit-btn">Pay Now</button>
+                <button type="submit" className="submit-btn">Pay $50</button>
                 <button onClick={() => { setShowPaymentModal(false); setShowPaymentMethodModal(true);}} className="back-btn">Back</button>
             </div>
             </form>
