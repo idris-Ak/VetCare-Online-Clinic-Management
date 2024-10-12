@@ -70,7 +70,12 @@ public class AppointmentController {
         return ResponseEntity.noContent().build();
     }
 
-    // Define DTO to map request payload
+    @GetMapping(params = "userId")
+    public List<Appointment> getAppointmentsByUserId(@RequestParam int userId) {
+        return appointmentService.getAppointmentsByUserId(userId);
+    }
+
+    // DEFINE DTO TO MAP PAYLOAD OF REQUEST
     public static class AppointmentRequest {
         private int userId;
         private int petId;
@@ -78,7 +83,7 @@ public class AppointmentController {
         private int appointmentTimeId;
         private String appointmentDate;
 
-        // Getters and setters
+        // DEFINED GETTERS AND SETTERS
         public int getUserId() {
             return userId;
         }

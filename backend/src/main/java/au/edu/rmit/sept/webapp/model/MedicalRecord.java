@@ -22,10 +22,17 @@ public class MedicalRecord {
     @JoinColumn(name = "pet_id", nullable = false)
     private Pet pet;
 
-    private Integer vetId;
+    @ManyToOne
+    @JoinColumn(name = "vet_id", nullable = false) // Now referencing Vet object
+    private Vet vet;
+    
     private String description;
-    private String diagnosis;
-    private String treatment;
+    private String medications;
+    private String allergies;
+    private String diet;
+    private String healthStatus;
+    private String weight;
+    private String service;
     
     @Column(name = "record_date")
     private LocalDate recordDate;
@@ -50,12 +57,12 @@ public class MedicalRecord {
         this.pet = pet;
     }
 
-    public Integer getVetId() {
-        return vetId;
+    public Vet getVet() {
+        return vet;
     }
 
-    public void setVetId(Integer vetId) {
-        this.vetId = vetId;
+    public void setVet(Vet vet) {
+        this.vet = vet;
     }
 
     public String getDescription() {
@@ -66,20 +73,54 @@ public class MedicalRecord {
         this.description = description;
     }
 
-    public String getDiagnosis() {
-        return diagnosis;
+    public String getMedications() {
+        return medications;
     }
 
-    public void setDiagnosis(String diagnosis) {
-        this.diagnosis = diagnosis;
+    public void setMedications(String medications) {
+        this.medications = medications;
     }
 
-    public String getTreatment() {
-        return treatment;
+    public String getHealthStatus() {
+        return healthStatus;
     }
 
-    public void setTreatment(String treatment) {
-        this.treatment = treatment;
+    public void setHealthStatus(String healthStatus) {
+        this.healthStatus = healthStatus;
+    }
+    
+    public String getAllergies() {
+        return allergies;
+    }
+
+    public void setAllergies(String allergies) {
+        this.allergies = allergies;
+    }
+    public String getDiet() {
+        return diet;
+    }
+
+    public void setDiet(String diet) {
+        this.diet = diet;
+    }
+
+   public String getWeight() {
+        return weight;
+    }
+
+    public void setWeight(String weight) {
+        this.weight = weight;
+    }
+
+
+
+
+    public String getService() {
+        return service;
+    }
+
+    public void setService(String service) {
+        this.service = service;
     }
 
     public LocalDate getRecordDate() {

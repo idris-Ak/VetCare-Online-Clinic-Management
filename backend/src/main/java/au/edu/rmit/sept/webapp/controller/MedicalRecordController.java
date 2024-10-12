@@ -59,21 +59,35 @@ public class MedicalRecordController {
             
             // Parse fields from the requestBody
             String description = (String) requestBody.get("description");
-            String diagnosis = (String) requestBody.get("diagnosis");
-            String treatment = (String) requestBody.get("treatment");
-            Integer vetId = (Integer) requestBody.get("vetId"); // Make sure the JSON being sent has vetId as a number
-            medicalRecord.setVetId(vetId);
+            String service = (String) requestBody.get("service");
+            String weight = (String) requestBody.get("weight");
+            String healthStatus = (String) requestBody.get("healthStatus");
+            String diet = (String) requestBody.get("diet");
+            String allergies = (String) requestBody.get("allergies");
+            String medications = (String) requestBody.get("medications");
+            Integer vetId = (Integer) requestBody.get("vetId"); // Assuming vetId is still passed as an ID
 
-            System.out.println("vetId : " + vetId); // Add this line to log the incoming data
+            // Fetch Vet by ID
+            Optional<Vet> vet = vetService.findById(Long.valueOf(vetId));
+            if (vet.isPresent()) {
+                medicalRecord.setVet(vet.get());
+            } else {
+                return ResponseEntity.badRequest().body(null); // Return 400 if vet not found
+            }
+
             // Optionally handle the recordDate
             LocalDate recordDate = requestBody.get("recordDate") != null 
                     ? LocalDate.parse((String) requestBody.get("recordDate")) 
                     : LocalDate.now();
 
+            medicalRecord.setAllergies(allergies);
+            medicalRecord.setHealthStatus(healthStatus);
+            medicalRecord.setMedications(medications);
+            medicalRecord.setWeight(weight);
+            medicalRecord.setDiet(diet);
             medicalRecord.setDescription(description);
-            medicalRecord.setDiagnosis(diagnosis);
-            medicalRecord.setTreatment(treatment);
             medicalRecord.setRecordDate(recordDate);
+            medicalRecord.setService(service);
 
             // Save the record and return response
             MedicalRecord savedRecord = medicalRecordService.saveMedicalRecord(medicalRecord);
@@ -86,23 +100,63 @@ public class MedicalRecordController {
     @PutMapping("/{recordId}")
     public ResponseEntity<MedicalRecord> updateMedicalRecord(
             @PathVariable Long recordId,
+            @RequestBody Map<String, Object> requestBody,
             @RequestParam(value = "description", required = false) String description,
-            @RequestParam(value = "diagnosis", required = false) String diagnosis,
-            @RequestParam(value = "treatment", required = false) String treatment,
-            @RequestParam(value = "recordDate", required = false) LocalDate recordDate) {
+            @RequestParam(value = "weight", required = false) String weight,
+            @RequestParam(value = "diet", required = false) String diet,
+            @RequestParam(value = "medications", required = false) String medications,
+            @RequestParam(value = "healthStatus", required = false) String healthStatus,
+            @RequestParam(value = "allergies", required = false) String allergies,
+            @RequestParam(value = "recordDate", required = false) LocalDate recordDate,
+            @RequestParam(value = "service", required = false) String service) { // Vet can also be updated
 
         Optional<MedicalRecord> existingRecord = medicalRecordService.findById(recordId);
         if (existingRecord.isPresent()) {
             MedicalRecord record = existingRecord.get();
 
-            if (description != null)
+            if (description != null){
                 record.setDescription(description);
-            if (diagnosis != null)
-                record.setDiagnosis(diagnosis);
-            if (treatment != null)
-                record.setTreatment(treatment);
-            if (recordDate != null)
+            }
+            if (allergies != null){
+                record.setAllergies(allergies);
+            }
+            if (diet != null){
+                record.setDiet(diet);
+            }
+            if (medications != null){
+                record.setMedications(medications);
+            }
+            if (healthStatus != null){
+                record.setHealthStatus(healthStatus);
+                }
+            if (healthStatus != null){
+            record.setHealthStatus(healthStatus);
+            }
+            if (weight != null){
+                record.setWeight(weight);
+            }
+            if (recordDate != null){
                 record.setRecordDate(recordDate);
+            }
+            if (service != null){
+                record.setService(service);
+            }
+
+            Integer vetId = (Integer) requestBody.get("vetId");
+            
+            if (vetId != null) {
+                System.out.println("vetId update: "+vetId);
+                Optional<Vet> vet = vetService.findById(Long.valueOf(vetId));
+                if (vet.isPresent()) {
+                    record.setVet(vet.get());
+                } else {
+                    return ResponseEntity.badRequest().body(null); // Return 400 if vet not found
+                }
+            }
+            else{
+                System.out.println("vetId is null: ");
+            }
+            System.out.println("record update"+record.getVet().getName());
 
             MedicalRecord updatedRecord = medicalRecordService.saveMedicalRecord(record);
             return ResponseEntity.ok(updatedRecord);

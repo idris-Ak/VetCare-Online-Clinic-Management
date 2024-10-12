@@ -8,18 +8,21 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+// Controller for handling all vet-related API requests
 @RestController
 @RequestMapping("/api/vets")
 public class VetController {
 
     @Autowired
-    private VetService vetService;
+    private VetService vetService; // Auto-inject the VetService
 
+    // Get all vets from the database
     @GetMapping
     public List<Vet> getAllVets() {
         return vetService.getAllVets();
     }
 
+    // Fetch a single vet by their ID
     @GetMapping("/{vetId}")
     public ResponseEntity<Vet> getVetById(@PathVariable Long vetId) {
         System.out.println("Fetching vet with ID: " + vetId);
@@ -34,13 +37,14 @@ public class VetController {
                 });
     }
     
-
+    // Create a new vet and save it to the database
     @PostMapping
     public ResponseEntity<Vet> createVet(@RequestBody Vet vet) {
         Vet savedVet = vetService.saveVet(vet);
         return ResponseEntity.ok(savedVet);
     }
 
+    // Update an existing vet's details
     @PutMapping("/{vetId}")
     public ResponseEntity<Vet> updateVet(@PathVariable Long vetId, @RequestBody Vet vet) {
         return vetService.findById(vetId)
@@ -57,6 +61,7 @@ public class VetController {
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
+    // Delete a vet from the database
     @DeleteMapping("/{vetId}")
     public ResponseEntity<Object> deleteVet(@PathVariable Long vetId) {
         return vetService.findById(vetId)

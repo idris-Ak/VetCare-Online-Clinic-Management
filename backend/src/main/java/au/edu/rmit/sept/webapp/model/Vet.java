@@ -104,11 +104,4 @@ public class Vet {
         this.detailPath = detailPath;
     }
 
-    // public List<MedicalRecord> getSharedRecords() {
-    //     return sharedRecords;
-    // }
-
-    // public void setSharedRecords(List<MedicalRecord> sharedRecords) {
-    //     this.sharedRecords = sharedRecords;
-    // }
 }

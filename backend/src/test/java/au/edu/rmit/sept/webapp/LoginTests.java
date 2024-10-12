@@ -21,7 +21,7 @@ class LoginTests {
 
     @BeforeEach
     public void setup() {
-        user = new User("John Smith", "john@example.com", "Password123", "Pet Owner");
+        user = new User("John Smith", "john@example.com", "Password123!", "Pet Owner");
     }
 
     @Test
@@ -32,7 +32,7 @@ class LoginTests {
         Optional<User> response = userService.findByEmail("john@example.com");
         assertTrue(response.isPresent());
         assertEquals(user.getEmail(), response.get().getEmail());
-        assertEquals("Password123", response.get().getPassword());
+        assertEquals("Password123!", response.get().getPassword());
     }
 
     @Test
@@ -58,12 +58,6 @@ class LoginTests {
         Mockito.when(userService.findByEmail("john@example.com")).thenReturn(Optional.of(user));
 
         assertNotEquals("Vet", user.getRole(), "Expected login to fail when the wrong role is selected.");
-    }
-
-    @Test
-    public void testVetEmailValidation() {
-        String invalidVetEmail = "jane@notvet.com";
-        assertFalse(invalidVetEmail.endsWith("@vetcare.com"), "Expected invalid Vet email.");
     }
 
     @Test

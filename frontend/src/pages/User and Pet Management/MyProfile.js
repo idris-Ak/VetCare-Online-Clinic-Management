@@ -2,14 +2,18 @@ import React, { useCallback, useState, useEffect } from 'react';
 import { Button, Form, Container, Modal, Card, Row, Col, Alert, Spinner } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
 import profilepic from '../../components/assets/profilepic.png';
+import defaultPetProfilePic from '../../components/assets/defaultPetProfilePic.png';
 
 function MyProfile({ user, setUser, logoutUser }) {
   const [profilePicPreview, setProfilePicPreview] = useState(null);
   const [isLoading, setIsLoading] = useState(true); // Loading state
+  const [isProfilePicLoading, setIsProfilePicLoading] = useState(false);
   const navigate = useNavigate();
 
   // Pet profiles state
   const [pets, setPets] = useState(user?.pets || []);
+  const [loadingStates, setLoadingStates] = useState({}); // Track loading state for each pet
+
 
   // State for pet details modal
   const [showPetModal, setShowPetModal] = useState(false);
@@ -66,6 +70,20 @@ const fetchPets = useCallback(async () => {
   // Handle profile picture upload
   const handleProfilePicChange = async(event) => {
   const file = event.target.files[0];
+  
+  // Start the loading state
+  setIsProfilePicLoading(true);
+
+  // Check file size (max 10MB)
+  const maxSizeInMB = 10;
+  if (file && file.size > maxSizeInMB * 1024 * 1024) {
+    setAlertContentDanger('Image size exceeds the allowable limit of 10MB. Please upload a smaller file.');
+    setAlertDanger(true);
+    setTimeout(() => setAlertDanger(false), 5000);
+    setIsProfilePicLoading(false); // Reset loading state
+    return; // Prevent further execution if size exceeds limit
+  }
+
   // Check file type for allowed image formats
   const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
     if (file && allowedTypes.includes(file.type)) {
@@ -78,33 +96,46 @@ const fetchPets = useCallback(async () => {
                 body: formData,
             });
 
-          if (!response.ok) {
-          if (response.status === 413) {
+        if (response.status === 413) {
           // Handle "Payload Too Large" error
           setAlertContentDanger('Image size exceeds the allowable limit of 10MB. Please upload a smaller file.');
           setAlertDanger(true);
-          setTimeout(() => setAlertDanger(false), 3000);
-          }
+          return; // Exit after displaying the error message
+        }
+        if (!response.ok) {
           throw new Error(`Error uploading profile picture: ${response.statusText}`);
-          }
+        }
           const updatedUser = await response.json();
           setUser(updatedUser);
-          setProfilePicPreview(URL.createObjectURL(file)); // Preview the uploaded image
+          // Update profilePicPreview using the updated user data from the server
+          if (updatedUser.profilePicture) {
+            setProfilePicPreview(`data:image/jpeg;base64,${updatedUser.profilePicture}`);
+          } else {
+            setProfilePicPreview(null);
+          }
         } catch (error) {
             console.error('Error uploading profile picture:', error);
             setAlertContentDanger(error.message || 'Failed to upload profile picture. Please try again later.');
             setAlertDanger(true);
-            setTimeout(() => setAlertDanger(false), 3000);
+            setTimeout(() => setAlertDanger(false), 5000);
+        }
+        finally {
+          // Reset the loading state
+          setIsProfilePicLoading(false);
         }
     }
     else {
     setAlertContentDanger('Please upload a valid image file (jpg or png).');
     setAlertDanger(true);
-    setTimeout(() => setAlertDanger(false), 3000);
+    setTimeout(() => setAlertDanger(false), 5000);
+    setIsProfilePicLoading(false); // Reset loading state
   }
 };
 
 const handleRemoveProfilePic = async () => {
+   // Start the loading state
+  setIsProfilePicLoading(true);
+
   try {
     const response = await fetch(`http://localhost:8080/api/users/${user.id}/profilePicture`, {
       method: 'DELETE', // Use DELETE method for removing the profile picture
@@ -117,12 +148,16 @@ const handleRemoveProfilePic = async () => {
     // Update the user object to reflect that the profile picture is removed
     const updatedUser = { ...user, profilePicture: null };
     setUser(updatedUser); // Update React state with the new user object
-    setProfilePicPreview(profilepic); // Set the profile picture preview to default placeholder
+    setProfilePicPreview(null); // Set the profile picture preview to default placeholder
   } catch (error) {
     console.error('Error removing profile picture:', error);
     setAlertContentDanger('Failed to remove profile picture. Please try again later.');
     setAlertDanger(true);
-    setTimeout(() => setAlertDanger(false), 3000);
+    setTimeout(() => setAlertDanger(false), 5000);
+  }
+  finally {
+    // Reset the loading state
+    setIsProfilePicLoading(false);
   }
 };
 
@@ -207,16 +242,6 @@ const handleRemoveProfilePic = async () => {
         return;
     }
 
-    // Email validation for Vet role
-    if (user.role === 'Vet' && !newEmail.endsWith('@vetcare.com')) {
-        setAlertContentDanger("As a Vet, your email must end with '@vetcare.com'");
-        setAlertDanger(true);
-        setTimeout(() => {
-        setAlertDanger(false);
-        }, 2500);
-        return;
-    }
-    
     //The following function was given by OpenAI (2024) ChatGPT [Large language model], accessed 3 September 2024. (*Link could not be generated successfully*)
     const isPasswordStrong = (newPassword) => {
         const re = new RegExp("^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\\$%\\^&\\*()_+\\-={}[\\]\\\\|;:'\",<.>/?~`])(?=.{8,})");
@@ -226,15 +251,6 @@ const handleRemoveProfilePic = async () => {
      //If password is not strong, output the error message
     if (currentPassword && newPassword && confirmPassword && !isPasswordStrong(newPassword)) {
      setAlertContentDanger('Your password must be at least 8 characters long and include uppercase letters, lowercase letters, numbers, and special characters.');
-     setAlertDanger(true);
-        setTimeout(() => {
-        setAlertDanger(false);
-     }, 2500);
-     return;
-    }
-
-    if(user.role === 'Pet Owner' && newEmail.endsWith('@vetcare.com')){
-     setAlertContentDanger('Your email cannot end with @vetcare.com.');
      setAlertDanger(true);
         setTimeout(() => {
         setAlertDanger(false);
@@ -318,9 +334,16 @@ const handleRemoveProfilePic = async () => {
 
     petData.append('name', form.elements.petName.value);
     petData.append('type', form.elements.petType.value);
-    petData.append('breed', form.elements.petBreed.value);
-    petData.append('age', form.elements.petAge.value);
-
+    // Only append breed and age if they have values (making them optional)
+    const breed = form.elements.petBreed.value.trim();
+    const age = form.elements.petAge.value.trim();
+  
+    if (breed) {
+      petData.append('breed', breed);
+    }
+    if (age) {
+      petData.append('age', age);
+    }
 
     // Handle pet profile picture
     const petProfilePicFile = form.elements.petProfilePicture.files[0];
@@ -344,8 +367,10 @@ const handleRemoveProfilePic = async () => {
             });
         }
 
+    // Check if response is not OK and handle it
     if (!response.ok) {
-      throw new Error(`Error saving pet: ${response.statusText}`);
+      const errorData = await response.text();  // Read the response as text
+      throw new Error(`Error saving pet: ${errorData || response.statusText}`);
     }
 
     const updatedPet = await response.json();
@@ -356,7 +381,7 @@ const handleRemoveProfilePic = async () => {
     setCurrentPet(null);
     } catch (error) {
     console.error('Error saving pet:', error);
-    setAlertContentDanger('Failed to save pet, please try again later.');
+    setAlertContentDanger(error.message || 'Failed to save pet, please try again later.');
     setAlertDanger(true);
     setTimeout(() => setAlertDanger(false), 3000);
     }
@@ -368,11 +393,21 @@ const handleRemoveProfilePic = async () => {
 // Handle pet profile picture upload
 const handlePetProfilePicChange = async (event, petId) => {
   const file = event.target.files[0];
+  if (!file) return;
 
-  // Check file type for allowed image formats
-  const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+  // Track loading state for this specific pet
+  setLoadingStates((prevStates) => ({ ...prevStates, [petId]: true }));
 
-    if (file && allowedTypes.includes(file.type)) {
+  // Check file size (max 10MB)
+  const maxSizeInMB = 10;
+  if (file && file.size > maxSizeInMB * 1024 * 1024) {
+    setAlertContentDanger('Image size exceeds the allowable limit of 10MB. Please upload a smaller file.');
+    setAlertDanger(true);
+    setTimeout(() => setAlertDanger(false), 5000);
+    setLoadingStates((prevStates) => ({ ...prevStates, [petId]: false }));
+    return; // Prevent further execution if size exceeds limit
+  }
+
     const formData = new FormData();
     formData.append('profilePicture', file);
 
@@ -383,12 +418,6 @@ const handlePetProfilePicChange = async (event, petId) => {
       });
 
       if (!response.ok) {
-        if (response.status === 413) {
-          // Handle "Payload Too Large" error for large files
-          setAlertContentDanger('Image size exceeds the allowable limit of 10MB. Please upload a smaller file.');
-          setAlertDanger(true);
-          setTimeout(() => setAlertDanger(false), 3000);
-        }
         throw new Error(`Error uploading pet profile picture: ${response.statusText}`);
       }
 
@@ -396,25 +425,21 @@ const handlePetProfilePicChange = async (event, petId) => {
 
       // Update the pets array in the state with the new profile picture
       setPets((prevPets) =>
-        prevPets.map((pet) => 
-          pet.id === updatedPet.id ? { ...pet, profilePicture: updatedPet.profilePicture } : pet
-        )
+        prevPets.map((pet) => (pet.id === updatedPet.id ? { ...pet, profilePicture: updatedPet.profilePicture } : pet))
       );
     } catch (error) {
       console.error('Error uploading pet profile picture:', error.message);
-      setAlertContentDanger(error.message || 'Failed to upload pet profile picture. Please try again later.');
+      setAlertContentDanger('Failed to upload pet profile picture. Please try again later.');
       setAlertDanger(true);
-      setTimeout(() => setAlertDanger(false), 3000);
+      setTimeout(() => setAlertDanger(false), 5000);
     }
-  }
-  else {
-    setAlertContentDanger('Please upload a valid image file (jpg or png).');
-    setAlertDanger(true);
-    setTimeout(() => setAlertDanger(false), 3000);
-  }
+    finally {
+      setLoadingStates((prevStates) => ({ ...prevStates, [petId]: false }));
+    }
 };
 
 const handleRemovePetProfilePic = async (petId) => {
+  setLoadingStates((prevStates) => ({ ...prevStates, [petId]: true }));
   try {
     // Send a PUT request to the backend to update the pet and remove the profile picture
     const response = await fetch(`http://localhost:8080/api/pets/${petId}/profilePicture?userId=${user.id}`, {
@@ -425,34 +450,46 @@ const handleRemovePetProfilePic = async (petId) => {
       throw new Error(`Error removing pet profile picture: ${response.statusText}`);
     }
 
-    // Update the pet in the frontend state
-    const updatedPets = pets.map((pet) =>
-      pet.id === petId ? { ...pet, profilePicture: null } : pet
+    // Update the pet state in the frontend
+     setPets((prevPets) =>
+      prevPets.map((pet) =>
+        pet.id === petId ? { ...pet, profilePicture: null } : pet
+      )
     );
-    setPets(updatedPets);
-    updateUserPets(updatedPets); // Update the pets in the user state as well
   } catch (error) {
-    console.error('Error removing pet profile picture:', error);
-    // Optionally, display an alert or error message to the user
+      console.error('Error removing pet profile picture:', error);
+      setAlertContentDanger('Failed to remove pet profile picture. Please try again later.');
+      setAlertDanger(true);
+      setTimeout(() => setAlertDanger(false), 5000);  }
+   finally {
+    setLoadingStates((prevStates) => ({ ...prevStates, [petId]: false }));
   }
 };
 
-// Helper function to update the user state with the new pets array
-const updateUserPets = (updatedPets) => {
-  const updatedUser = { ...user, pets: updatedPets };
-  setUser(updatedUser);
-};
-
-
-  // Handle pet profile picture preview
-  const getPetProfilePicPreview = (pet) => {
-    if (pet.profilePicture) {
-      return `data:image/png;base64,${pet.profilePicture}`;
-    } else {
-      // Set placeholder pet profile picture
-      return 'https://via.placeholder.com/286x180.png?text=Pet+Picture';
+// Helper function to display the profile picture with a spinner
+const getPetProfilePicPreview = (pet) => {
+    if (loadingStates[pet.id]) {
+      return (
+        <div className="d-flex justify-content-center align-items-center" style={{ height: '220px' }}>
+          <Spinner animation="border" role="status">
+            <span className="visually-hidden">Loading...</span>
+          </Spinner>
+        </div>
+      );
     }
+      const src = pet.profilePicture
+      ? `data:image/png;base64,${pet.profilePicture}`
+      : defaultPetProfilePic; // Use the default pet profile picture
+
+    return (
+    <Card.Img
+      variant="top"
+      src={src}
+      style={{ height: '220px', objectFit: 'cover', borderBottom: '5px solid #007bff'  }}
+    />    
+  );
   };
+
 
   // Handle pet edit
   const handlePetEdit = (pet) => {
@@ -503,6 +540,7 @@ const updateUserPets = (updatedPets) => {
     <Container style={{ marginTop: '50px', marginBottom: '50px', fontFamily: 'Lato, sans-serif' }}>
       {isSavingPet && <Spinner animation="border" role="status"><span className="visually-hidden">Saving...</span></Spinner>}
         {showAlert && alertContent &&(<Alert variant="success">{alertContent}</Alert>)}
+        {showAlertDanger && alertContentDanger && <Alert variant="danger">{alertContentDanger}</Alert>}
       <div
         className="d-flex flex-column align-items-center p-5"
         style={{
@@ -514,12 +552,32 @@ const updateUserPets = (updatedPets) => {
       >
         {/* User Profile Picture */}
         <div style={{ position: 'relative', marginBottom: '20px' }}>
+        {isProfilePicLoading ? (
+        // Render spinner in place of the profile picture
+        <div
+          className="d-flex justify-content-center align-items-center"
+          style={{
+          width: '150px',
+          height: '150px',
+          backgroundColor: '#f0f0f0',
+          borderRadius: '50%',
+        }}
+        >
+        <Spinner animation="border" role="status">
+          <span className="visually-hidden">Loading...</span>
+        </Spinner>
+          </div>
+          ) : (
           <img
             src={profilePicPreview || profilepic}
             alt="Profile"
             className="rounded-circle"
             style={{ width: '150px', height: '150px', objectFit: 'cover' }}
           />
+           )}
+        {/* Overlay Spinner when loading */}
+        {!isProfilePicLoading && (
+           <>
           <div
             onClick={handleProfilePicClick}
             style={{
@@ -528,8 +586,8 @@ const updateUserPets = (updatedPets) => {
               right: '0',
               backgroundColor: '#007bff',
               borderRadius: '50%',
-              width: '40px',
-              height: '40px',
+              width: '30px',
+              height: '30px',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -538,7 +596,7 @@ const updateUserPets = (updatedPets) => {
           >
             <i className="bi bi-pencil-fill" style={{ color: '#fff', fontSize: '16px' }}></i>
           </div>
-           {user.profilePicture && (
+           {user.profilePicture && !isProfilePicLoading && (
             <div
             onClick={handleRemoveProfilePic}
             style={{
@@ -558,6 +616,8 @@ const updateUserPets = (updatedPets) => {
          <i className="bi bi-x" style={{ color: '#fff', fontSize: '20px' }}></i>
             </div>
         )}
+        </>
+         )}
           <input
             type="file"
             id="profilePicInput"
@@ -693,6 +753,7 @@ const updateUserPets = (updatedPets) => {
         </Modal.Header>
         <Form onSubmit={handlePetSubmit}>
             <Modal.Body>
+              {showAlertDanger && alertContentDanger && <Alert variant="danger">{alertContentDanger}</Alert>}
             <Form.Group controlId="petName" className="mb-3">
               <Form.Label>Pet Name</Form.Label>
               <Form.Control
@@ -780,11 +841,8 @@ const updateUserPets = (updatedPets) => {
                   <Card className="m-2 flex-fill" style={{  width: '100%', borderRadius: '15px', boxShadow: '0 8px 16px rgba(0,0,0,0.15)', backgroundColor: '#f8f9fa', overflow: 'hidden', 
                   transition: 'transform 0.3s' }} onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.025)'} onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}>
                     <div style={{ position: 'relative' }}>
-                      <Card.Img
-                        variant="top"
-                        src={getPetProfilePicPreview(pet)}
-                        style={{ height: '220px', objectFit: 'cover', borderBottom: '5px solid #007bff'  }}
-                      />
+                        {getPetProfilePicPreview(pet)}
+                    {!loadingStates[pet.id] && (
                       <div
                         onClick={() => document.getElementById(`petPicInput-${pet.id}`).click()}
                         style={{
@@ -804,7 +862,8 @@ const updateUserPets = (updatedPets) => {
                       >
                         <i className="bi bi-pencil-fill" style={{ color: '#fff', fontSize: '16px' }}></i>
                       </div>
-                      {pet.profilePicture && (
+                    )}
+                      {pet.profilePicture && pet.profilePicture !== defaultPetProfilePic && !loadingStates[pet.id] && (
                         <div
                           onClick={() => handleRemovePetProfilePic(pet.id)}
                           style={{

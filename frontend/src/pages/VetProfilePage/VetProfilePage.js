@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import '../pages/VetProfilePage.css';
+import "../VetProfilePage/VetProfilePage.css"
 
 const VetProfilePage = () => {
   const { id } = useParams(); // Get the vet ID from the URL

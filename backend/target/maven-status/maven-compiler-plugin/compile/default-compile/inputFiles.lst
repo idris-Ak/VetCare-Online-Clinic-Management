@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 /Users/farahanwazir/Desktop/Group Work/team-project-group-p06-02/backend/src/main/java/au/edu/rmit/sept/webapp/SecurityConfig.java
 /Users/farahanwazir/Desktop/Group Work/team-project-group-p06-02/backend/src/main/java/au/edu/rmit/sept/webapp/WebConfig.java
 /Users/farahanwazir/Desktop/Group Work/team-project-group-p06-02/backend/src/main/java/au/edu/rmit/sept/webapp/WebappApplication.java
@@ -31,3 +32,38 @@
 /Users/farahanwazir/Desktop/Group Work/team-project-group-p06-02/backend/src/main/java/au/edu/rmit/sept/webapp/service/TransactionService.java
 /Users/farahanwazir/Desktop/Group Work/team-project-group-p06-02/backend/src/main/java/au/edu/rmit/sept/webapp/service/UserService.java
 /Users/farahanwazir/Desktop/Group Work/team-project-group-p06-02/backend/src/main/java/au/edu/rmit/sept/webapp/service/VetService.java
+=======
+/Users/shreyas/github-classroom/Software Engineering Process and Tools/team-project-group-p06-02/backend/src/main/java/au/edu/rmit/sept/webapp/SecurityConfig.java
+/Users/shreyas/github-classroom/Software Engineering Process and Tools/team-project-group-p06-02/backend/src/main/java/au/edu/rmit/sept/webapp/WebConfig.java
+/Users/shreyas/github-classroom/Software Engineering Process and Tools/team-project-group-p06-02/backend/src/main/java/au/edu/rmit/sept/webapp/WebappApplication.java
+/Users/shreyas/github-classroom/Software Engineering Process and Tools/team-project-group-p06-02/backend/src/main/java/au/edu/rmit/sept/webapp/config/DataLoader.java
+/Users/shreyas/github-classroom/Software Engineering Process and Tools/team-project-group-p06-02/backend/src/main/java/au/edu/rmit/sept/webapp/controller/AppointmentController.java
+/Users/shreyas/github-classroom/Software Engineering Process and Tools/team-project-group-p06-02/backend/src/main/java/au/edu/rmit/sept/webapp/controller/MedicalRecordController.java
+/Users/shreyas/github-classroom/Software Engineering Process and Tools/team-project-group-p06-02/backend/src/main/java/au/edu/rmit/sept/webapp/controller/PaymentController.java
+/Users/shreyas/github-classroom/Software Engineering Process and Tools/team-project-group-p06-02/backend/src/main/java/au/edu/rmit/sept/webapp/controller/PetController.java
+/Users/shreyas/github-classroom/Software Engineering Process and Tools/team-project-group-p06-02/backend/src/main/java/au/edu/rmit/sept/webapp/controller/TransactionController.java
+/Users/shreyas/github-classroom/Software Engineering Process and Tools/team-project-group-p06-02/backend/src/main/java/au/edu/rmit/sept/webapp/controller/UserController.java
+/Users/shreyas/github-classroom/Software Engineering Process and Tools/team-project-group-p06-02/backend/src/main/java/au/edu/rmit/sept/webapp/controller/VetController.java
+/Users/shreyas/github-classroom/Software Engineering Process and Tools/team-project-group-p06-02/backend/src/main/java/au/edu/rmit/sept/webapp/model/Appointment.java
+/Users/shreyas/github-classroom/Software Engineering Process and Tools/team-project-group-p06-02/backend/src/main/java/au/edu/rmit/sept/webapp/model/MedicalRecord.java
+/Users/shreyas/github-classroom/Software Engineering Process and Tools/team-project-group-p06-02/backend/src/main/java/au/edu/rmit/sept/webapp/model/Payment.java
+/Users/shreyas/github-classroom/Software Engineering Process and Tools/team-project-group-p06-02/backend/src/main/java/au/edu/rmit/sept/webapp/model/Pet.java
+/Users/shreyas/github-classroom/Software Engineering Process and Tools/team-project-group-p06-02/backend/src/main/java/au/edu/rmit/sept/webapp/model/Transaction.java
+/Users/shreyas/github-classroom/Software Engineering Process and Tools/team-project-group-p06-02/backend/src/main/java/au/edu/rmit/sept/webapp/model/User.java
+/Users/shreyas/github-classroom/Software Engineering Process and Tools/team-project-group-p06-02/backend/src/main/java/au/edu/rmit/sept/webapp/model/Vet.java
+/Users/shreyas/github-classroom/Software Engineering Process and Tools/team-project-group-p06-02/backend/src/main/java/au/edu/rmit/sept/webapp/repository/AppointmentRepository.java
+/Users/shreyas/github-classroom/Software Engineering Process and Tools/team-project-group-p06-02/backend/src/main/java/au/edu/rmit/sept/webapp/repository/MedicalRecordRepository.java
+/Users/shreyas/github-classroom/Software Engineering Process and Tools/team-project-group-p06-02/backend/src/main/java/au/edu/rmit/sept/webapp/repository/PaymentRepository.java
+/Users/shreyas/github-classroom/Software Engineering Process and Tools/team-project-group-p06-02/backend/src/main/java/au/edu/rmit/sept/webapp/repository/PetRepository.java
+/Users/shreyas/github-classroom/Software Engineering Process and Tools/team-project-group-p06-02/backend/src/main/java/au/edu/rmit/sept/webapp/repository/TransactionRepository.java
+/Users/shreyas/github-classroom/Software Engineering Process and Tools/team-project-group-p06-02/backend/src/main/java/au/edu/rmit/sept/webapp/repository/UserRepository.java
+/Users/shreyas/github-classroom/Software Engineering Process and Tools/team-project-group-p06-02/backend/src/main/java/au/edu/rmit/sept/webapp/repository/VetRepository.java
+/Users/shreyas/github-classroom/Software Engineering Process and Tools/team-project-group-p06-02/backend/src/main/java/au/edu/rmit/sept/webapp/service/AppointmentService.java
+/Users/shreyas/github-classroom/Software Engineering Process and Tools/team-project-group-p06-02/backend/src/main/java/au/edu/rmit/sept/webapp/service/ImageService.java
+/Users/shreyas/github-classroom/Software Engineering Process and Tools/team-project-group-p06-02/backend/src/main/java/au/edu/rmit/sept/webapp/service/MedicalRecordService.java
+/Users/shreyas/github-classroom/Software Engineering Process and Tools/team-project-group-p06-02/backend/src/main/java/au/edu/rmit/sept/webapp/service/PaymentService.java
+/Users/shreyas/github-classroom/Software Engineering Process and Tools/team-project-group-p06-02/backend/src/main/java/au/edu/rmit/sept/webapp/service/PetService.java
+/Users/shreyas/github-classroom/Software Engineering Process and Tools/team-project-group-p06-02/backend/src/main/java/au/edu/rmit/sept/webapp/service/TransactionService.java
+/Users/shreyas/github-classroom/Software Engineering Process and Tools/team-project-group-p06-02/backend/src/main/java/au/edu/rmit/sept/webapp/service/UserService.java
+/Users/shreyas/github-classroom/Software Engineering Process and Tools/team-project-group-p06-02/backend/src/main/java/au/edu/rmit/sept/webapp/service/VetService.java
+>>>>>>> origin/HEAD

@@ -42,7 +42,7 @@ const AllVetMembers = () => {
             <img src={`http://localhost:8080${vet.imagePath}`} alt={`Portrait of ${vet.name}`} className="vet-image" />
             <h3>{vet.name}</h3>
             <p>{vet.shortDescription}</p>
-            <Link to={`/details/${vet.id}`} className="learn-more-link">Learn More</Link>
+            <Link to={`/vets/${vet.id}`} className="learn-more-link">Learn More</Link>
           </div>
         ))}
       </div>
