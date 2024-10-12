@@ -1,16 +1,17 @@
 import { DateCalendar, LocalizationProvider } from '@mui/x-date-pickers';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';
 import React, { useState } from 'react';
 import { Button, Card, Container, Table } from 'react-bootstrap';
 import './VetDashboard.css';
 
-function VetDashboard({ vet }) {
+function VetDashboard({ user }) {
   const [selectedDate, setSelectedDate] = useState(dayjs());
 
   return (
-    <LocalizationProvider dateAdapter={dayjs}>
+    <LocalizationProvider dateAdapter={AdapterDayjs}>
       <Container className="vet-dashboard">
-        <h1 className="dashboard-title">Welcome, Dr. {vet ? vet.name : 'Vet'}</h1>
+        <h1 className="dashboard-title" >Welcome, {user && user.role === 'Vet' ? `Dr. ${user.name}` : user ? user.name : 'Vet'}</h1>
         
         <div className="dashboard-content">
           <div className="calendar-section">

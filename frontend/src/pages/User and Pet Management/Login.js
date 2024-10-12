@@ -58,7 +58,7 @@ function Login({loginUser}) {
         loginUser(user);
         // Redirect based on user role
         if (user.role === "Vet") {
-          navigate('/vet-dashboard');  // Redirect to vet dashboard
+          navigate('/VetDashboard');  // Redirect to vet dashboard
         } else {
           const redirectTo = location.state?.from || '/';
           navigate(redirectTo);

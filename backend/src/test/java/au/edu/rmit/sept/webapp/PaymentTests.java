@@ -84,7 +84,7 @@ class PaymentTests {
         when(transactionService.saveTransaction(any(Transaction.class))).thenReturn(mockTransaction);
 
         // Handle PayPal payment
-        ResponseEntity<Map<String, String>> response = paymentController.handlePayPalPayment(paymentData, 1L, 1L, "prescription");
+        ResponseEntity<Map<String, String>> response = paymentController.handlePayPalPayment(paymentData, 1L, 1L, "Prescription Refill");
 
         // Verify the right messages are outputted and the transaction is saved
         assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -100,7 +100,7 @@ class PaymentTests {
         paymentData.put("amount", 50.00);
 
         // Handle PayPal payment
-        ResponseEntity<Map<String, String>> response = paymentController.handlePayPalPayment(paymentData, 1L, 1L, "prescription");
+        ResponseEntity<Map<String, String>> response = paymentController.handlePayPalPayment(paymentData, 1L, 1L, "Appointment Booking");
 
         // Verify a bad request is outputted and the transaction is not saved
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
@@ -150,7 +150,7 @@ class PaymentTests {
         when(transactionService.saveTransaction(any(Transaction.class))).thenReturn(mockTransaction);
 
         // Handle Credit/Debit card payment
-        ResponseEntity<Map<String, String>> response = paymentController.handleCreditCardPayment(paymentDetails, 1L, 1L, "prescription");
+        ResponseEntity<Map<String, String>> response = paymentController.handleCreditCardPayment(paymentDetails, 1L, 1L, "Prescription Refill");
 
         // Verify the payment is successful and the transaction has been saved
         assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -166,7 +166,7 @@ class PaymentTests {
         paymentDetails.put("amount", -50.00);
 
         // Handle Credit/Debit card payment
-        ResponseEntity<Map<String, String>> response = paymentController.handleCreditCardPayment(paymentDetails, 1L, 1L, "prescription");
+        ResponseEntity<Map<String, String>> response = paymentController.handleCreditCardPayment(paymentDetails, 1L, 1L, "Appointment Booking");
 
         // Verify a bad request and error message is outputted
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
@@ -180,7 +180,7 @@ class PaymentTests {
         paymentDetails.put("amount", "invalid-amount");
 
         // Handle Credit/Debit card payment
-        ResponseEntity<Map<String, String>> response = paymentController.handleCreditCardPayment(paymentDetails, 1L, 1L, "prescription");
+        ResponseEntity<Map<String, String>> response = paymentController.handleCreditCardPayment(paymentDetails, 1L, 1L, "Prescription Refill");
 
         // Verify a bad request and error message is outputted
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
