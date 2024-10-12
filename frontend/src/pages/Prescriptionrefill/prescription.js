@@ -5,7 +5,7 @@ import './prescription.css';
 import { PayPalButtons, PayPalScriptProvider } from '@paypal/react-paypal-js'; // PayPalButton Component
 import successfulPaymentCheck from 'frontend/src/components/assets/check.png';
 
-function PrescriptionRefill({ user, addPrescriptionToHistory }) {
+function PrescriptionRefill({ user }) {
   const [petData, setPetData] = useState([]);
   const [selectedPet, setSelectedPet] = useState(null);
   const [refillRequest, setRefillRequest] = useState({
@@ -20,6 +20,20 @@ function PrescriptionRefill({ user, addPrescriptionToHistory }) {
   const [showPaymentModal, setShowPaymentModal] = useState(false); // State to control payment modal
   const [showPayPalButtons, setShowPayPalButtons] = useState(false);
   const [showConfirmationModal, setShowConfirmationModal] = useState(false); // State to control confirmation modal  
+
+    // Payment Form State
+  const [paymentDetails, setPaymentDetails] = useState({
+    cardNumber: '',
+    expiryDate: '',
+    cvv: '',
+  });
+
+  const [errors, setErrors] = useState({
+    cardNumberError: '',
+    expiryDateError: '',
+    cvvError: '',
+  });
+
 
   // Fetch pet data
   useEffect(() => {
@@ -57,21 +71,17 @@ function PrescriptionRefill({ user, addPrescriptionToHistory }) {
     fetchVets();
   }, []);
 
-    // Payment Form State
-    const [paymentDetails, setPaymentDetails] = useState({
-      cardNumber: '',
-      expiryDate: '',
-      cvv: ''
-    });
-
-    const [errors, setErrors] = useState({
-      cardNumberError: '',
-      expiryDateError: '',
-      cvvError: ''
-    });
-
   // Handle prescription submission
-  const handleSubmit = async () => {
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    // Check if form is valid
+    const form = e.currentTarget;
+    if (form.checkValidity() === false) {
+        e.stopPropagation();
+        return;
+    }
+
     if (!selectedPet) {
       alert('Please select a pet for the prescription request.');
       return;
@@ -163,7 +173,7 @@ const validateExpiryDate = (expiryDate) => {
 };
 
   // Validate Payment Form
-const validatePaymentForm = () => {
+const validatePaymentForm = async() => {
     const { cardNumber, expiryDate, cvv } = paymentDetails;
     let isValid = true;
     let newErrors = {
@@ -177,6 +187,28 @@ const validatePaymentForm = () => {
     if (cardNumberDigits.length !== 16) {
     newErrors.cardNumberError = "Card number must be 16 digits.";
     isValid = false;
+    }
+
+      // Validate expiry date (MM/YY)
+    if (!validateExpiryDate(expiryDate)) {
+    newErrors.expiryDateError = "Invalid or expired date. Use MM/YY format.";
+    isValid = false;
+    }
+
+    // Validate CVV (3 digits)
+    if (cvv.length !== 3) {
+    newErrors.cvvError = "CVV must be 3 digits.";
+    isValid = false;
+    }
+    setErrors(newErrors);
+    return isValid;
+};
+
+  // Function to submit prescription request
+  const submitPrescriptionRequest = async () => {
+    if (!user || !selectedPet) {
+      alert('User or pet information is missing.');
+      return false;
     }
 
     const requestData = {
@@ -201,27 +233,48 @@ const validatePaymentForm = () => {
 
       if (response.ok) {
         const newRecord = await response.json();
-        alert('Prescription refill request submitted successfully!');
-        // Payment successful
-        setShowPaymentModal(false);
-        setShowConfirmationModal(true);
-        // Add the new prescription to the history
-        addPrescriptionToHistory(newRecord);
 
-        // Reset form fields
-        setRefillRequest({
-          medication: '',
-          dosage: '',
-          preferredPharmacy: '',
-          pickupDate: '',
-        });
+        return true;
+      } else {
+        alert('Failed to submit the refill request.');
+        return false; // Indicate failure
+      }
+    } catch (error) {
+      console.error('Error submitting refill request:', error);
+    return false; // Indicate failure
+    }
+  };
+
+   // Handle Payment Submission
+ const handlePaymentSubmit = async (e) => {
+      e.preventDefault();
+      if (validatePaymentForm()) {
+        if (!user || !selectedPet) {
+            alert('User or pet information is missing.');
+            return;
+        }
+        // Send payment details to the backend
+        try {
+            const response = await fetch(`http://localhost:8080/api/payment/credit-card?userId=${user.id}&petId=${selectedPet}&serviceType=Prescription+Refill`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                amount: 50.00
+            }),
+          });
+
+      if (response.ok) {
+        await submitPrescriptionRequest();
       } else {
         alert('Failed to submit the refill request.');
       }
     } catch (error) {
       console.error('Error submitting refill request:', error);
     }
-  };
+  }
+};
 
 const handleCloseConfirmationModal = () => {
     // Reset form or navigate to home page
@@ -233,6 +286,7 @@ const handleCloseConfirmationModal = () => {
         preferredPharmacy: '',
         pickupDate: ''
     });
+    setSelectedVet(null);
 };
 
   // Get today's date in 'YYYY-MM-DD' format for the min attribute
@@ -270,6 +324,7 @@ return (
             placeholder="Enter medication name"
             className="form-input"
             value={refillRequest.medication}
+            required
             onChange={(e) => setRefillRequest({ ...refillRequest, medication: e.target.value })}
           />
         </Form.Group>
@@ -281,6 +336,7 @@ return (
             placeholder="Enter dosage"
             className="form-input"
             value={refillRequest.dosage}
+            required
             onChange={(e) => setRefillRequest({ ...refillRequest, dosage: e.target.value })}
           />
         </Form.Group>
@@ -292,6 +348,7 @@ return (
             placeholder="Enter pharmacy name"
             className="form-input"
             value={refillRequest.preferredPharmacy}
+            required
             onChange={(e) => setRefillRequest({ ...refillRequest, preferredPharmacy: e.target.value })}
           />
         </Form.Group>
@@ -303,6 +360,7 @@ return (
             className="form-input"
             min={today}
             value={refillRequest.pickupDate}
+            required
             onChange={(e) => setRefillRequest({ ...refillRequest, pickupDate: e.target.value })}
           />
         </Form.Group>
@@ -311,6 +369,7 @@ return (
           <Form.Label>Select Veterinarian</Form.Label>
           <Form.Control
             as="select"
+            required
             value={selectedVet ? selectedVet.name : ''}
             onChange={(e) => {
               const selectedVetName = e.target.value;
@@ -367,21 +426,30 @@ return (
                   return;
                 }
                 try {
-                  const response = await fetch(`http://localhost:8080/api/payment/paypal?userId=${user.id}&petId=${selectedPet.id}&serviceType=Prescription+Refill`, {
+                  const response = await fetch(`http://localhost:8080/api/payment/paypal?userId=${user.id}&petId=${selectedPet}&serviceType=Prescription+Refill`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ orderId: data.orderID, amount: 50.00 }),
                   });
                   if (response.ok) {
-                    setShowPaymentMethodModal(false);
-                    setShowPayPalButtons(false);
-                    setShowConfirmationModal(true);
-                    addPrescriptionToMedicalRecords();
+                      // Proceed to submit the prescription request
+                    const prescriptionSuccess = await submitPrescriptionRequest();
+                    if (prescriptionSuccess) {
+                        // Only show confirmation modal if prescription request succeeds
+                        setShowPaymentMethodModal(false);
+                        setShowPayPalButtons(false);
+                        setShowConfirmationModal(true);
+                  }
+                  else {
+                    // Prescription submission failed
+                    alert('Failed to submit the prescription request.');
+                  }
                   } else {
                     alert('Payment failed. Please try again.');
                   }
                 } catch (error) {
-                  alert('Error processing payment.');
+                    console.error('Error during payment or prescription submission:', error);
+                alert(`An error occurred: ${error.message || 'Please try again later.'}`);
                 }
               })}
               onCancel={() => {
@@ -471,7 +539,7 @@ return (
           <p>Thank you for your submission and payment!</p>
           <p>Here is a summary of your request:</p>
           <ul>
-            <li><strong>Pet:</strong> {selectedPet?.name || 'N/A'}</li>
+            <li><strong>Pet:</strong> {petData.find((pet) => pet.id === selectedPet)?.name || 'N/A'}</li>
             <li><strong>Medication:</strong> {refillRequest.medication || 'N/A'}</li>
             <li><strong>Dosage:</strong> {refillRequest.dosage || 'N/A'}</li>
             <li><strong>Preferred Pharmacy:</strong> {refillRequest.preferredPharmacy || 'N/A'}</li>
@@ -484,5 +552,4 @@ return (
   </Container>
 );
 }
-};
 export default PrescriptionRefill;
