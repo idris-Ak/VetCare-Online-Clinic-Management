@@ -15,6 +15,7 @@ import TransactionHistory from './pages/User and Pet Management/TransactionHisto
 import Prescription from './pages/Prescriptionrefill/prescription';
 import SignUp from './pages/User and Pet Management/SignUp';
 import VetProfilePage from './pages/VetProfilePage/VetProfilePage'; // Adjusted relative path
+import VetDashboard from './pages/VetDashboard/VetDashboard';
 
 // PrivateRoute component to protect certain routes
 function PrivateRoute({ children, isLoggedIn }) {
@@ -78,6 +79,7 @@ function App() {
             
             {/* Dynamic route for vet profile pages */}
             <Route path="/vets/:id" element={<VetProfilePage />} /> {/* :id captures the vet ID from the URL */}
+            <Route path="/VetDashboard" element={<VetDashboard user={user} />} />
             
             <Route path="/login" element={<Login loginUser={loginUser} />} />
             <Route path="/signup" element={<SignUp loginUser={loginUser} />} />

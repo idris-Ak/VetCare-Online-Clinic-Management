@@ -102,7 +102,7 @@ try {
         loginUser(fetchUser);
         // Redirect based on role
         if (fetchUser.role === "Vet") {
-          navigate('/vet-dashboard');  // Redirect to Vet dashboard
+          navigate('/VetDashboard');  // Redirect to Vet dashboard
         } else {
           navigate('/');
         }

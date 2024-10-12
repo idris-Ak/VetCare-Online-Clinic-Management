@@ -50,22 +50,23 @@ function Navbar({ logoutUser, isLoggedIn, user }) {
         </button>
     <div className="collapse navbar-collapse" style={{fontWeight: 'bold'}} id="navbarSupportedContent">
       <ul className="navbar-list main-links">
-        <li className="navbar-item">
-        <NavLink to="/" className="navbar-link" activeClassName="active">Home</NavLink>
-        </li>
-
         {/* Conditional Rendering Based on User Role */}
         {isLoggedIn && user && user.role === 'Vet' ? (
             <>
               {/* Vets can only see the Vet Dashboard */}
-              <li className="navbar-item">
-                <NavLink to="/vet-dashboard" className="navbar-link" onClick={() => handleNavigation('/vet-dashboard')}>
+                <div className="navbar-center">
+                  <li className="navbar-item">
+                <NavLink to="/VetDashboard" className="navbar-link" onClick={() => handleNavigation('/VetDashboard')}>
                   Vet Dashboard
                 </NavLink>
-              </li>
+                   </li>
+                </div>
             </>
           ) : (
             <>
+        <li className="navbar-item">
+          <NavLink to="/" className="navbar-link" activeClassName="active">Home</NavLink>
+        </li>
         <li className="navbar-item">
           <NavLink to="/AppointmentPage/Appointments" className="navbar-link" onClick={()=> handleNavigation('/AppointmentPage/Appointments')}>
             Book Online

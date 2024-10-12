@@ -58,25 +58,65 @@ function PrescriptionRefill({ user, addPrescriptionToHistory }) {
       return;
     }
 
-    const requestData = {
-      petId: selectedPet,
-      service: 'Prescription', // Specify this is a prescription
-      medication: refillRequest.medication,
-      dosage: refillRequest.dosage,
-      preferredPharmacy: refillRequest.preferredPharmacy,
-      pickupDate: refillRequest.pickupDate,
-      recordDate: dayjs().format('YYYY-MM-DD'), // Record the date of the prescription submission
-      vetId: selectedVet ? selectedVet.id : null, // Include the vet ID if available
+    // Validate expiry date (MM/YY)
+    if (!validateExpiryDate(expiryDate)) {
+    newErrors.expiryDateError = "Invalid or expired date. Use MM/YY format.";
+    isValid = false;
+    }
+
+    // Validate CVV (3 digits)
+    if (cvv.length !== 3) {
+    newErrors.cvvError = "CVV must be 3 digits.";
+    isValid = false;
+    }
+    setErrors(newErrors);
+    return isValid;
+};
+
+  // Automatically add prescription to medical records
+const addPrescriptionToMedicalRecords = () => {
+    const newPrescription = {
+    petId: selectedPet.id,
+    prescriptionDetail,
+    pharmacy: preferredPharmacy,
+    pickupDate: preferredPickupDate,
+    pickupTime: preferredPickupTime,
+      date: new Date().toISOString().split('T')[0] // Current date in YYYY-MM-DD format
     };
 
-    try {
-      const response = await fetch(`http://localhost:8080/api/medicalRecords/pet/${selectedPet}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(requestData),
-      });
+    // Retrieve existing medical records
+    const medicalRecords = JSON.parse(localStorage.getItem('medicalRecords')) || [];
+
+    // Add the new prescription
+    medicalRecords.push({
+    ...newPrescription,
+    service: 'Prescription',
+      vet: preferredPharmacy, // Pharmacy becomes the 'vet' field in this case
+    });
+
+    // Save the updated records back to localStorage
+    localStorage.setItem('medicalRecords', JSON.stringify(medicalRecords));
+};
+
+  // Handle Payment Submission
+ const handlePaymentSubmit = async (e) => {
+      e.preventDefault();
+      if (validatePaymentForm()) {
+        if (!user || !selectedPet) {
+            alert('User or pet information is missing.');
+            return;
+        }
+        // Send payment details to the backend
+        try {
+            const response = await fetch(`http://localhost:8080/api/payment/credit-card?userId=${user.id}&petId=${selectedPet.id}&serviceType=Prescription+Refill`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                amount: 50.00
+            }),
+          });
 
       if (response.ok) {
         const newRecord = await response.json();
