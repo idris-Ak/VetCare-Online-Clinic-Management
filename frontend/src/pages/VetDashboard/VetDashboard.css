@@ -1,0 +1,26 @@
+.vet-dashboard {
+  padding: 20px;
+}
+
+.dashboard-title {
+  text-align: center;
+  margin-bottom: 20px;
+  color: #007bff;
+}
+
+.dashboard-content {
+  display: flex;
+  gap: 20px;
+}
+
+.calendar-section {
+  flex: 1;
+}
+
+.appointments-section {
+  flex: 2;
+}
+
+.card {
+  margin-bottom: 20px;
+}
