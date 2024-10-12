@@ -27,8 +27,11 @@ public class MedicalRecord {
     private Vet vet;
     
     private String description;
-    private String diagnosis;
-    private String treatment;
+    private String medications;
+    private String allergies;
+    private String diet;
+    private String healthStatus;
+    private String weight;
     private String service;
     
     @Column(name = "record_date")
@@ -70,28 +73,54 @@ public class MedicalRecord {
         this.description = description;
     }
 
+    public String getMedications() {
+        return medications;
+    }
+
+    public void setMedications(String medications) {
+        this.medications = medications;
+    }
+
+    public String getHealthStatus() {
+        return healthStatus;
+    }
+
+    public void setHealthStatus(String healthStatus) {
+        this.healthStatus = healthStatus;
+    }
+    
+    public String getAllergies() {
+        return allergies;
+    }
+
+    public void setAllergies(String allergies) {
+        this.allergies = allergies;
+    }
+    public String getDiet() {
+        return diet;
+    }
+
+    public void setDiet(String diet) {
+        this.diet = diet;
+    }
+
+   public String getWeight() {
+        return weight;
+    }
+
+    public void setWeight(String weight) {
+        this.weight = weight;
+    }
+
+
+
+
     public String getService() {
         return service;
     }
 
     public void setService(String service) {
         this.service = service;
-    }
-
-    public String getDiagnosis() {
-        return diagnosis;
-    }
-
-    public void setDiagnosis(String diagnosis) {
-        this.diagnosis = diagnosis;
-    }
-
-    public String getTreatment() {
-        return treatment;
-    }
-
-    public void setTreatment(String treatment) {
-        this.treatment = treatment;
     }
 
     public LocalDate getRecordDate() {
