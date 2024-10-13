@@ -1,9 +1,9 @@
+import { PayPalButtons, PayPalScriptProvider } from '@paypal/react-paypal-js'; // PayPalButton Component
 import dayjs from 'dayjs';
+import successfulPaymentCheck from 'frontend/src/components/assets/check.png';
 import React, { useEffect, useState } from 'react';
 import { Button, Container, Form } from 'react-bootstrap';
 import './prescription.css';
-import { PayPalButtons, PayPalScriptProvider } from '@paypal/react-paypal-js'; // PayPalButton Component
-import successfulPaymentCheck from 'frontend/src/components/assets/check.png';
 
 function PrescriptionRefill({ user }) {
   const [petData, setPetData] = useState([]);
@@ -317,41 +317,67 @@ return (
 
     <div className="prescription-form">
       <Form>
-        <Form.Group controlId="formMedication" className="form-group">
-          <Form.Label>Medication</Form.Label>
-          <Form.Control
-            type="text"
-            placeholder="Enter medication name"
-            className="form-input"
-            value={refillRequest.medication}
-            required
-            onChange={(e) => setRefillRequest({ ...refillRequest, medication: e.target.value })}
-          />
-        </Form.Group>
+      <Form.Group controlId="formMedication" className="form-group">
+  <Form.Label>Medication</Form.Label>
+  <Form.Control
+    as="select"
+    className="form-input"
+    value={refillRequest.medication}
+    required
+    onChange={(e) => setRefillRequest({ ...refillRequest, medication: e.target.value })}
+  >
+    <option value="">Select Medication</option>
+    <option value="Walgreens">Walgreens</option>
+<option value="Walmart Pharmacy">Walmart Pharmacy</option>
+<option value="Rite Aid">Rite Aid</option>
+  </Form.Control>
+</Form.Group>
 
-        <Form.Group controlId="formDosage" className="form-group">
-          <Form.Label>Dosage</Form.Label>
-          <Form.Control
-            type="text"
-            placeholder="Enter dosage"
-            className="form-input"
-            value={refillRequest.dosage}
-            required
-            onChange={(e) => setRefillRequest({ ...refillRequest, dosage: e.target.value })}
-          />
-        </Form.Group>
+<Form.Group controlId="formDosage" className="form-group">
+  <Form.Label>Dosage</Form.Label>
+  <Form.Control
+    as="select"
+    className="form-input"
+    value={refillRequest.dosage}
+    required
+    onChange={(e) => setRefillRequest({ ...refillRequest, dosage: e.target.value })}
+  >
+    <option value="50 mg">50 mg</option>
+<option value="100 mg">100 mg</option>
+<option value="250 mg">250 mg</option>
+<option value="500 mg">500 mg</option>
+<option value="1 g">1 g</option>
+<option value="5 mL">5 mL</option>
+<option value="10 mL">10 mL</option>
+<option value="1 tablet">1 tablet</option>
+<option value="2 tablets">2 tablets</option>
+<option value="1 injection">1 injection</option>
 
-        <Form.Group controlId="formPharmacy" className="form-group">
-          <Form.Label>Preferred Pharmacy</Form.Label>
-          <Form.Control
-            type="text"
-            placeholder="Enter pharmacy name"
-            className="form-input"
-            value={refillRequest.preferredPharmacy}
-            required
-            onChange={(e) => setRefillRequest({ ...refillRequest, preferredPharmacy: e.target.value })}
-          />
-        </Form.Group>
+  </Form.Control>
+</Form.Group>
+
+<Form.Group controlId="formPharmacy" className="form-group">
+  <Form.Label>Preferred Pharmacy</Form.Label>
+  <Form.Control
+    as="select"
+    className="form-input"
+    value={refillRequest.preferredPharmacy}
+    required
+    onChange={(e) => setRefillRequest({ ...refillRequest, preferredPharmacy: e.target.value })}
+  >
+    <option value="">Select Pharmacy</option>
+    <option value="Walgreens">Walgreens</option>
+<option value="Rite Aid">Rite Aid</option>
+<option value="Walmart Pharmacy">Walmart Pharmacy</option>
+<option value="Kroger Pharmacy">Kroger Pharmacy</option>
+<option value="Safeway Pharmacy">Safeway Pharmacy</option>
+<option value="Costco Pharmacy">Costco Pharmacy</option>
+<option value="Target Pharmacy">Target Pharmacy</option>
+<option value="Publix Pharmacy">Publix Pharmacy</option>
+<option value="Albertsons Pharmacy">Albertsons Pharmacy</option>
+  </Form.Control>
+</Form.Group>
+
 
         <Form.Group controlId="formPickupDate" className="form-group">
           <Form.Label>Preferred Pickup Date</Form.Label>
@@ -366,23 +392,25 @@ return (
         </Form.Group>
 
         <Form.Group controlId="formVet" className="form-group">
-          <Form.Label>Select Veterinarian</Form.Label>
-          <Form.Control
-            as="select"
-            required
-            value={selectedVet ? selectedVet.name : ''}
-            onChange={(e) => {
-              const selectedVetName = e.target.value;
-              const selectedVet = vets.find((vet) => vet.name === selectedVetName);
-              setSelectedVet(selectedVet);
-            }}
-          >
-            <option value="">Select Vet</option>
-            {vets.map((vet) => (
-              <option key={vet.id} value={vet.name}>{vet.name}</option>
-            ))}
-          </Form.Control>
-        </Form.Group>
+  <Form.Label>Select Veterinarian</Form.Label>
+  <Form.Control
+    as="select"
+    required
+    value={selectedVet ? selectedVet.name : ''}
+    onChange={(e) => {
+      const selectedVetName = e.target.value;
+      const selectedVet = vets.find((vet) => vet.name === selectedVetName);
+      setSelectedVet(selectedVet);
+    }}
+  >
+    <option value="">Select Vet</option>
+    <option value="Dr. Sarah Johnson">Dr. Sarah Johnson</option>
+    <option value="Dr. Michael Lee">Dr. Michael Lee</option>
+    <option value="Dr. Emily Rodriguez">Dr. Emily Rodriguez</option>
+    <option value="Dr. David Brown">Dr. David Brown</option>
+  </Form.Control>
+</Form.Group>
+
 
         <Button className="submit-btn" onClick={handleSubmit} disabled={!selectedPet}>
           Proceed To Payment
