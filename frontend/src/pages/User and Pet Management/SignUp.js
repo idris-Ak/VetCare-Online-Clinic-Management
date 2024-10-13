@@ -70,7 +70,11 @@ function SignUp({loginUser}) {
   if(!validateForm()){
     return;
   }
-  const nameDr = "Dr. " + user.name.trim();
+
+  let name = user.name.trim();
+  if (user.role === "vet"){
+    name = "Dr. " + user.name.trim();
+  }
 
   try {
     // Try getting a response from the api
@@ -81,7 +85,7 @@ function SignUp({loginUser}) {
       },
       // Send the user data to the backend
       body: JSON.stringify({
-        name: nameDr,
+        name: name,
         email: user.email.trim(),
         password: user.password,
         role: user.role,
