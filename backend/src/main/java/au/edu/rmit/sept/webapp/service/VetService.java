@@ -30,9 +30,19 @@ public class VetService {
     public void deleteVet(Long vetId) {
         vetRepository.deleteById(vetId);
     }
+    public Vet shareRecordWithVet(Long vetId, Long recordId) throws Exception {
+        Optional<Vet> optionalVet = vetRepository.findById(vetId);
 
-    // public List<MedicalRecord> getSharedRecords(Long vetId) {
-    //     Optional<Vet> vet = vetRepository.findById(vetId);
-    //     return vet.map(Vet::getSharedRecords).orElse(null);
-    // }
+        if (optionalVet.isPresent()) {
+            Vet vet = optionalVet.get();
+            if (!vet.getSharedRecordIds().contains(recordId)) {
+                vet.addRecordId(recordId);
+                return vetRepository.save(vet);
+            } else {
+                throw new Exception("Record ID already shared with this vet.");
+            }
+        } else {
+            throw new Exception("Vet not found.");
+        }
+    }
 }

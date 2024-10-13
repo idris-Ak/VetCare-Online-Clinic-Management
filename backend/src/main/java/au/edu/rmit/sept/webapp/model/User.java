@@ -18,6 +18,7 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    private Long vetId;  // New field for Vet ID
     private String name;
     @Column(unique = true)
     private String email;
@@ -54,6 +55,14 @@ public class User {
 
     public void setId(Long id) {
         this.id = id;
+    }
+    // Constructors, Getters and Setters
+    public Long getVetId() {
+        return vetId;
+    }
+
+    public void setVetId(Long vetId) {
+        this.vetId = vetId;
     }
     
     public String getName() {

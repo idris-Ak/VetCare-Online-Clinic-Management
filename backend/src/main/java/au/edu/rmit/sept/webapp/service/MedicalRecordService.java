@@ -36,5 +36,9 @@ public class MedicalRecordService {
     public void deleteMedicalRecord(Long id) {
         medicalRecordRepository.deleteById(id);
     }
+
+    public List<MedicalRecord> getRecordsByIds(List<Long> recordIds) {
+        return medicalRecordRepository.findAllById(recordIds);
+    }
     
 }

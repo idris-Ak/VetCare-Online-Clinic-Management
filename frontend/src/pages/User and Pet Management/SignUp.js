@@ -71,7 +71,7 @@ function SignUp({loginUser}) {
     return;
   }
 
-try {
+  try {
     // Try getting a response from the api
     const response = await fetch('http://localhost:8080/api/users/signup', {
       method: 'POST',
@@ -100,8 +100,10 @@ try {
       setTimeout(() => {
         setShowSuccessAlert(false);
         loginUser(fetchUser);
+
         // Redirect based on role
         if (fetchUser.role === "Vet") {
+          addVet(fetchUser);
           navigate('/VetDashboard');  // Redirect to Vet dashboard
         } else {
           navigate('/');
@@ -114,12 +116,56 @@ try {
   finally {
     setIsLoading(false);
   }
-    if (user.role === 'Vet') {
-      user.medRecSent = []; // Array to hold multiple medical records
+  };
+  const addVet = async (user) => {
+    try {
+      // Prepare the vet data using the user details from signup
+      const vetData = {
+        name: user.name,
+        title: 'Veterinarian',  
+        short_description: `Dr. ${user.name} is a skilled`,
+        long_description: `Dr. ${user.name} has joined VetCare as a dedicated vet, bringing expertise and a passion for pet health.`,
+        image_path: 'default-vet.jpg',  // Placeholder image path, could be updated later
+        detail_path: `/vets/${user.name.toLowerCase()}`, // Dynamic vet detail path
+        clinic_name: 'Clinic 4',  // You can update this as per actual clinic name or leave as default
+      };
+  
+      // Send the vet data to the backend
+      const response = await fetch('http://localhost:8080/api/vets', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(vetData),
+      });
+  
+      if (response.ok) {
+        const vet = await response.json();
+        console.log('Vet added successfully:', vet);
+  
+        // Now update the user with the vetId
+        const userResponse = await fetch(`http://localhost:8080/api/users/vetId/${user.id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ vetId: vet.id }),
+        });
+  
+        if (userResponse.ok) {
+          console.log('User vetId updated successfully');
+        } else {
+          console.error('Error updating user with vetId');
+        }
+      } else {
+        console.error('Error adding vet');
+      }
+    } catch (error) {
+      console.error('Error adding vet:', error);
     }
   };
 
-   const renderTooltipEmail = (props) => (
+     const renderTooltipEmail = (props) => (
     <Tooltip id="button-tooltip" {...props}>
       Enter a valid email. If you're a vet, use an email ending in '@vetcare.com'.
     </Tooltip>

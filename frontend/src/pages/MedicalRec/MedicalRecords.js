@@ -10,7 +10,7 @@ import './MedicalRecords.css';
 
 function MedicalRecords({ user }) {
   const [vets, setVets] = useState([]);
-  const [petData, setPetData] = useState([]); // Added state for pets
+  const [petData, setPetData] = useState([]);
   const [selectedVet, setSelectedVet] = useState(null);
   const [showVetModal, setShowVetModal] = useState(false);
   const [allRecords, setAllRecords] = useState([]);
@@ -47,6 +47,7 @@ function MedicalRecords({ user }) {
   });
   const [errors, setErrors] = useState({ date: "", service: "", vet: "" });
 
+  // Effect to fetch the list of veterinarians from the API on component mount
   useEffect(() => {
     const fetchVets = async () => {
       try {
@@ -61,7 +62,8 @@ function MedicalRecords({ user }) {
     fetchVets();
   }, []);
 
-  // LOAD PET DATA FROM DATABASE
+  // Effect to fetch the user's pets if the user is defined
+// eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (user) {
       async function getUserPets() {
@@ -72,8 +74,9 @@ function MedicalRecords({ user }) {
       getUserPets();
     }
 
-  }, [user]); // Add user dependency to ensure it fetches when user is defined
+  }, [user]); 
   
+  // Function to fetch pet information for the current user
   const getPetInfo = async () => {
     try {
       const response = await fetch(`http://localhost:8080/api/pets/user/${user.id}`);
@@ -84,32 +87,31 @@ function MedicalRecords({ user }) {
     }
   };
 
+  // Effect to fetch medical records based on selected pet or user
+// eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     const fetchRecords = async () => {
 
       if (!user) {
         console.error("User is not defined.");
-        return; // Exit if user is not defined
+        return; 
     }
     
       let url = `http://localhost:8080/api/medicalRecords`;
       if (selectedPet) {
         url += `/pet/${selectedPet}`;
       } else {
-        url += `/user/${user.id}`; // Fetch records for all pets belonging to the logged-in user
+        url += `/user/${user.id}`; 
       }
 
       try {
         const response = await fetch(url);
-        console.log("Fetch Response:", response); // Log response status and headers
 
         if (response.ok) {
           const records = await response.json();
-          console.log("Fetched Records:", records); // Log the records fetched
           setAllRecords(records);
 
           setTimeout(() => {
-            console.log("Updated allRecords State:", allRecords);
         }, 0);
         } else {
           console.error('Failed to fetch records');
@@ -122,72 +124,78 @@ function MedicalRecords({ user }) {
     };
 
     fetchRecords();
-    console.log("Updated allRecords State: round2", allRecords);
   }, [selectedPet, user]);
 
+  // Effect to filter medical records based on selected pet and search term
   useEffect(() => {
-    console.log("All Records for Filtering:", allRecords);
-    console.log("selectedPet:", selectedPet);
-    
     const filtered = allRecords.filter(record => {
-        // Ensure record.pet exists before accessing id
         const matchesPet = !selectedPet || (record.pet && record.pet.id === Number(selectedPet)); 
         const matchesSearch = 
             (record.service && record.service.toLowerCase().includes(searchTerm.toLowerCase())) ||
-            (record.recordDate && record.recordDate.includes(searchTerm)); // Use the correct date property
+            (record.recordDate && record.recordDate.includes(searchTerm)); 
 
         return matchesPet && matchesSearch;
     });
 
     setFilteredRecords(filtered);
-    console.log("Filtered Records:", filtered);
 }, [allRecords, selectedPet, searchTerm]);
 
-
-  useEffect(() => {
-    console.log("current allRecords: ", allRecords);
-  }, [ allRecords]);
-
-
-  const formatRecordDetails = (record) => {
-    return `
-      Date: ${record.date}
-      Service: ${record.service}
-      Veterinarian: ${record.vet}
-      Weight: ${record.weight}
-      Health Status: ${record.healthStatus}
-      Diet: ${record.diet}
-      Allergies: ${record.allergies}
-      Medications: ${record.medications}
-    `;
-  };
-
+  // Function to handle downloading a medical record as a PDF
   const handleDownload = (record) => {
     const doc = new jsPDF();
+  
     doc.setFontSize(16);
     doc.text('Medical Record', 10, 10);
+  
     doc.setFontSize(12);
-    doc.text(`Date: ${record.date}`, 10, 20);
-    doc.text(`Service: ${record.service}`, 10, 30);
-    doc.text(`Veterinarian: ${record.vet}`, 10, 40);
+    doc.text(`Date: ${record.recordDate || 'N/A'}`, 10, 20); 
+    doc.text(`Service: ${record.service || 'N/A'}`, 10, 30);
+    doc.text(`Veterinarian: ${record.vet.name || 'N/A'}`, 10, 40);
+  
+    let yPosition = 50; 
     if (record.weight) {
-      doc.text(`Weight: ${record.weight}`, 10, 50);
-      doc.text(`Health Status: ${record.healthStatus}`, 10, 60);
-      doc.text(`Diet: ${record.diet}`, 10, 70);
+      doc.text(`Weight: ${record.weight}`, 10, yPosition);
+      yPosition += 10;
     }
-    doc.save(`medical-record-${record.id}.pdf`);
+  
+    if (record.healthStatus) {
+      doc.text(`Health Status: ${record.healthStatus}`, 10, yPosition);
+      yPosition += 10;
+    }
+  
+    if (record.diet) {
+      doc.text(`Diet: ${record.diet}`, 10, yPosition);
+      yPosition += 10;
+    }
+  
+    if (record.allergies) {
+      doc.text(`Allergies: ${record.allergies}`, 10, yPosition);
+      yPosition += 10;
+    }
+  
+    if (record.medications) {
+      doc.text(`Medications: ${record.medications}`, 10, yPosition);
+      yPosition += 10;
+    }
+  
+    if (record.description) {
+      doc.text(`Description: ${record.description}`, 10, yPosition);
+      yPosition += 10;
+    }
+  
+    doc.save(`medical-record-${record.id || 'unknown'}.pdf`);
   };
-
+  
+  // Function to send the selected medical record to the selected veterinarian
   const handleSendToVet = async () => {
     if (!selectedVet || !selectedRecord) return;
 
     const shareData = {
       recordId: selectedRecord.id,
-      vetId: selectedVet.id
     };
 
     try {
-      const response = await fetch("http://localhost:8080/api/medicalRecords/share", {
+      const response = await fetch(`http://localhost:8080/api/vets/share/${selectedVet.id}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -206,11 +214,12 @@ function MedicalRecords({ user }) {
       console.error("Error sharing record:", error);
     }
   };
-
+  // Function to handle showing the modal for adding a new medical record
   const handleAddRecord = () => {
     setShowAddModal(true);
   };
 
+  // Function to validate and save a new medical record
   const handleSaveNewRecord = async () => {
     let valid = true;
     const newErrors = { date: "", service: "", vet: "" };
@@ -225,35 +234,31 @@ function MedicalRecords({ user }) {
       valid = false;
     }
 
-    if (!newRecord.vet.startsWith("Dr.")) {
-      newErrors.vet = "Veterinarian must start with 'Dr.'";
+    if (newRecord.vet.startsWith("Select")) {
+      newErrors.vet = "You must select a Veterinarian";
       valid = false;
     }
 
     setErrors(newErrors);
 
-    // Add validation for selectedVet
     if (!selectedVet) {
       alert("Please select a veterinarian before saving the record.");
-      return; // Exit if selectedVet is null
+      return; 
     }
     
     if (valid) {
       const recordData = {
-        petId: selectedPet,  // Assuming `selectedPet` is defined and holds the pet's ID
-
+        petId: selectedPet,  
         recordDate: dayjs(newRecord.date).format('YYYY-MM-DD'),
-        service: newRecord.service,
-        vetId: selectedVet.id, // Send vet ID to backend
+        service: newRecord.service === 'Other' ? newRecord.customService : newRecord.service, 
+        vetId: selectedVet.id,
         weight: newRecord.weight || "", 
         healthStatus: newRecord.healthStatus || "", 
         diet: newRecord.diet || "", 
         allergies: newRecord.allergies || "", 
         medications: newRecord.medications || "", 
-        description: newRecord.description || "",  // Optional fields
+        description: newRecord.description || "",
       };
-
-      console.log("new entry: ",recordData);
 
       try {
         const response = await fetch(`http://localhost:8080/api/medicalRecords/pet/${selectedPet}`, {
@@ -265,7 +270,6 @@ function MedicalRecords({ user }) {
         });
 
         if (response.ok) {
-          console.log("add record begin");
           const createdRecord = await response.json();
           setAllRecords(prev => [...prev, createdRecord]);
           setShowAddModal(false);
@@ -281,7 +285,7 @@ function MedicalRecords({ user }) {
             description: ""
           });
         } else {
-          const errorData = await response.json();  // Read the error response body
+          const errorData = await response.json(); 
           console.error("Failed to add medical record:", errorData);
           alert("Failed to add medical record: " + (errorData.message || "Unknown error"));
         }
@@ -291,6 +295,26 @@ function MedicalRecords({ user }) {
     }
   };
 
+  // Function to handle showing the modal for editing an existing medical record
+  const handleShowEditModal = (record) => {
+    setEditRecord({
+        id: record.id,
+        date: dayjs(record.recordDate), 
+        service: record.service || "", 
+        vet: record.vet.name || "", 
+        weight: record.weight || "", 
+        healthStatus: record.healthStatus || "", 
+        diet: record.diet || "", 
+        allergies: record.allergies || "", 
+        medications: record.medications || "", 
+        description: record.description || "", 
+    });
+  
+      setShowEditModal(true);
+    };
+    
+
+  // Function to validate and save the edited medical record
   const handleSaveEdit = async () => {
     let valid = true;
     const newErrors = { date: "", service: "", vet: "" };
@@ -305,9 +329,8 @@ function MedicalRecords({ user }) {
       valid = false;
     }
 
-    // Ensure editRecord.vet is a string before applying .startsWith
-    if (typeof editRecord.vet !== 'string' || !editRecord.vet.startsWith("Dr.")) {
-      newErrors.vet = "Veterinarian must start with 'Dr.'";
+    if (typeof editRecord.vet !== 'string' || editRecord.vet.startsWith("Select")) {
+      newErrors.vet = "You must select a Veterinarian";
       valid = false;
     }
 
@@ -318,17 +341,16 @@ function MedicalRecords({ user }) {
         ...editRecord,
 
         recordDate: dayjs(editRecord.date).format('YYYY-MM-DD'),
-        service: editRecord.service,
-        vetId: selectedVet.id, // Send vet ID to backend
+        service: editRecord.service === 'Other' ? editRecord.customService : editRecord.service, 
+        vetId: selectedVet.id,
         weight: editRecord.weight || "", 
         healthStatus: editRecord.healthStatus || "", 
         diet: editRecord.diet || "", 
         allergies: editRecord.allergies || "", 
         medications: editRecord.medications || "", 
-        description: editRecord.description || "",  // Optional fields
+        description: editRecord.description || "", 
       };
 
-      console.log("vetId Record:", updatedRecordData.vetId); // Log the record being sent
 
       try {
         const response = await fetch(`http://localhost:8080/api/medicalRecords/${editRecord.id}`, {
@@ -358,6 +380,7 @@ function MedicalRecords({ user }) {
     setErrors({ date: "", service: "", vet: "" });
   };
 
+  // Function to delete a medical record
   const handleDeleteRecord = async (id) => {
     try {
       const response = await fetch(`http://localhost:8080/api/medicalRecords/${id}`, {
@@ -372,23 +395,6 @@ function MedicalRecords({ user }) {
     } catch (error) {
       console.error("Error deleting record:", error);
     }
-  };
-
-  const handleShowEditModal = (record) => {
-  setEditRecord({
-      id: record.id,
-      date: dayjs(record.recordDate), 
-      service: record.service || "", 
-      vet: record.vet.name || "", 
-      weight: record.weight || "", 
-      healthStatus: record.healthStatus || "", 
-      diet: record.diet || "", 
-      allergies: record.allergies || "", 
-      medications: record.medications || "", 
-      description: record.description || "", 
-  });
-
-    setShowEditModal(true);
   };
 
 
@@ -493,7 +499,7 @@ function MedicalRecords({ user }) {
                   label="Select date"
                   value={newRecord.date}
                   onChange={(date) => setNewRecord({ ...newRecord, date })}
-                  maxDate={dayjs()} // Set max date using Day.js
+                  maxDate={dayjs()}  
                   textField={(params) => (
                     <Form.Control
                       {...params.inputProps}
@@ -514,7 +520,7 @@ function MedicalRecords({ user }) {
                     const selectedService = e.target.value;
                     setNewRecord((prevRecord) => ({
                       ...prevRecord,
-                      service: selectedService !== 'Other' ? selectedService : prevRecord.customService,
+                      service: selectedService,
                       customService: selectedService === 'Other' ? '' : prevRecord.customService,
                     }));
                   }}
@@ -536,10 +542,10 @@ function MedicalRecords({ user }) {
                   <Form.Label>Custom Service</Form.Label>
                   <Form.Control
                     type="text"
-                    value={newRecord.customService || ""} // Ensure this defaults to an empty string
+                    value={newRecord.customService || ""}  
                     onChange={(e) => setNewRecord((prevRecord) => ({
                       ...prevRecord,
-                      customService: e.target.value || "", // Default to empty if undefined
+                      customService: e.target.value,
                     }))}
                     isInvalid={!!errors.customService}
                   />
@@ -553,10 +559,10 @@ function MedicalRecords({ user }) {
               <Form.Group controlId="formVet">
                 <Form.Label>Veterinarian</Form.Label>
                 <Form.Control as="select" value={newRecord.vet} onChange={(e) => {
-                  const selectedVetName = e.target.value; // Get the selected vet name
-                  const selectedVet = vets.find(vet => vet.name === selectedVetName); // Find the vet object based on the name
-                  setSelectedVet(selectedVet); // Update selectedVet state
-                  setNewRecord({ ...newRecord, vet: selectedVetName }); // Update newRecord.vet with the selected vet name
+                  const selectedVetName = e.target.value;
+                  const selectedVet = vets.find(vet => vet.name === selectedVetName);
+                  setSelectedVet(selectedVet);
+                  setNewRecord({ ...newRecord, vet: selectedVetName });
                 }} isInvalid={!!errors.vet}>
                   <option value="">Select Vet</option>
                   {vets.map(vet => (
@@ -685,9 +691,9 @@ function MedicalRecords({ user }) {
                 <Form.Label>Date</Form.Label>
                 <DatePicker
                   label="Select date"
-                  value={editRecord.date} // Ensure the value is controlled
+                  value={editRecord.date}
                   onChange={(date) => setEditRecord({ ...editRecord, date })}
-                  maxDate={dayjs()} // Set max date using Day.js
+                  maxDate={dayjs()}
                   textField={(params) => (
                     <Form.Control
                       {...params.inputProps}
@@ -703,12 +709,12 @@ function MedicalRecords({ user }) {
             <Form.Group controlId="formService">
               <Form.Label>Service</Form.Label>
               <Form.Select
-                value={editRecord.service || ""} // Ensure this is controlled
+                value={editRecord.service || ""}
                 onChange={(e) => {
                   const selectedService = e.target.value;
                   setEditRecord((prevRecord) => ({
                     ...prevRecord,
-                    service: selectedService !== 'Other' ? selectedService : prevRecord.customService,
+                    service: selectedService,
                     customService: selectedService === 'Other' ? '' : prevRecord.customService,
                   }));
                 }}
@@ -730,7 +736,7 @@ function MedicalRecords({ user }) {
                 <Form.Label>Custom Service</Form.Label>
                 <Form.Control
                   type="text"
-                  value={editRecord.customService}
+                  value={editRecord.customService || ""}
                   onChange={(e) => setEditRecord((prevRecord) => ({
                     ...prevRecord,
                     customService: e.target.value
@@ -745,10 +751,10 @@ function MedicalRecords({ user }) {
               <Form.Group controlId="formVet">
                 <Form.Label>Veterinarian</Form.Label>
                 <Form.Control as="select" value={editRecord.vet} onChange={(e) => {
-                  const selectedVetName = e.target.value; // Get the selected vet name
-                  const selectedVet = vets.find(vet => vet.name === selectedVetName); // Find the vet object based on the name
-                  setSelectedVet(selectedVet); // Update selectedVet state
-                  setEditRecord({ ...editRecord, vet: selectedVetName }); // Update newRecord.vet with the selected vet name
+                  const selectedVetName = e.target.value;
+                  const selectedVet = vets.find(vet => vet.name === selectedVetName);
+                  setSelectedVet(selectedVet);
+                  setEditRecord({ ...editRecord, vet: selectedVetName });
                 }} isInvalid={!!errors.vet}>
                   <option value="">Select Vet</option>
                   {vets.map(vet => (

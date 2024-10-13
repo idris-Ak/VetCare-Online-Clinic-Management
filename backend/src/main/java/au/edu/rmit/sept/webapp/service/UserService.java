@@ -26,6 +26,17 @@ public class UserService {
     public Optional<User> findByEmail(String email) {
         return userRepository.findByEmail(email);
     }
+    
+    // method to update vetId for a user
+    public User updateVetId(Long userId, Long vetId) {
+        Optional<User> userOptional = findById(userId);
+        if (userOptional.isPresent()) {
+            User user = userOptional.get();
+            user.setVetId(vetId);  
+            return userRepository.save(user); 
+        }
+        return null; 
+    }
 
     public Optional<User> findById(Long id) {
         return userRepository.findById(id);
