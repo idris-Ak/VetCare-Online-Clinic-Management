@@ -57,23 +57,19 @@ function VetDashboard({ user }) {
     };
   
   const handleDownload = (record) => {
-    // Create a new jsPDF document
     const doc = new jsPDF();
   
-    // Title of the document
     doc.setFontSize(16);
     doc.text('Medical Record', 10, 10);
 
     console.log("record to download: ", record);
   
-    // Add record information
     doc.setFontSize(12);
-    doc.text(`Date: ${record.recordDate || 'N/A'}`, 10, 20); // Default 'N/A' if date is missing
+    doc.text(`Date: ${record.recordDate || 'N/A'}`, 10, 20); 
     doc.text(`Service: ${record.service || 'N/A'}`, 10, 30);
     doc.text(`Veterinarian: ${record.vet.name || 'N/A'}`, 10, 40);
   
-    // Conditionally add the optional fields if they exist
-    let yPosition = 50; // Keep track of vertical position
+    let yPosition = 50; 
   
     if (record.weight) {
       doc.text(`Weight: ${record.weight}`, 10, yPosition);
@@ -105,64 +101,9 @@ function VetDashboard({ user }) {
       yPosition += 10;
     }
   
-    // Save the PDF file with a unique name using the record ID
     doc.save(`medical-record-${record.id || 'unknown'}.pdf`);
     console.log("Downloading PDF for record:", record);
   };
-
-
-    //   // Create a new jsPDF document
-    //   const doc = new jsPDF();
-  
-    //   // Title of the document
-    //   doc.setFontSize(16);
-    //   doc.text('Medical Record', 10, 10);
-  
-    //   console.log("record to download: ", record);
-    
-    //   // Add record information
-    //   doc.setFontSize(12);
-    //   doc.text(`Date: ${record.recordDate || 'N/A'}`, 10, 20); // Default 'N/A' if date is missing
-    //   doc.text(`Service: ${record.service || 'N/A'}`, 10, 30);
-    //   doc.text(`Veterinarian: ${record.vet.name || 'N/A'}`, 10, 40);
-    
-    //   // Conditionally add the optional fields if they exist
-    //   let yPosition = 50; // Keep track of vertical position
-    
-    //   if (record.weight) {
-    //     doc.text(`Weight: ${record.weight}`, 10, yPosition);
-    //     yPosition += 10;
-    //   }
-    
-    //   if (record.healthStatus) {
-    //     doc.text(`Health Status: ${record.healthStatus}`, 10, yPosition);
-    //     yPosition += 10;
-    //   }
-    
-    //   if (record.diet) {
-    //     doc.text(`Diet: ${record.diet}`, 10, yPosition);
-    //     yPosition += 10;
-    //   }
-    
-    //   if (record.allergies) {
-    //     doc.text(`Allergies: ${record.allergies}`, 10, yPosition);
-    //     yPosition += 10;
-    //   }
-    
-    //   if (record.medications) {
-    //     doc.text(`Medications: ${record.medications}`, 10, yPosition);
-    //     yPosition += 10;
-    //   }
-    
-    //   if (record.description) {
-    //     doc.text(`Description: ${record.description}`, 10, yPosition);
-    //     yPosition += 10;
-    //   }
-    
-    //   // Save the PDF file with a unique name using the record ID
-    //   doc.save(`medical-record-${record.id || 'unknown'}.pdf`);
-    // };
-    
 
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
