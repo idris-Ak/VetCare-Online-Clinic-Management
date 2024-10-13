@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 // Controller for handling all vet-related API requests
 @RestController
@@ -70,5 +71,16 @@ public class VetController {
                     return ResponseEntity.noContent().build();
                 })
                 .orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    @PostMapping("/share/{vetId}")
+    public ResponseEntity<?> shareRecordWithVet(@PathVariable Long vetId, @RequestBody Map<String, Long> requestBody) {
+        Long recordId = requestBody.get("recordId");
+        try {
+            Vet updatedVet = vetService.shareRecordWithVet(vetId, recordId);
+            return ResponseEntity.ok(updatedVet);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 }

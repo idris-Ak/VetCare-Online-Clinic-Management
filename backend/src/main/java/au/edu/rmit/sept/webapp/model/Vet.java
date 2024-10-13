@@ -1,14 +1,17 @@
 package au.edu.rmit.sept.webapp.model;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Table;
 
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "vets")
@@ -28,14 +31,31 @@ public class Vet {
     @Column(length = 4096)
     private String longDescription;
 
+    
+
     private String imagePath;
     private String detailPath;
 
     private String clinicName;
 
+    @ElementCollection(fetch = FetchType.EAGER)
+    private Set<Long> sharedRecordIds = new HashSet<>(); // Store record IDs in a Set
 
     // Default constructor
     public Vet() {
+    }
+
+    // Getters and Setters for sharedRecordIds
+    public Set<Long> getSharedRecordIds() {
+        return sharedRecordIds;
+    }
+
+    public void setSharedRecordIds(Set<Long> sharedRecordIds) {
+        this.sharedRecordIds = sharedRecordIds;
+    }
+
+    public void addRecordId(Long recordId) {
+        this.sharedRecordIds.add(recordId);
     }
 
     // Constructor with parameters

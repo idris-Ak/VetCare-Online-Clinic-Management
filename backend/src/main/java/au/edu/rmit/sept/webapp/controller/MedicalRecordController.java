@@ -44,6 +44,11 @@ public class MedicalRecordController {
 
         return ResponseEntity.ok(records); // Return records with 200 OK
     }
+    
+    @GetMapping("/getRecordsByIds")
+    public List<MedicalRecord> getRecordsByIds(@RequestParam List<Long> recordIds) {
+        return medicalRecordService.getRecordsByIds(recordIds);
+    }
 
     @PostMapping("/pet/{petId}")
     public ResponseEntity<MedicalRecord> createMedicalRecord(
@@ -143,7 +148,7 @@ public class MedicalRecordController {
             }
 
             Integer vetId = (Integer) requestBody.get("vetId");
-            
+
             if (vetId != null) {
                 System.out.println("vetId update: "+vetId);
                 Optional<Vet> vet = vetService.findById(Long.valueOf(vetId));
@@ -184,23 +189,5 @@ public class MedicalRecordController {
         return ResponseEntity.ok(allRecords); // Return records with 200 OK
     }
 
-    // @PostMapping("/share")
-    // public ResponseEntity<String> shareMedicalRecord(@RequestBody Map<String, Long> shareRequest) {
-    //     Long recordId = shareRequest.get("recordId");
-    //     Long vetId = shareRequest.get("vetId");
-
-    //     // Find the vet and the medical record
-    //     Optional<Vet> vet = vetService.findById(vetId);
-    //     Optional<MedicalRecord> medicalRecord = medicalRecordService.findById(recordId);
-
-    //     if (vet.isPresent() && medicalRecord.isPresent()) {
-    //         // Add the record to the vet's shared records
-    //         vet.get().getSharedRecords().add(medicalRecord.get());
-    //         vetService.saveVet(vet.get()); // Save the vet with updated shared records
-    //         return ResponseEntity.ok("Medical record shared with vet ID: " + vetId);
-    //     }
-
-    //     return ResponseEntity.notFound().build();
-    // }
 
 }

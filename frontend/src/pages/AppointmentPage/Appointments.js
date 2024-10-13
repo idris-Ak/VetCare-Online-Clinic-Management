@@ -848,6 +848,7 @@ const rescheduleAppointment = async () => {
                             }),
                         });
                             if (response.ok) {
+                              finaliseAppointmentBooking(); // Finalise the booking after payment
                               setShowPaymentMethodModal(false);
                               setShowPayPalButtons(false);
                               setShowConfirmationModal(true);

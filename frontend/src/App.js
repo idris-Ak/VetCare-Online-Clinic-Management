@@ -6,13 +6,13 @@ import Footer from "./components/Footer/Footer";
 import Navbar from './components/Navbar/Navbar';
 import AllVetMembers from './pages/AllVetMembers/AllVetMembers';
 import Appointments from './pages/AppointmentPage/Appointments';
-import EducationalResource from './pages/EducationalResource';
+import EducationalResource from './pages/EducationalResource/EducationalResource';
 import HomePage from './pages/HomePage/HomePage';
 import Login from './pages/User and Pet Management/Login';
 import MedicalRecords from './pages/MedicalRec/MedicalRecords';
 import MyProfile from './pages/User and Pet Management/MyProfile'; // Assuming MyProfile is located in the 'pages' directory
 import TransactionHistory from './pages/User and Pet Management/TransactionHistory';
-import Prescription from './pages/Prescriptionrefill/prescription';
+import PrescriptionRefill from './pages/Prescriptionrefill/prescription';
 import SignUp from './pages/User and Pet Management/SignUp';
 import VetProfilePage from './pages/VetProfilePage/VetProfilePage'; // Adjusted relative path
 import VetDashboard from './pages/VetDashboard/VetDashboard';
@@ -116,7 +116,7 @@ function App() {
               path="/prescription" 
               element={
                 <PrivateRoute isLoggedIn={isLoggedIn}>
-                <Prescription user={user} />
+                <PrescriptionRefill user={user} />
                 </PrivateRoute>
               } 
             />

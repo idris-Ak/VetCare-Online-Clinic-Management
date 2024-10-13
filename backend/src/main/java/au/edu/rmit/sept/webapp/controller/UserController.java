@@ -13,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.io.IOException;
 import java.util.Base64;
@@ -156,5 +157,19 @@ public class UserController {
             return ResponseEntity.noContent().build();
         }
         return ResponseEntity.notFound().build();
+    }
+
+    @PutMapping("/vetId/{userId}")
+    public ResponseEntity<User> updateVetId(@PathVariable Long userId, @RequestBody Map<String, Long> vetData) {
+        Long vetId = vetData.get("vetId");
+        Optional<User> existingUser = userService.findById(userId);
+    
+        if (existingUser.isPresent()) {
+            User user = existingUser.get();
+            user.setVetId(vetId);  // Set the vetId for the user
+            User updatedUser = userService.saveUser(user);  // Save the updated user in the database
+            return ResponseEntity.ok(updatedUser);
+        }
+        return ResponseEntity.status(404).build();
     }
 }
