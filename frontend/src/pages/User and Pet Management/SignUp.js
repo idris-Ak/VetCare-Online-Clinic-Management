@@ -70,6 +70,7 @@ function SignUp({loginUser}) {
   if(!validateForm()){
     return;
   }
+  const nameDr = "Dr. " + user.name.trim();
 
   try {
     // Try getting a response from the api
