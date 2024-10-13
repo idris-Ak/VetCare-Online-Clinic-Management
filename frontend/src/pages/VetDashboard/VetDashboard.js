@@ -167,7 +167,7 @@ function VetDashboard({ user }) {
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
       <Container className="vet-dashboard">
-        <h1 className="dashboard-title" >Welcome, {user && user.role === 'Vet' ? `Dr. ${user.name}` : user ? user.name : 'Vet'}</h1>
+        <h1 className="dashboard-title" >Welcome, {user && user.role === 'Vet' ? `${user.name}` : user ? user.name : 'Vet'}</h1>
         
         <div className="dashboard-content">
           <div className="calendar-section">

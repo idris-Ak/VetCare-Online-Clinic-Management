@@ -72,7 +72,7 @@ function SignUp({loginUser}) {
   }
 
   let name = user.name.trim();
-  if (user.role === "vet"){
+  if (user.role === "Vet"){
     name = "Dr. " + user.name.trim();
   }
 
