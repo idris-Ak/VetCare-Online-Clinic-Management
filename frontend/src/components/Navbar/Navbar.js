@@ -95,12 +95,7 @@ function Navbar({ logoutUser, isLoggedIn, user }) {
       <ul className="navbar-list user-links ms-auto">
         {isLoggedIn && user ? (
           <li className="navbar-item">
-          <span className="welcome-text">Welcome, {user.role === 'Vet' ? (
-          <span>
-          <span style={{ color: '#007bff', fontStyle: 'italic', marginLeft: '5px'}}>Dr. </span>{user.name}
-          </span>
-          ) : user.name} 
-          </span>
+          <span className="welcome-text">Welcome, {user.name} </span>
             <Link to="/myprofile" className="navbar-link">
             {/* <a href="https://www.flaticon.com/free-icons/user" title="user icons">User icons created by Becris - Flaticon</a> */}
               <img 
