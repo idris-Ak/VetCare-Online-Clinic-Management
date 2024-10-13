@@ -13,6 +13,25 @@ function VetDashboard({ user }) {
   const [showRecordModal, setShowRecordModal] = useState(false);
   const [selectedRecord, setSelectedRecord] = useState(null);
 
+  const timeSlotKeys = {
+    1: "09:00",
+    2: "09:30",
+    3: "10:00",
+    4: "10:30",
+    5: "11:00",
+    6: "11:30",
+    7: "12:00",
+    8: "12:30",
+    9: "13:00",
+    10: "13:30",
+    11: "14:00",
+    12: "14:30",
+    13: "15:00",
+    14: "15:30",
+    15: "16:00",
+    16: "16:30"
+  }; 
+
   // Fetch shared records when the component mounts
   useEffect(() => {
     if (user && user.role === 'Vet') {
@@ -161,47 +180,25 @@ function VetDashboard({ user }) {
                     </tr>
                   </thead>
                   <tbody>
-                  {appointments.length > 0 ? (
-                    appointments.map((appointment) => (
-                      <tr key={appointment.id}>
-                        <td>{appointment.date}</td>
-                        <td>{appointment.time}</td>
-                        <td>{appointment.pet?.name || 'N/A'}</td>  {/* Safeguard here */}
-                        <td>{appointment.owner?.name || 'N/A'}</td>  {/* Safeguard here */}
-                        <td>{appointment.status}</td>
-                        <td>
-                          <Button variant="info" size="sm">View</Button>{' '}
-                          <Button variant="warning" size="sm">Reschedule</Button>
-                        </td>
+                    {appointments.length > 0 ? (
+                      appointments.map((appointment) => (
+                        <tr key={appointment.id}>
+                          <td>{appointment.appointmentDate}</td>
+                          <td>{timeSlotKeys[appointment.appointmentTimeId]}</td> {/* Convert appointmentTimeId to actual time */}
+                          <td>{/* Add pet name based on petId */}</td>
+                          <td>{/* Add owner info based on userId */}</td>
+                          <td>Confirmed</td>
+                          <td>
+                            <Button variant="info" size="sm">View</Button>{' '}
+                            <Button variant="warning" size="sm">Reschedule</Button>
+                          </td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan="6" className="text-center">No upcoming appointments</td>
                       </tr>
-                    ))
-                  ) : (
-                    <tr>
-                      <td colSpan="6" className="text-center">No upcoming appointments</td>
-                    </tr>
-                  )}
-
-                  </tbody>
-                </Table>
-              </Card.Body>
-            </Card>
-
-            <Card>
-              <Card.Header>Prescription Requests</Card.Header>
-              <Card.Body>
-                <Table striped bordered hover>
-                  <thead>
-                    <tr>
-                      <th>Medication</th>
-                      <th>Pet</th>
-                      <th>Owner</th>
-                      <th>Request Date</th>
-                      <th>Status</th>
-                      <th>Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {/* Add prescription requests data here */}
+                    )}
                   </tbody>
                 </Table>
               </Card.Body>
