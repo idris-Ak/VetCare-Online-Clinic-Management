@@ -766,12 +766,11 @@ const rescheduleAppointment = async () => {
                   setSelectedTimeSlot,
                   userAppointments,
                   user,
-                  selectedClinic // Pass the selected clinic to the function
+                  selectedClinic
                 )}
               </div>
 
               <div className="appointment-modal-actions">
-                {/* Only show Reschedule button for the clinic where the user has a booked appointment */}
                 {selectedAppointment?.clinicId === selectedClinic.id ? (
                   <button className="reschedule" onClick={handleAppointmentAction}>
                     Reschedule Appointment
@@ -792,7 +791,6 @@ const rescheduleAppointment = async () => {
         </div>
       )}
 
-    {/* Payment Method Selection Modal */}
     {showPaymentMethodModal && (
         <div className="modal">
         <div className="modal-content payment-method-modal">
@@ -825,7 +823,7 @@ const rescheduleAppointment = async () => {
                         purchase_units: [
                             {
                            amount: {
-                              value: `${selectedClinic?.price || 50}`, // Use the clinic price if available, default to 50 if not
+                              value: `${selectedClinic?.price}`, // Use the clinic price if available, default to 50 if not
                             },
                             },
                         ],
@@ -846,7 +844,7 @@ const rescheduleAppointment = async () => {
                               },
                               body: JSON.stringify({
                                 orderId: data.orderID,
-                                amount: 50.00, // Pass the actual amount here after a amount variable has been made
+                                amount: `${selectedClinic?.price}` // Pass the actual amount here after a amount variable has been made
                             }),
                         });
                             if (response.ok) {
@@ -901,7 +899,7 @@ const rescheduleAppointment = async () => {
             <div className="modal">
               <div className="modal-content payment-modal">
                 <h3>Payment Details</h3>
-                <p><strong>Total Price: </strong>${selectedClinic?.price || 50.00}</p>
+                <p><strong>Total Price: </strong>${selectedClinic?.price}</p>
                 <form onSubmit={handlePaymentSubmit}>
                   <div className="form-group">
                     <label htmlFor="cardNumber">Card Number:</label>
@@ -968,7 +966,7 @@ const rescheduleAppointment = async () => {
                   </div>
 
                   <div className="button-row two-buttons">
-                  <button type="submit" className="submit-btn">Pay ${selectedClinic?.price || 50.00}</button>
+                  <button type="submit" className="submit-btn">Pay ${selectedClinic?.price}</button>
                     <button
                       onClick={() => {
                         setShowPaymentModal(false);
