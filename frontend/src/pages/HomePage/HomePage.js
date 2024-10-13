@@ -1,5 +1,5 @@
 import React from "react";
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Swiper, SwiperSlide } from "swiper/react";
 import 'swiper/css';
 import 'swiper/css/navigation';
@@ -22,8 +22,9 @@ import CustomerReviews from "../../components/CustomerReviews";
 import "./HomePage.css";
 
 
-function HomePage() {
+function HomePage({ isLoggedIn }) {
   const [vets, setVets] = useState([]); // This holds the vet data
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetch(`http://localhost:8080/api/vets`) // Adjust the URL as per your actual backend URL
@@ -40,6 +41,14 @@ function HomePage() {
         console.error('Error fetching data:', error.message);
       });
   }, []);
+
+  const handleSignUpClick = () => {
+    if (isLoggedIn) {
+      navigate('/myprofile'); // Redirect to profile page if logged in
+    } else {
+      navigate('/signup'); // Redirect to signup page if not logged in
+    }
+  };
   
   return (
     <div>
@@ -88,9 +97,9 @@ function HomePage() {
                 <h2>Don't have an account yet?</h2>
                 <h1>Sign Up Today</h1>
                 <h3>For Free</h3>
-                <Link to="/SignUp">
-                  <button className="explore-btn">Sign up</button>
-                </Link>
+                <button className="explore-btn" onClick={handleSignUpClick}>
+                  {isLoggedIn ? "Go To Profile" : "Sign Up"}
+                </button>
               </div>
             </SwiperSlide>
 
