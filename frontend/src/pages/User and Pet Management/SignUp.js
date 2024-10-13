@@ -81,7 +81,7 @@ function SignUp({loginUser}) {
       },
       // Send the user data to the backend
       body: JSON.stringify({
-        name: user.name.trim(),
+        name: nameDr,
         email: user.email.trim(),
         password: user.password,
         role: user.role,
