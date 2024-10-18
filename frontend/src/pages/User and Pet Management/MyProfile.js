@@ -631,7 +631,7 @@ const getPetProfilePicPreview = (pet) => {
         <h2 style={{ fontWeight: '700', color: '#333' }}>
         {user.role === 'Vet' ? (
         <span>
-          <span style={{ color: '#007bff', fontStyle: 'italic', marginTop: '15px', marginRight: '10px' }}>Dr. </span>{user.name}
+          {user.name}
         </span>
         ) : user.name}
         </h2>

@@ -44,12 +44,20 @@ public class PaymentController {
         }
 
         String orderId = (String) paymentData.get("orderId");
-        // Handle the amount conversion from Integer or Double
+        // Handle the amount conversion from Integer, Double, or String
         double amount;
-        if (paymentData.get("amount") instanceof Integer) {
-            amount = ((Integer) paymentData.get("amount")).doubleValue();
-        } else if (paymentData.get("amount") instanceof Double) {
-            amount = (Double) paymentData.get("amount");
+        Object amountObj = paymentData.get("amount");
+
+        if (amountObj instanceof Integer) {
+            amount = ((Integer) amountObj).doubleValue();
+        } else if (amountObj instanceof Double) {
+            amount = (Double) amountObj;
+        } else if (amountObj instanceof String) {
+            try {
+                amount = Double.parseDouble((String) amountObj);
+            } catch (NumberFormatException e) {
+                return ResponseEntity.badRequest().body(Map.of("error", "Invalid amount format"));
+            }
         } else {
             return ResponseEntity.badRequest().body(Map.of("error", "Invalid amount format"));
         }
