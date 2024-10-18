@@ -470,13 +470,15 @@ const finaliseAppointmentBooking = async() => {
             }),
           });
 
-          // Handle the response correctly
-            if (!response.ok) {
-                const errorResponse = await response.json(); // Read the response as JSON once
-                console.error("Error processing payment:", errorResponse);
-                return;
-            }
-        finaliseAppointmentBooking(); // Finalise the booking after payment
+      if (response.ok) {
+        await finaliseAppointmentBooking(); // Finalise the booking after payment
+
+        // Close the payment modal and show confirmation modal
+        setShowPaymentModal(false);
+        setShowConfirmationModal(true);
+      } else {
+        alert('Failed to process the payment.');
+      }
     } catch (error) {
         console.error('Error processing payment:', error);
         alert('An error occurred while processing the payment. Please try again.');
@@ -499,6 +501,7 @@ const handleCloseConfirmationModal = () => {
   setSelectedDay(null);
   setSelectedTimeSlot('');
   setSelectedClinic(null);
+  setSelectedPet(null);
 };
 
 // FUNCTION THAT HANDLES APPOINTMENT RESCHEDUALING
@@ -819,17 +822,21 @@ const rescheduleAppointment = async () => {
                     <PayPalButtons
                     style={{ layout: 'vertical' }}
                     createOrder={(data, actions) => {
+                        // Format the amount as a number
+                        const amount = parseFloat(selectedClinic?.price || 50).toFixed(2);
                         return actions.order.create({
                         purchase_units: [
                             {
                            amount: {
-                              value: `${selectedClinic?.price}`, // Use the clinic price if available, default to 50 if not
+                           value: amount, // Send the amount as a string in the PayPal request
                             },
                             },
                         ],
                         });
                     }}
                     onApprove={(data, actions) => {
+                         // Format the amount correctly to have two decimal places
+                        const amount = parseFloat(selectedClinic?.price || 50).toFixed(2);
                         return actions.order.capture().then(async (details) => {
                             if (!user || !selectedPet) {
                                 alert('User or pet information is missing.');
@@ -844,13 +851,11 @@ const rescheduleAppointment = async () => {
                               },
                               body: JSON.stringify({
                                 orderId: data.orderID,
-                                amount: `${selectedClinic?.price}` // Pass the actual amount here after a amount variable has been made
+                                amount: amount // Pass the actual amount here after a amount variable has been made
                             }),
                         });
                             if (response.ok) {
-                              finaliseAppointmentBooking(); // Finalise the booking after payment
-                              setShowPaymentMethodModal(false);
-                              setShowPayPalButtons(false);
+                              await finaliseAppointmentBooking(); // Finalise the booking after payment
                               setShowConfirmationModal(true);
                               } 
                               else {

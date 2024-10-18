@@ -266,7 +266,16 @@ const validatePaymentForm = async() => {
           });
 
       if (response.ok) {
-        await submitPrescriptionRequest();
+        const prescriptionSuccess = await submitPrescriptionRequest();
+        if (prescriptionSuccess) {
+          // Close the payment modal
+          setShowPaymentModal(false);
+
+          // Open the confirmation modal
+          setShowConfirmationModal(true);
+        } else {
+          alert('Failed to submit the prescription request.');
+        }
       } else {
         alert('Failed to submit the refill request.');
       }
@@ -399,15 +408,14 @@ return (
     value={selectedVet ? selectedVet.name : ''}
     onChange={(e) => {
       const selectedVetName = e.target.value;
-      const selectedVet = vets.find((vet) => vet.name === selectedVetName);
-      setSelectedVet(selectedVet);
+      const vet = vets.find((v) => v.name === selectedVetName); // Find the vet by name
+      setSelectedVet(vet); // Set the selected vet object
     }}
   >
-    <option value="">Select Vet</option>
-    <option value="Dr. Sarah Johnson">Dr. Sarah Johnson</option>
-    <option value="Dr. Michael Lee">Dr. Michael Lee</option>
-    <option value="Dr. Emily Rodriguez">Dr. Emily Rodriguez</option>
-    <option value="Dr. David Brown">Dr. David Brown</option>
+  <option value="">Select Vet</option>
+    {vets.map((vet) => (
+      <option key={vet.id} value={vet.name}>{vet.name}</option> // Use vet name as the value
+    ))}
   </Form.Control>
 </Form.Group>
 
