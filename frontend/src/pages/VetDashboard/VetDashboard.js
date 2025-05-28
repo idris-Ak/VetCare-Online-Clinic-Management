@@ -5,8 +5,10 @@ import { jsPDF } from 'jspdf';
 import React, { useEffect, useState } from 'react';
 import { Button, Card, Container, Table, Modal } from 'react-bootstrap';
 import './VetDashboard.css';
+ 
 
 function VetDashboard({ user }) {
+  const API_URL = process.env.REACT_APP_API_URL;
   const [selectedDate, setSelectedDate] = useState(dayjs());
   const [sharedRecords, setSharedRecords] = useState([]);
   const [appointments, setAppointments] = useState([]); // New state for appointments
@@ -42,7 +44,7 @@ function VetDashboard({ user }) {
 
   const fetchSharedRecords = async (vetId) => {
     try {
-      const response = await fetch(`http://localhost:8080/api/vets/${vetId}`);
+      const response = await fetch(`${API_URL}/api/vets/${vetId}`);
       if (response.ok) {
         const vet = await response.json();
         const recordIds = vet.sharedRecordIds;
@@ -58,7 +60,7 @@ function VetDashboard({ user }) {
   // Function to save records based on the list of record IDs
   const saveRecords = async (recordIds) => {
     try {
-      const response = await fetch(`http://localhost:8080/api/medicalRecords/getRecordsByIds?recordIds=${recordIds.join(',')}`);
+      const response = await fetch(`${API_URL}/api/medicalRecords/getRecordsByIds?recordIds=${recordIds.join(',')}`);
       if (response.ok) {
         const records = await response.json();
         setSharedRecords(records); // Update state with fetched records
@@ -85,7 +87,7 @@ function VetDashboard({ user }) {
   // Function to get all appointments
   const getAllAppointments = async () => {
     try {
-      const response = await fetch(`http://localhost:8080/api/appointments`);
+      const response = await fetch(`${API_URL}/api/appointments`);
       return response.ok ? response.json() : null;
     } catch (error) {
       console.error('Error fetching all appointments:', error);

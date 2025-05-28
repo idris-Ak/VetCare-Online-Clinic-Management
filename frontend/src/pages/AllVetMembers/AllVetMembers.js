@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import './AllVetMembers.css'; // Ensure the CSS file is correctly set up
+ 
+const API_URL = process.env.REACT_APP_API_URL;
 
 const AllVetMembers = () => {
   const [vets, setVets] = useState([]);
@@ -8,7 +10,7 @@ const AllVetMembers = () => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    fetch('http://localhost:8080/api/vets') // Updated to correct API URL
+    fetch(`${API_URL}/api/vets`) // Updated to correct API URL
       .then(response => {
         if (!response.ok) {
           throw new Error('Network response was not ok');
@@ -39,7 +41,7 @@ const AllVetMembers = () => {
       <div className="vets-list">
         {vets.map(vet => (
           <div key={vet.id} className="vet-card">
-            <img src={`http://localhost:8080${vet.imagePath}`} alt={`Portrait of ${vet.name}`} className="vet-image" />
+            <img src={`${API_URL}${vet.imagePath}`} alt={`Portrait of ${vet.name}`} className="vet-image" />
             <h3>{vet.name}</h3>
             <p>{vet.shortDescription}</p>
             <Link to={`/vets/${vet.id}`} className="learn-more-link">Learn More</Link>

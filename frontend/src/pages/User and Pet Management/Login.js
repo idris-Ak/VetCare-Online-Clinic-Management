@@ -1,8 +1,10 @@
 import React, {useState} from 'react';
 import { Button, Form, Alert, Container, ToggleButtonGroup, ToggleButton, Spinner } from 'react-bootstrap';
 import { useNavigate, Link, useLocation } from "react-router-dom";
+ 
 
 function Login({loginUser}) {
+  const API_URL = process.env.REACT_APP_API_URL;
   const [userDetails, setUserDetails] = useState({ email: '', password: '', role: 'Pet Owner' });
   const [errorMessage, setErrorMessage] = useState('');
   const [showErrorMessage, setShowErrorMessage] = useState(false);
@@ -30,7 +32,7 @@ function Login({loginUser}) {
 
     try {
     // Try getting a response from the api
-    const response = await fetch('http://localhost:8080/api/users/login', {
+    const response = await fetch(`${API_URL}/api/users/login`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

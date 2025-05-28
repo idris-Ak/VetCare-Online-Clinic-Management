@@ -4,7 +4,8 @@ import successfulPaymentCheck from 'frontend/src/components/assets/check.png';
 import React, { useEffect, useState } from 'react';
 import { Button, Container, Form } from 'react-bootstrap';
 import './prescription.css';
-
+ 
+const API_URL = process.env.REACT_APP_API_URL; // Ensure this is set in your .env file
 function PrescriptionRefill({ user }) {
   const [petData, setPetData] = useState([]);
   const [selectedPet, setSelectedPet] = useState(null);
@@ -48,7 +49,7 @@ function PrescriptionRefill({ user }) {
 
   const getPetInfo = async () => {
     try {
-      const response = await fetch(`http://localhost:8080/api/pets/user/${user.id}`);
+      const response = await fetch(`${API_URL}/api/pets/user/${user.id}`);
       return response.ok ? response.json() : null;
     } catch (error) {
       console.error('Error fetching pets:', error);
@@ -60,7 +61,7 @@ function PrescriptionRefill({ user }) {
   useEffect(() => {
     const fetchVets = async () => {
       try {
-        const response = await fetch('http://localhost:8080/api/vets');
+        const response = await fetch(`${API_URL}/api/vets`);
         const vetData = await response.json();
         setVets(vetData);
       } catch (error) {
@@ -223,7 +224,7 @@ const validatePaymentForm = async() => {
     };
 
     try {
-      const response = await fetch(`http://localhost:8080/api/medicalRecords/pet/${selectedPet}`, {
+      const response = await fetch(`${API_URL}/api/medicalRecords/pet/${selectedPet}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -255,7 +256,7 @@ const validatePaymentForm = async() => {
         }
         // Send payment details to the backend
         try {
-            const response = await fetch(`http://localhost:8080/api/payment/credit-card?userId=${user.id}&petId=${selectedPet}&serviceType=Prescription+Refill`, {
+            const response = await fetch(`${API_URL}/api/payment/credit-card?userId=${user.id}&petId=${selectedPet}&serviceType=Prescription+Refill`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -462,7 +463,7 @@ return (
                   return;
                 }
                 try {
-                  const response = await fetch(`http://localhost:8080/api/payment/paypal?userId=${user.id}&petId=${selectedPet}&serviceType=Prescription+Refill`, {
+                  const response = await fetch(`${API_URL}/api/payment/paypal?userId=${user.id}&petId=${selectedPet}&serviceType=Prescription+Refill`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ orderId: data.orderID, amount: 50.00 }),

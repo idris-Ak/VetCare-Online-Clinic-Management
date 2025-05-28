@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import "../VetProfilePage/VetProfilePage.css"
+ 
 
 const VetProfilePage = () => {
+  const API_URL = process.env.REACT_APP_API_URL;
   const { id } = useParams(); // Get the vet ID from the URL
   const [vet, setVet] = useState(null);
   const [loading, setLoading] = useState(true); // Loading state
@@ -10,7 +12,7 @@ const VetProfilePage = () => {
 
   useEffect(() => {
     // Fetch the specific vet data by ID
-    fetch(`http://localhost:8080/api/vets/${id}`)
+    fetch(`${API_URL}/api/vets/${id}`)
       .then(response => {
         if (!response.ok) {
           throw new Error('Failed to fetch vet data');
@@ -46,7 +48,7 @@ const VetProfilePage = () => {
         <h2>{vet.name}</h2>
       </div>
       <div className="profile-body">
-        <img src={`http://localhost:8080${vet.imagePath}`} alt={`Portrait of ${vet.name}`} className="profile-image" />
+        <img src={`${API_URL}${vet.imagePath}`} alt={`Portrait of ${vet.name}`} className="profile-image" />
         <p>{vet.longDescription}</p>
         <div className="button-container">
           <Link to="/all-vets">

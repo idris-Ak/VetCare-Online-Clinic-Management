@@ -1,4 +1,3 @@
-import React from "react";
 import { Link, useNavigate } from 'react-router-dom';
 import { Swiper, SwiperSlide } from "swiper/react";
 import 'swiper/css';
@@ -21,13 +20,16 @@ import about2 from  "../../components/assets/about2.jpg";
 import CustomerReviews from "../../components/CustomerReviews";
 import "./HomePage.css";
 
+ 
+
 
 function HomePage({ isLoggedIn }) {
+  const API_URL = process.env.REACT_APP_API_URL;
   const [vets, setVets] = useState([]); // This holds the vet data
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetch(`http://localhost:8080/api/vets`) // Adjust the URL as per your actual backend URL
+    fetch(`${API_URL}/api/vets`) // Adjust the URL as per your actual backend URL
       .then(response => {
         if (!response.ok) { // Check if response is ok (status in the range 200-299)
           throw new Error('Network response was not ok');

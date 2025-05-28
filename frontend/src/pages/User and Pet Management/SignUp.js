@@ -1,8 +1,10 @@
 import React, { useState} from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Button, Form, Alert, Container, ToggleButtonGroup, ToggleButton, OverlayTrigger, Tooltip, Spinner} from 'react-bootstrap';
+ 
 
 function SignUp({loginUser}) {
+  const API_URL = process.env.REACT_APP_API_URL;
   const [user, setUser] = useState({
     name: '',
     email: '',
@@ -78,7 +80,7 @@ function SignUp({loginUser}) {
 
   try {
     // Try getting a response from the api
-    const response = await fetch('http://localhost:8080/api/users/signup', {
+    const response = await fetch(`${API_URL}/api/users/signup`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -136,7 +138,7 @@ function SignUp({loginUser}) {
       };
   
       // Send the vet data to the backend
-      const response = await fetch('http://localhost:8080/api/vets', {
+      const response = await fetch(`${API_URL}/api/vets`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -149,7 +151,7 @@ function SignUp({loginUser}) {
         console.log('Vet added successfully:', vet);
   
         // Now update the user with the vetId
-        const userResponse = await fetch(`http://localhost:8080/api/users/vetId/${user.id}`, {
+        const userResponse = await fetch(`${API_URL}/api/users/vetId/${user.id}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',

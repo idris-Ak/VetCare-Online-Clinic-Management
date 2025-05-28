@@ -2,8 +2,10 @@ import React, { useState, useEffect } from "react";
 import './Appointments.css';
 import { PayPalScriptProvider, PayPalButtons } from '@paypal/react-paypal-js';
 import successfulPaymentCheck from 'frontend/src/components/assets/check.png';
+ 
 
 function Appointments({ user }) {
+  const API_URL = process.env.REACT_APP_API_URL;
   const [currentDate, setCurrentDate] = useState(new Date());
   const [daysInMonth, setDaysInMonth] = useState([]);
   const [showSelector, setShowSelector] = useState(false);
@@ -189,7 +191,7 @@ function Appointments({ user }) {
 
   const getPetInfo = async () => {
     try {
-      const response = await fetch(`http://localhost:8080/api/pets/user/${user.id}`);
+      const response = await fetch(`${API_URL}/api/pets/user/${user.id}`);
       return response.ok ? response.json() : null;
     } catch (error) {
       console.error('Error fetching pets:', error);
@@ -237,7 +239,7 @@ function Appointments({ user }) {
   
   const getUserAppointments = async () => {
     try {
-      const response = await fetch(`http://localhost:8080/api/appointments?userId=${user.id}`);
+      const response = await fetch(`${API_URL}/api/appointments?userId=${user.id}`);
       return response.ok ? response.json() : null;
     } catch (error) {
       console.error('Error fetching user appointments:', error);
@@ -247,7 +249,7 @@ function Appointments({ user }) {
   
   const getAllAppointments = async () => {
     try {
-      const response = await fetch(`http://localhost:8080/api/appointments`);
+      const response = await fetch(`${API_URL}/api/appointments`);
       return response.ok ? response.json() : null;
     } catch (error) {
       console.error('Error fetching all appointments:', error);
@@ -265,7 +267,7 @@ function Appointments({ user }) {
 
   const getVetsData = async () => {
     try {
-      const response = await fetch('http://localhost:8080/api/vets'); 
+      const response = await fetch(`${API_URL}/api/vets`); 
       return response.ok? response.json() : null; 
     } catch (error) {
       console.error("Error fetching Vet Data:", error);
@@ -377,7 +379,7 @@ function Appointments({ user }) {
  // FUNCTION THAT HANDLES APPOINTMENT CANCELING 
 const cancelAppointment = async (appointmentId) => {
   try {
-    const response = await fetch(`http://localhost:8080/api/appointments/${appointmentId}`, {
+    const response = await fetch(`${API_URL}/api/appointments/${appointmentId}`, {
       method: "DELETE",
       headers: {
         "Content-Type": "application/json",
@@ -421,7 +423,7 @@ const finaliseAppointmentBooking = async() => {
   };
 
   try {
-    const response = await fetch("http://localhost:8080/api/appointments/book", {
+    const response = await fetch(`${API_URL}/api/appointments/book`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -460,7 +462,7 @@ const finaliseAppointmentBooking = async() => {
         }
         // Send payment details to the backend
         try {
-            const response = await fetch(`http://localhost:8080/api/payment/credit-card?userId=${user.id}&petId=${selectedPet.id}&serviceType=Appointment+Booking`, {
+            const response = await fetch(`${API_URL}/api/payment/credit-card?userId=${user.id}&petId=${selectedPet.id}&serviceType=Appointment+Booking`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -520,7 +522,7 @@ const rescheduleAppointment = async () => {
   };
 
   try {
-    const response = await fetch(`http://localhost:8080/api/appointments/${selectedAppointment.id}`, {
+    const response = await fetch(`${API_URL}/api/appointments/${selectedAppointment.id}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
@@ -844,7 +846,7 @@ const rescheduleAppointment = async () => {
                             }
                          // Send orderID and other details to the backend
                           try {
-                              const response = await fetch(`http://localhost:8080/api/payment/paypal?userId=${user.id}&petId=${selectedPet.id}&serviceType=Appointment+Booking`, {
+                              const response = await fetch(`${API_URL}/api/payment/paypal?userId=${user.id}&petId=${selectedPet.id}&serviceType=Appointment+Booking`, {
                               method: 'POST',
                               headers: {
                                 'Content-Type': 'application/json',

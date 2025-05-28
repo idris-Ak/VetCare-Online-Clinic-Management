@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { Button, Container, Row, Col, Card, Spinner, Alert, Pagination, Form, InputGroup } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
+ 
 
 function TransactionHistory({ user }) {
+  const API_URL = process.env.REACT_APP_API_URL;
   const [transactions, setTransactions] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
@@ -16,7 +18,7 @@ function TransactionHistory({ user }) {
 
     const fetchTransactions = async () => {
       try {
-        const response = await fetch(`http://localhost:8080/api/transactions/user/${user.id}`);
+        const response = await fetch(`${API_URL}/api/transactions/user/${user.id}`);
         if (!response.ok) {
           throw new Error('Error fetching transactions');
         }

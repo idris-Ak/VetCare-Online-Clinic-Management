@@ -7,8 +7,10 @@ import React, { useEffect, useState } from 'react';
 import { Button, Container, Dropdown, DropdownButton, Form, Modal, Table } from 'react-bootstrap';
 
 import './MedicalRecords.css';
+ 
 
 function MedicalRecords({ user }) {
+  const API_URL = process.env.REACT_APP_API_URL;
   const [vets, setVets] = useState([]);
   const [petData, setPetData] = useState([]);
   const [selectedVet, setSelectedVet] = useState(null);
@@ -51,7 +53,7 @@ function MedicalRecords({ user }) {
   useEffect(() => {
     const fetchVets = async () => {
       try {
-        const response = await fetch('http://localhost:8080/api/vets');
+        const response = await fetch(`${API_URL}/api/vets`);
         const vetData = await response.json();
         setVets(vetData);
       } catch (error) {
@@ -79,7 +81,7 @@ function MedicalRecords({ user }) {
   // Function to fetch pet information for the current user
   const getPetInfo = async () => {
     try {
-      const response = await fetch(`http://localhost:8080/api/pets/user/${user.id}`);
+      const response = await fetch(`${API_URL}/api/pets/user/${user.id}`);
       return response.ok ? response.json() : null;
     } catch (error) {
       console.error('Error fetching pets:', error);
@@ -97,7 +99,7 @@ function MedicalRecords({ user }) {
         return; 
     }
     
-      let url = `http://localhost:8080/api/medicalRecords`;
+      let url = `${API_URL}/api/medicalRecords`;
       if (selectedPet) {
         url += `/pet/${selectedPet}`;
       } else {
@@ -195,7 +197,7 @@ function MedicalRecords({ user }) {
     };
 
     try {
-      const response = await fetch(`http://localhost:8080/api/vets/share/${selectedVet.id}`, {
+      const response = await fetch(`${API_URL}/api/vets/share/${selectedVet.id}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -261,7 +263,7 @@ function MedicalRecords({ user }) {
       };
 
       try {
-        const response = await fetch(`http://localhost:8080/api/medicalRecords/pet/${selectedPet}`, {
+        const response = await fetch(`${API_URL}/api/medicalRecords/pet/${selectedPet}`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -353,7 +355,7 @@ function MedicalRecords({ user }) {
 
 
       try {
-        const response = await fetch(`http://localhost:8080/api/medicalRecords/${editRecord.id}`, {
+        const response = await fetch(`${API_URL}/api/medicalRecords/${editRecord.id}`, {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
@@ -383,7 +385,7 @@ function MedicalRecords({ user }) {
   // Function to delete a medical record
   const handleDeleteRecord = async (id) => {
     try {
-      const response = await fetch(`http://localhost:8080/api/medicalRecords/${id}`, {
+      const response = await fetch(`${API_URL}/api/medicalRecords/${id}`, {
         method: "DELETE",
       });
 

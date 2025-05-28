@@ -16,6 +16,8 @@ import PrescriptionRefill from './pages/Prescriptionrefill/prescription';
 import SignUp from './pages/User and Pet Management/SignUp';
 import VetProfilePage from './pages/VetProfilePage/VetProfilePage'; // Adjusted relative path
 import VetDashboard from './pages/VetDashboard/VetDashboard';
+ 
+const API_URL = process.env.REACT_APP_API_URL;
 
 // PrivateRoute component to protect certain routes
 function PrivateRoute({ children, isLoggedIn }) {
@@ -25,7 +27,7 @@ function PrivateRoute({ children, isLoggedIn }) {
 // Fetch user details by userId
 async function fetchUserDetails(userId) {
   try {
-    const response = await fetch(`http://localhost:8080/api/users/${userId}`);
+    const response = await fetch(`${API_URL}/api/users/${userId}`);
     if (response.ok) {
       const data = await response.json();
       return data;

@@ -3,8 +3,10 @@ import { Button, Form, Container, Modal, Card, Row, Col, Alert, Spinner } from '
 import { useNavigate } from 'react-router-dom';
 import profilepic from '../../components/assets/profilepic.png';
 import defaultPetProfilePic from '../../components/assets/defaultPetProfilePic.png';
+ 
 
 function MyProfile({ user, setUser, logoutUser }) {
+  const API_URL = process.env.REACT_APP_API_URL;
   const [profilePicPreview, setProfilePicPreview] = useState(null);
   const [isLoading, setIsLoading] = useState(true); // Loading state
   const [isProfilePicLoading, setIsProfilePicLoading] = useState(false);
@@ -38,7 +40,7 @@ function MyProfile({ user, setUser, logoutUser }) {
 // Fetch pets from the backend for the current user
 const fetchPets = useCallback(async () => {
   try {
-    const response = await fetch(`http://localhost:8080/api/pets/user/${user.id}`);
+    const response = await fetch(`${API_URL}/api/pets/user/${user.id}`);
     if (!response.ok) {
       throw new Error(`Error fetching pets: ${response.statusText}`);
     }
@@ -91,7 +93,7 @@ const fetchPets = useCallback(async () => {
         formData.append('profilePicture', file);
 
         try {
-            const response = await fetch(`http://localhost:8080/api/users/${user.id}/profilePicture`, {
+            const response = await fetch(`${API_URL}/api/users/${user.id}/profilePicture`, {
                 method: 'PUT',
                 body: formData,
             });
@@ -137,7 +139,7 @@ const handleRemoveProfilePic = async () => {
   setIsProfilePicLoading(true);
 
   try {
-    const response = await fetch(`http://localhost:8080/api/users/${user.id}/profilePicture`, {
+    const response = await fetch(`${API_URL}/api/users/${user.id}/profilePicture`, {
       method: 'DELETE', // Use DELETE method for removing the profile picture
     });
 
@@ -259,7 +261,7 @@ const handleRemoveProfilePic = async () => {
     }
 
     try {
-      const response = await fetch(`http://localhost:8080/api/users/${user.id}`, {
+      const response = await fetch(`${API_URL}/api/users/${user.id}`, {
         method: 'PUT',
         body: formData,  // Use FormData to send the request
       });
@@ -293,7 +295,7 @@ const handleRemoveProfilePic = async () => {
   // Handle account deletion
   const handleAccountDeletion = async() => {
    try {
-      const response = await fetch(`http://localhost:8080/api/users/${user.id}`, {
+      const response = await fetch(`${API_URL}/api/users/${user.id}`, {
         method: 'DELETE',
       });
 
@@ -355,13 +357,13 @@ const handleRemoveProfilePic = async () => {
       let response;
         if (currentPet) {
             // If currentPet is defined, we are editing an existing pet
-            response = await fetch(`http://localhost:8080/api/pets/${currentPet.id}?userId=${user.id}`, {
+            response = await fetch(`${API_URL}/api/pets/${currentPet.id}?userId=${user.id}`, {
                 method: 'PUT',
                 body: petData,
             });
         } else {
             // If currentPet is not defined, we are adding a new pet
-            response = await fetch(`http://localhost:8080/api/pets/user/${user.id}`, {
+            response = await fetch(`${API_URL}/api/pets/user/${user.id}`, {
                 method: 'POST',
                 body: petData,
             });
@@ -412,7 +414,7 @@ const handlePetProfilePicChange = async (event, petId) => {
     formData.append('profilePicture', file);
 
     try {
-        const response = await fetch(`http://localhost:8080/api/pets/${petId}/profilePicture?userId=${user.id}`, {
+        const response = await fetch(`${API_URL}/api/pets/${petId}/profilePicture?userId=${user.id}`, {
         method: 'PUT',
         body: formData,
       });
@@ -442,7 +444,7 @@ const handleRemovePetProfilePic = async (petId) => {
   setLoadingStates((prevStates) => ({ ...prevStates, [petId]: true }));
   try {
     // Send a PUT request to the backend to update the pet and remove the profile picture
-    const response = await fetch(`http://localhost:8080/api/pets/${petId}/profilePicture?userId=${user.id}`, {
+    const response = await fetch(`${API_URL}/api/pets/${petId}/profilePicture?userId=${user.id}`, {
       method: 'DELETE',
     });
 
@@ -511,7 +513,7 @@ const getPetProfilePicPreview = (pet) => {
     return;
   }
     try {
-      const response = await fetch(`http://localhost:8080/api/pets/${petToDelete}?userId=${user.id}`, {
+      const response = await fetch(`${API_URL}/api/pets/${petToDelete}?userId=${user.id}`, {
         method: 'DELETE',
       });
       if (response.ok) {
